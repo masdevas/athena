@@ -6,7 +6,8 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-add_library(athena INTERFACE)
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/null.cpp "")
+add_library(athena STATIC ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
 
 add_subdirectory(src)
 
