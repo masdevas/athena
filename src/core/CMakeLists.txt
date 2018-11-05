@@ -1,0 +1,1 @@
+add_library(athena-core STATIC Graph.cpp)
