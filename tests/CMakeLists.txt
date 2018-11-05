@@ -28,7 +28,6 @@ function(get_gtest)
     set(GTEST_MAIN_LIBRARIES gtest_main PARENT_SCOPE)
 endfunction(get_gtest)
 
-enable_testing()
 find_package(GTest)
 
 
