@@ -1,30 +1,39 @@
 function(get_gtest)
-    include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
-    ExternalProject_Add( googletest
-            GIT_REPOSITORY https://github.com/google/googletest.git
-            GIT_TAG "master"
+    configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
+    if(result)
+        message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+    endif()
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
+    if(result)
+        message(FATAL_ERROR "Build step for googletest failed: ${result}")
+    endif()
 
-            UPDATE_COMMAND ""
-            PATCH_COMMAND ""
+    # Prevent overriding the parent project's compiler/linker
+    # settings on Windows
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-            PREFIX ${PROJECT_SOURCE_DIR}/libs/googletest
-            SOURCE_DIR "googletest"
+    # Add googletest directly to our build. This defines
+    # the gtest and gtest_main targets.
+    add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
+            ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
+            EXCLUDE_FROM_ALL)
 
-            INSTALL_COMMAND ""
-    )
 
-    ExternalProject_Get_Property(googletest source_dir)
-    set(GTEST_INCLUDE_DIR ${source_dir}/include)
-    ExternalProject_Get_Property(googletest binary_dir)
-    set(GTEST_LIBRARY_PATH ${binary_dir}/${CMAKE_FIND_LIBRARY_PREFIXES}gtest.a)
-    set(GTEST_LIBRARY gtest)
-    add_library(${GTEST_LIBRARY} UNKNOWN IMPORTED)
+    set(GTEST_INCLUDE_DIRS ${gtest_SOURCE_DIR}/include PARENT_SCOPE)
+    set(GTEST_MAIN_LIBRARIES gtest_main PARENT_SCOPE)
 endfunction(get_gtest)
 
 enable_testing()
 find_package(GTest)
 
-if (${GTEST_FOUND})
-else()
+
+if (NOT ${GTEST_FOUND})
     get_gtest()
 endif()
+
+add_subdirectory(unit)
