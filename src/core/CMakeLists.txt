@@ -1,1 +1,1 @@
-add_library(athena-core STATIC Graph.cpp TensorShape.cpp)
+add_library(athena-core STATIC Graph.cpp TensorShape.cpp Executor.cpp Node.cpp Tensor.cpp Allocator.cpp)
