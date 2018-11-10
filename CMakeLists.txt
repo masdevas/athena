@@ -9,7 +9,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/null.cpp "")
-add_library(athena STATIC ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
+add_library(athena STATIC ${CMAKE_CURRENT_BINARY_DIR}/null.cpp include/athena/core/Operation.h)
 
 add_subdirectory(src)
 
