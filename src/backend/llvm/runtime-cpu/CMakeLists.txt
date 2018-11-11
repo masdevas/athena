@@ -13,15 +13,12 @@ function(getopenblas)
             SOURCE_DIR "openblas"
             INSTALL_DIR "openblas"
 
-            CMAKE_GENERATOR "Ninja"
-
             CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
 
             BUILD_IN_SOURCE TRUE
-            #BUILD_COMMAND "make"
+            BUILD_COMMAND cmake --build . --config Release
 
-            INSTALL_COMMAND ${MAKE_EXE} PREFIX=${PROJECT_SOURCE_DIR}/libs/src/openblas install
-
+            INSTALL_DIR ${PROJECT_SOURCE_DIR}/libs/src/openblas
             )
     externalproject_get_property(OpenBLAS SOURCE_DIR)
     add_dependencies(athena OpenBLAS)

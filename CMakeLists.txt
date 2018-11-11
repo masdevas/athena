@@ -13,7 +13,7 @@ add_library(athena STATIC ${CMAKE_CURRENT_BINARY_DIR}/null.cpp include/athena/co
 
 add_subdirectory(src)
 
-target_link_libraries(athena INTERFACE athena-core)
+target_link_libraries(athena PUBLIC athena-core backend-llvm)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     add_subdirectory(tests)
