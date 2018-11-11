@@ -42,7 +42,7 @@ class TensorShape {
      * @param index Dimension index ( 0 <= index < dimensions )
      * @return Size for dimension
      */
-    size_t operator[](size_t index) const;
+    size_t dim(size_t index) const;
 
     /**
      * Returns number of dimensions in the shape

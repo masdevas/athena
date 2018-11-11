@@ -13,6 +13,8 @@
 
 #include <athena/core/TensorShape.h>
 #include <string>
+#include <stdexcept>
+
 TensorShape::TensorShape(const TensorShape &rhs) {
     mShape = rhs.mShape;
 }
@@ -31,7 +33,7 @@ size_t TensorShape::getTotalSize() const {
 
     return mShape.empty() ? 0 : totalSize;
 }
-size_t TensorShape::operator[](size_t index) const {
+size_t TensorShape::dim(size_t index) const {
     if (index >= mShape.size()) {
         throw std::out_of_range(
             "TensorShape only has " + std::to_string(mShape.size()) + " dimensions. " + std::to_string(index)
