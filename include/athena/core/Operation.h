@@ -1,3 +1,5 @@
+#include <utility>
+
 /*
  * Copyright (c) 2018 Athena. All rights reserved.
  * https://athenaframework.ml
@@ -19,10 +21,12 @@
 namespace athena::core {
     class Operation {
      protected:
-        std::string name;
+        std::string mName;
      public:
+        explicit Operation(std::string&& name) : mName(std::move(name)) {};
         template <class Generator, typename ...Args>
         void gen(Generator g, Args... args) {};
+        std::string getName();
     };
 }
 

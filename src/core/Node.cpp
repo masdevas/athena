@@ -12,3 +12,16 @@
  */
 
 #include <athena/core/Node.h>
+athena::core::Node::Node(athena::core::Operation &&op) : mOperation(op) {
+    mName = mOperation.getName() + std::to_string(++mNodeCounter);
+}
+
+void athena::core::Node::after(athena::core::Node &node) {
+    node.mOutgoingNodes.push_back(this);
+    mIncomingNodes.push_back(&node);
+}
+athena::core::Node::Node(const athena::core::Node &&src) noexcept : mOperation(src.mOperation) {
+    mIncomingNodes = src.mIncomingNodes;
+    mOutgoingNodes = src.mOutgoingNodes;
+    mName = src.mName;
+}

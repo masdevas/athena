@@ -15,11 +15,30 @@
 #define ATHENA_NODE_H
 
 #include <vector>
+#include <athena/core/Operation.h>
 
+namespace athena::core {
+
+/**
+ * The class represents a single node of a computation graph. It has a name, a set of incoming nodes,
+ * and a set of outgoing nodes. It also encapsulates Operation.
+ */
 class Node {
- private:
-    std::vector<std::shared_ptr<Node> > mIncomingNodes;
-    std::vector<std::shared_ptr<Node> > mOutcomingNodes;
+ protected:
+    std::vector<Node*> mIncomingNodes;
+    std::vector<Node*> mOutgoingNodes;
+    Operation& mOperation;
+    std::string mName;
+    static size_t mNodeCounter;
+
+ public:
+    explicit Node(Operation&& op);
+    // Node object is not copyable
+    Node(const Node& ) = delete;
+    Node(const Node&& src) noexcept;
+    void after(Node& node);
 };
+
+}
 
 #endif //ATHENA_NODE_H

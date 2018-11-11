@@ -12,3 +12,6 @@
  */
 
 #include <athena/core/Operation.h>
+std::string athena::core::Operation::getName() {
+    return mName;
+}
