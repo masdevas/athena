@@ -12,16 +12,29 @@
  */
 
 #include <athena/core/Node.h>
-athena::core::Node::Node(athena::core::Operation &&op) : mOperation(op) {
-    mName = mOperation.getName() + std::to_string(++mNodeCounter);
+
+size_t athena::core::Node::mNodeCounter = 0;
+
+athena::core::Node::Node(Node&& src) noexcept : mIncomingNodes(std::move(src.mIncomingNodes)),
+                                                mOutgoingNodes(std::move(src.mOutgoingNodes)),
+                                                mOperation(std::move(src.mOperation)),
+                                                mName(std::move(src.mName)) {
 }
 
-void athena::core::Node::after(athena::core::Node &node) {
-    node.mOutgoingNodes.push_back(this);
-    mIncomingNodes.push_back(&node);
+athena::core::Node::Node(athena::core::Operation&& op) : mOperation(std::move(op)),
+                                                         mName(mOperation.getName() +
+                                                               std::to_string(++mNodeCounter)) {
 }
-athena::core::Node::Node(const athena::core::Node &&src) noexcept : mOperation(src.mOperation) {
-    mIncomingNodes = src.mIncomingNodes;
-    mOutgoingNodes = src.mOutgoingNodes;
-    mName = src.mName;
+
+athena::core::Node& athena::core::Node::operator=(Node&& src) noexcept {
+    mIncomingNodes = std::move(src.mIncomingNodes);
+    mOutgoingNodes = std::move(src.mOutgoingNodes);
+    mOperation = std::move(src.mOperation);
+    mName = std::move(src.mName);
+    return *this;
+}
+
+void athena::core::Node::after(athena::core::Node* node) {
+    node->mOutgoingNodes.push_back(this);
+    mIncomingNodes.push_back(node);
 }

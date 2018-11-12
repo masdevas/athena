@@ -27,16 +27,19 @@ class Node {
  protected:
     std::vector<Node*> mIncomingNodes;
     std::vector<Node*> mOutgoingNodes;
-    Operation& mOperation;
+    Operation mOperation;
     std::string mName;
     static size_t mNodeCounter;
 
  public:
+    Node() = delete;
+    Node(const Node& src) = delete;
+    Node(Node&& src) noexcept;
     explicit Node(Operation&& op);
-    // Node object is not copyable
-    Node(const Node& ) = delete;
-    Node(const Node&& src) noexcept;
-    void after(Node& node);
+    ~Node() = default;  //TODO rewrite if change Node* in vectors to shared_ptr<Node>. Now must deleted by Graph.
+    Node& operator=(const Node& src) = delete;
+    Node& operator=(Node&& src) noexcept;
+    void after(Node* node);
 };
 
 }
