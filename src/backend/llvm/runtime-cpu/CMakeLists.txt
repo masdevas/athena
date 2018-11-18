@@ -17,7 +17,6 @@ function(getopenblas)
         CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
 
         BUILD_IN_SOURCE TRUE
-        #BUILD_COMMAND "make"
 
         INSTALL_COMMAND ${MAKE_EXE} PREFIX=${PROJECT_SOURCE_DIR}/libs/src/openblas install
     )
