@@ -2,24 +2,25 @@ function(getopenblas)
     include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
     find_program(MAKE_EXE NAMES gmake nmake make)
     externalproject_add(OpenBLAS
+        GIT_REPOSITORY "https://github.com/xianyi/OpenBLAS.git"
+        GIT_TAG "master"
 
-            GIT_REPOSITORY "https://github.com/xianyi/OpenBLAS.git"
-            GIT_TAG "master"
+        UPDATE_COMMAND ""
+        PATCH_COMMAND ""
 
-            UPDATE_COMMAND ""
-            PATCH_COMMAND ""
+        PREFIX ${PROJECT_SOURCE_DIR}/libs
+        SOURCE_DIR "openblas"
+        INSTALL_DIR "openblas"
 
-            PREFIX ${PROJECT_SOURCE_DIR}/libs
-            SOURCE_DIR "openblas"
-            INSTALL_DIR "openblas"
+        CMAKE_GENERATOR "Ninja"
 
-            CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
+        CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
 
-            BUILD_IN_SOURCE TRUE
-            BUILD_COMMAND cmake --build . --config Release
+        BUILD_IN_SOURCE TRUE
+        #BUILD_COMMAND "make"
 
-            INSTALL_DIR ${PROJECT_SOURCE_DIR}/libs/src/openblas
-            )
+        INSTALL_COMMAND ${MAKE_EXE} PREFIX=${PROJECT_SOURCE_DIR}/libs/src/openblas install
+    )
     externalproject_get_property(OpenBLAS SOURCE_DIR)
     add_dependencies(athena OpenBLAS)
     target_include_directories(athena PUBLIC
