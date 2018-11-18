@@ -1,33 +1,8 @@
-function(getopenblas)
-    include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
-    find_program(MAKE_EXE NAMES gmake nmake make)
-    externalproject_add(OpenBLAS
-        GIT_REPOSITORY "https://github.com/xianyi/OpenBLAS.git"
-        GIT_TAG "master"
+function(getboost)
+    find_package(Boost REQUIRED COMPONENTS numeric)
 
-        UPDATE_COMMAND ""
-        PATCH_COMMAND ""
-
-        PREFIX ${PROJECT_SOURCE_DIR}/libs
-        SOURCE_DIR "openblas"
-        INSTALL_DIR "openblas"
-
-        CMAKE_GENERATOR "Ninja"
-
-        CMAKE_ARGS -DNOFORTRAN=1 -DBUILD_WITHOUT_LAPACK=yes -DCMAKE_BUILD_TYPE=Release
-
-        BUILD_IN_SOURCE TRUE
-
-        INSTALL_COMMAND ${MAKE_EXE} PREFIX=${PROJECT_SOURCE_DIR}/libs/src/openblas install
-    )
-    externalproject_get_property(OpenBLAS SOURCE_DIR)
-    add_dependencies(athena OpenBLAS)
-    target_include_directories(athena PUBLIC
-            ${PROJECT_SOURCE_DIR}/libs/src/openblas/include)
-    target_compile_definitions(athena PUBLIC -DFORCE_OPENBLAS)
-    set(BLAS_LIBRARIES ${PROJECT_SOURCE_DIR}/libs/src/openblas/lib/libopenblas.a
-            PARENT_SCOPE)
-endfunction(getopenblas)
+    target_include_directories(runtime-llvm-cpu PUBLIC ${BOOST_INCLUDE_DIRS})
+endfunction(getboost)
 
 function(getblis)
     include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
@@ -62,14 +37,15 @@ endfunction(getblis)
 option(FORCE_BLIS "Require library to use BLIS" OFF)
 option(FORCE_OPENBLAS "Require library to use OpenBLAS" OFF)
 
+add_library(runtime-llvm-cpu STATIC add.cpp)
 
 if (FORCE_BLIS)
     message(STATUS "BLIS will be downloaded and compiled")
     getblis()
 
-elseif (FORCE_OPENBLAS)
-    message(STATUS "OpenBLAS will be downloaded and compiled")
-    getopenblas()
+elseif (FORCE_UBLAS)
+    message(STATUS "Boost will be downloaded and compiled")
+    getboost()
 else ()
     if (APPLE)
         set(BLA_VENDOR Apple)
@@ -78,9 +54,8 @@ else ()
     endif ()
     find_package(BLAS)
     if (NOT BLAS_FOUND)
-        message(STATUS "No BLAS installation found. OpenBLAS will be downloaded and compiled")
-        getopenblas()
+        message(STATUS "No BLAS installation found. Boost will be downloaded and compiled")
+        getboost()
     endif()
 endif ()
 
-add_library(runtime-llvm-cpu INTERFACE)
