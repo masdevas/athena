@@ -14,7 +14,7 @@ function(getopenblas)
 
         CMAKE_GENERATOR "Ninja"
 
-        CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
+        CMAKE_ARGS -DNOFORTRAN=1 -DBUILD_WITHOUT_LAPACK=yes -DCMAKE_BUILD_TYPE=Release
 
         BUILD_IN_SOURCE TRUE
 
