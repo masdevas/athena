@@ -14,9 +14,22 @@
 #ifndef ATHENA_GRAPH_H
 #define ATHENA_GRAPH_H
 
+#include <athena/core/Node.h>
+
 namespace athena::core {
 
 class Graph {
+ private:
+    Node* outputNode;
+    Node* lossFunctionNode;
+
+ public:
+    Graph() : outputNode(nullptr), lossFunctionNode(nullptr) {};
+    Graph(const Graph&) = delete;
+    Graph(Graph&& src) noexcept;
+    Graph& operator=(const Graph&) = delete;
+    Graph& operator=(Graph&& src) noexcept;
+    ~Graph();
 
 };
 
