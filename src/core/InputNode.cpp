@@ -15,7 +15,8 @@
 
 namespace athena::core {
 
-InputNode::InputNode(InputNode &&node) noexcept : AbstractNode(std::move(node)), tensor(node.tensor) {
+InputNode::InputNode(InputNode &&node) noexcept
+    : AbstractNode(std::move(node)), tensor(node.tensor) {
     node.tensor = nullptr;
 }
 
