@@ -39,7 +39,7 @@ class Node {
     ~Node() = default;  //TODO rewrite if change Node* in vectors to shared_ptr<Node>. Now must deleted by Graph.
     Node& operator=(const Node& src) = delete;
     Node& operator=(Node&& src) noexcept;
-    void after(Node* node);
+    virtual void after(Node* node);
 };
 
 }
