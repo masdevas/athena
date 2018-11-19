@@ -11,30 +11,28 @@
  * the License.
  */
 
-#include <athena/core/Node.h>
+#include <athena/core/AbstractNode.h>
 
 namespace athena::core {
 
-Node::Node(Node &&src) noexcept
-    : AbstractNode(std::move(src)), mIncomingNodes(std::move(src.mIncomingNodes)),
-      mOperation(std::move(src.mOperation)) {
+size_t AbstractNode::mNodeCounter = 0;
+
+AbstractNode::AbstractNode(AbstractNode &&node) noexcept
+    : mOutgoingNodes(std::move(node.mOutgoingNodes)), mName(std::move(node.mName)) {
 }
 
-Node::Node(Operation &&op)
-    : AbstractNode(op.getName() + std::to_string(++mNodeCounter)), mOperation(std::move(op)) {
+AbstractNode::AbstractNode(std::string&& name)
+    : mName(std::move(name)) {
 }
 
-Node &Node::operator=(Node &&src) noexcept {
-    mIncomingNodes = std::move(src.mIncomingNodes);
+AbstractNode& AbstractNode::operator=(AbstractNode &&src) noexcept {
     mOutgoingNodes = std::move(src.mOutgoingNodes);
-    mOperation = std::move(src.mOperation);
     mName = std::move(src.mName);
     return *this;
 }
 
-void Node::after(AbstractNode* node) {
-    node->addOutgoingNode(node);
-    mIncomingNodes.emplace_back(node);
+void AbstractNode::addOutgoingNode(AbstractNode* node) {
+    mOutgoingNodes.emplace_back(node);
 }
 
 }
