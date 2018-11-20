@@ -11,30 +11,25 @@
  * the License.
  */
 
-#include <athena/core/Node.h>
+#include "athena/core/InputNode.h"
 
 namespace athena::core {
 
-Node::Node(Node &&src) noexcept
-    : AbstractNode(std::move(src)), mIncomingNodes(std::move(src.mIncomingNodes)),
-      mOperation(std::move(src.mOperation)) {
+InputNode::InputNode(InputNode &&node) noexcept
+    : AbstractNode(std::move(node)), tensor(node.tensor) {
+    node.tensor = nullptr;
 }
 
-Node::Node(Operation &&op)
-    : AbstractNode(op.getName() + std::to_string(++mNodeCounter)), mOperation(std::move(op)) {
-}
-
-Node &Node::operator=(Node &&src) noexcept {
-    mIncomingNodes = std::move(src.mIncomingNodes);
+InputNode& InputNode::operator=(InputNode&& src) noexcept {
     mOutgoingNodes = std::move(src.mOutgoingNodes);
-    mOperation = std::move(src.mOperation);
+    tensor = src.tensor;
     mName = std::move(src.mName);
+    src.tensor = nullptr;
     return *this;
 }
 
-void Node::after(AbstractNode* node) {
-    node->addOutgoingNode(node);
-    mIncomingNodes.emplace_back(node);
+void InputNode::after(AbstractNode* node) {
+    throw "Error. Input node can not be after something!";
 }
 
 }

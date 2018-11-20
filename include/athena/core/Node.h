@@ -16,6 +16,7 @@
 
 #include <vector>
 #include <athena/core/Operation.h>
+#include <athena/core/AbstractNode.h>
 
 namespace athena::core {
 
@@ -23,23 +24,21 @@ namespace athena::core {
  * The class represents a single node of a computation graph. It has a name, a set of incoming nodes,
  * and a set of outgoing nodes. It also encapsulates Operation.
  */
-class Node {
+
+class Node : public AbstractNode {
  protected:
-    std::vector<Node*> mIncomingNodes;
-    std::vector<Node*> mOutgoingNodes;
+    std::vector<AbstractNode*> mIncomingNodes;
     Operation mOperation;
-    std::string mName;
-    static size_t mNodeCounter;
 
  public:
     Node() = delete;
     Node(const Node& src) = delete;
     Node(Node&& src) noexcept;
     explicit Node(Operation&& op);
-    ~Node() = default;  //TODO rewrite if change Node* in vectors to shared_ptr<Node>. Now must deleted by Graph.
+    ~Node() override = default;
     Node& operator=(const Node& src) = delete;
     Node& operator=(Node&& src) noexcept;
-    void after(Node* node);
+    void after(AbstractNode* node) override;
 };
 
 }
