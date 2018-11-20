@@ -29,7 +29,7 @@ athena::core::Graph &athena::core::Graph::operator=(athena::core::Graph &&src) n
     return *this;
 }
 athena::core::Graph::~Graph() {
-    std::queue<Node*> nodes;
+    std::queue<AbstractNode*> nodes;
 
     if (lossFunctionNode != nullptr) {
         nodes.push(lossFunctionNode);
@@ -38,16 +38,17 @@ athena::core::Graph::~Graph() {
     }
 
     while (!nodes.empty()) {
-        Node* curNode = nodes.front();
+        AbstractNode* curAbstractNode = nodes.front();
         nodes.pop();
 
+        auto curNode = dynamic_cast<Node*>(curAbstractNode);
         if (curNode != nullptr && !curNode->mIncomingNodes.empty()) {
             for(auto node : curNode->mIncomingNodes) {
                 nodes.push(node);
             }
         }
 
-        delete curNode;
+        delete curAbstractNode;
     }
 
 }

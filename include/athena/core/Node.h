@@ -20,12 +20,14 @@
 
 namespace athena::core {
 
+class Graph;
+
 /**
  * The class represents a single node of a computation graph. It has a name, a set of incoming nodes,
  * and a set of outgoing nodes. It also encapsulates Operation.
  */
-
 class Node : public AbstractNode {
+    friend class Graph;
  protected:
     std::vector<AbstractNode*> mIncomingNodes;
     Operation mOperation;
