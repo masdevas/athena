@@ -41,7 +41,7 @@ athena::core::Graph::~Graph() {
         AbstractNode* curAbstractNode = nodes.front();
         nodes.pop();
 
-        auto curNode = dynamic_cast<Node*>(curAbstractNode);
+        auto curNode = static_cast<Node*>(curAbstractNode);
         if (curNode != nullptr && !curNode->mIncomingNodes.empty()) {
             for(auto node : curNode->mIncomingNodes) {
                 nodes.push(node);

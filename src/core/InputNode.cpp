@@ -29,7 +29,7 @@ InputNode& InputNode::operator=(InputNode&& src) noexcept {
 }
 
 void InputNode::after(AbstractNode* node) {
-    throw "Error. Input node can not be after something!";
+    //throw "Error. Input node can not be after something!";
 }
 
 }
