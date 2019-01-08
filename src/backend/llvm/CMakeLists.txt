@@ -5,6 +5,11 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 add_subdirectory(runtime-cpu)
 
-add_library(backend-llvm INTERFACE)
+add_library(backend-llvm STATIC LLVMExecutor.cpp)
 
-target_link_libraries(backend-llvm INTERFACE athena-core runtime-llvm-cpu)
+target_include_directories(backend-llvm PUBLIC ${LLVM_INCLUDE_DIRS})
+target_compile_definitions(backend-llvm PUBLIC ${LLVM_DEFINITIONS})
+
+llvm_map_components_to_libnames(llvm_libs support core irreader)
+
+target_link_libraries(backend-llvm INTERFACE athena-core runtime-llvm-cpu ${llvm_libs})

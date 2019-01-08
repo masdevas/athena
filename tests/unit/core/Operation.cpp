@@ -15,3 +15,6 @@
 std::string athena::core::Operation::getName() {
     return mName;
 }
+athena::core::Tensor *athena::core::Operation::getResultSize(std::deque<Tensor *> args) {
+    return new Tensor();
+}

@@ -21,8 +21,8 @@ AbstractNode::AbstractNode(AbstractNode &&node) noexcept
     : mOutgoingNodes(std::move(node.mOutgoingNodes)), mName(std::move(node.mName)) {
 }
 
-AbstractNode::AbstractNode(std::string&& name)
-    : mName(std::move(name)) {
+AbstractNode::AbstractNode(std::string&& name, NodeType type)
+    : mName(std::move(name)), mNodeType(type), mWasVisitedFlag(false) {
 }
 
 AbstractNode& AbstractNode::operator=(AbstractNode &&src) noexcept {

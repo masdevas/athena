@@ -21,18 +21,20 @@ namespace athena::core {
 
 class InputNode : public AbstractNode {
  private:
-    Tensor *tensor;
+    Tensor *mTensor;
 
  public:
     InputNode() = delete;
     InputNode(const InputNode &node) = delete;
     InputNode(InputNode &&node) noexcept;
+    explicit InputNode(Tensor *tensor);
     ~InputNode() override = default;
     InputNode& operator=(const InputNode& src) = delete;
     InputNode& operator=(InputNode&& src) noexcept;
     void after(AbstractNode* node) override;
+    Tensor* getData();
     template <class Generator, typename ...Args>
-    void gen(Generator g, Args... args) {};
+    void gen(Generator g, Tensor* tensor, Args... args) {};
 };
 
 }

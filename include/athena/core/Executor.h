@@ -14,8 +14,15 @@
 #ifndef ATHENA_EXECUTOR_H
 #define ATHENA_EXECUTOR_H
 
-class Executor {
+#include <athena/core/Graph.h>
 
+namespace athena::core {
+
+class Executor {
+ public:
+    virtual void prepare(Graph &graph) = 0;
+    virtual void execute() = 0;
 };
 
+}
 #endif //ATHENA_EXECUTOR_H

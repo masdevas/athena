@@ -21,7 +21,8 @@ Node::Node(Node &&src) noexcept
 }
 
 Node::Node(Operation &&op)
-    : AbstractNode(op.getName() + std::to_string(++mNodeCounter)), mOperation(std::move(op)) {
+    : AbstractNode(op.getName() + std::to_string(++mNodeCounter), NodeType::DEFAULT),
+      mOperation(std::move(op)) {
 }
 
 Node &Node::operator=(Node &&src) noexcept {
@@ -32,7 +33,7 @@ Node &Node::operator=(Node &&src) noexcept {
     return *this;
 }
 
-void Node::after(AbstractNode* node) {
+void Node::after(AbstractNode *node) {
     node->addOutgoingNode(node);
     mIncomingNodes.emplace_back(node);
 }
