@@ -18,13 +18,14 @@
 #include <tuple>
 #include <athena/core/Tensor.h>
 
-athena::core::Graph::Graph(athena::core::Graph &&src) noexcept {
+namespace athena::core {
+Graph::Graph(Graph &&src) noexcept {
     outputNode = src.outputNode;
     lossFunctionNode = src.lossFunctionNode;
     src.lossFunctionNode = nullptr;
     src.outputNode = nullptr;
 }
-athena::core::Graph &athena::core::Graph::operator=(athena::core::Graph &&src) noexcept {
+Graph &Graph::operator=(Graph &&src) noexcept {
     outputNode = src.outputNode;
     lossFunctionNode = src.lossFunctionNode;
     src.lossFunctionNode = nullptr;
@@ -32,7 +33,7 @@ athena::core::Graph &athena::core::Graph::operator=(athena::core::Graph &&src) n
 
     return *this;
 }
-athena::core::Graph::~Graph() {
+Graph::~Graph() {
     std::queue<AbstractNode *> nodes;
 
     if (lossFunctionNode != nullptr) {
@@ -56,13 +57,13 @@ athena::core::Graph::~Graph() {
     }
 
 }
-std::tuple<std::queue<athena::core::AbstractNode*>, std::deque<athena::core::Tensor*> > athena::core::Graph::traverse() {
+std::tuple<std::queue<AbstractNode *>, std::deque<Tensor *> > Graph::traverse() {
     Node *startNode = lossFunctionNode == nullptr ? outputNode : lossFunctionNode;
 
     std::stack<AbstractNode *> dfsStack;
     dfsStack.push(startNode);
-    std::deque<Tensor*> arguments;
-    std::queue<AbstractNode*> graphQueue;
+    std::deque<Tensor *> arguments;
+    std::queue<AbstractNode *> graphQueue;
 
     while (!dfsStack.empty()) {
         AbstractNode *currentAbstractNode = dfsStack.top();
@@ -71,7 +72,7 @@ std::tuple<std::queue<athena::core::AbstractNode*>, std::deque<athena::core::Ten
             auto currentNode = dynamic_cast<Node *>(currentAbstractNode);
             if (currentNode) {
                 bool hasUnvisited = false;
-                for (AbstractNode* node : currentNode->mIncomingNodes) {
+                for (AbstractNode *node : currentNode->mIncomingNodes) {
                     if (!node->mWasVisitedFlag) {
                         dfsStack.push(node);
                         hasUnvisited = true;
@@ -85,11 +86,12 @@ std::tuple<std::queue<athena::core::AbstractNode*>, std::deque<athena::core::Ten
                 }
             }
         } else {
-            auto * inputNode = dynamic_cast<InputNode*>(currentAbstractNode);
+            auto *inputNode = dynamic_cast<InputNode *>(currentAbstractNode);
             arguments.push_back(inputNode->getData());
             graphQueue.push(currentAbstractNode);
         }
     }
 
     return std::make_tuple(graphQueue, arguments);
+}
 }
