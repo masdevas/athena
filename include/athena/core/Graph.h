@@ -39,9 +39,6 @@ class Graph {
     std::tuple<std::queue<AbstractNode*>, std::deque<Tensor*> > traverse();
 
 };
-Operation &Node::getAssignedOperation() {
-    return mOperation;
-}
 
 }
 
