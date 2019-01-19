@@ -44,8 +44,6 @@ endfunction(getblis)
 option(FORCE_BLIS "Require library to use BLIS" OFF)
 option(FORCE_OPENBLAS "Require library to use OpenBLAS" OFF)
 
-add_library(runtime-llvm-cpu STATIC add.cpp)
-
 if (FORCE_BLIS)
     message(STATUS "BLIS will be downloaded and compiled")
     getblis()
@@ -64,4 +62,4 @@ else ()
     endif()
 endif ()
 
-add_athena_library(runtime-llvm-cpu INTERFACE)
+add_athena_library(runtime-llvm-cpu STATIC add.cpp)
