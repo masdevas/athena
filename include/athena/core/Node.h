@@ -41,6 +41,7 @@ class Node : public AbstractNode {
     Node& operator=(const Node& src) = delete;
     Node& operator=(Node&& src) noexcept;
     void after(AbstractNode* node) override;
+    Operation& getAssignedOperation();
 };
 
 }

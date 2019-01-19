@@ -13,14 +13,19 @@
 
 #include <athena/core/Graph.h>
 #include <queue>
+#include <deque>
+#include <athena/core/InputNode.h>
+#include <tuple>
+#include <athena/core/Tensor.h>
 
-athena::core::Graph::Graph(athena::core::Graph &&src) noexcept {
+namespace athena::core {
+Graph::Graph(Graph &&src) noexcept {
     outputNode = src.outputNode;
     lossFunctionNode = src.lossFunctionNode;
     src.lossFunctionNode = nullptr;
     src.outputNode = nullptr;
 }
-athena::core::Graph &athena::core::Graph::operator=(athena::core::Graph &&src) noexcept {
+Graph &Graph::operator=(Graph &&src) noexcept {
     outputNode = src.outputNode;
     lossFunctionNode = src.lossFunctionNode;
     src.lossFunctionNode = nullptr;
@@ -28,8 +33,8 @@ athena::core::Graph &athena::core::Graph::operator=(athena::core::Graph &&src) n
 
     return *this;
 }
-athena::core::Graph::~Graph() {
-    std::queue<AbstractNode*> nodes;
+Graph::~Graph() {
+    std::queue<AbstractNode *> nodes;
 
     if (lossFunctionNode != nullptr) {
         nodes.push(lossFunctionNode);
@@ -38,12 +43,12 @@ athena::core::Graph::~Graph() {
     }
 
     while (!nodes.empty()) {
-        AbstractNode* curAbstractNode = nodes.front();
+        AbstractNode *curAbstractNode = nodes.front();
         nodes.pop();
 
-        auto curNode = dynamic_cast<Node*>(curAbstractNode);
+        auto curNode = dynamic_cast<Node *>(curAbstractNode);
         if (curNode != nullptr && !curNode->mIncomingNodes.empty()) {
-            for(auto node : curNode->mIncomingNodes) {
+            for (auto node : curNode->mIncomingNodes) {
                 nodes.push(node);
             }
         }
@@ -51,4 +56,42 @@ athena::core::Graph::~Graph() {
         delete curAbstractNode;
     }
 
+}
+std::tuple<std::queue<AbstractNode *>, std::deque<Tensor *> > Graph::traverse() {
+    Node *startNode = lossFunctionNode == nullptr ? outputNode : lossFunctionNode;
+
+    std::stack<AbstractNode *> dfsStack;
+    dfsStack.push(startNode);
+    std::deque<Tensor *> arguments;
+    std::queue<AbstractNode *> graphQueue;
+
+    while (!dfsStack.empty()) {
+        AbstractNode *currentAbstractNode = dfsStack.top();
+
+        if (currentAbstractNode->getType() == NodeType::DEFAULT) {
+            auto currentNode = dynamic_cast<Node *>(currentAbstractNode);
+            if (currentNode) {
+                bool hasUnvisited = false;
+                for (AbstractNode *node : currentNode->mIncomingNodes) {
+                    if (!node->mWasVisitedFlag) {
+                        dfsStack.push(node);
+                        hasUnvisited = true;
+                    }
+                }
+                if (!hasUnvisited) {
+                    graphQueue.push(currentAbstractNode);
+                    Tensor *result = currentNode->mOperation.getResultSize(arguments);
+                    arguments.push_back(result);
+                    dfsStack.pop();
+                }
+            }
+        } else {
+            auto *inputNode = dynamic_cast<InputNode *>(currentAbstractNode);
+            arguments.push_back(inputNode->getData());
+            graphQueue.push(currentAbstractNode);
+        }
+    }
+
+    return std::make_tuple(graphQueue, arguments);
+}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Athena. All rights reserved.
+ * Copyright (c) 2019 Athena. All rights reserved.
  * https://athenaframework.ml
  *
  * Licensed under MIT license.
@@ -10,14 +10,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+#ifndef ATHENA_LLVMGENERATOR_H
+#define ATHENA_LLVMGENERATOR_H
 
-#ifndef ATHENA_TENSOR_H
-#define ATHENA_TENSOR_H
-
-namespace athena::core {
-class Tensor {
+namespace athena::backend::llvm {
+class LLVMGenerator {
 
 };
 }
 
-#endif //ATHENA_TENSOR_H
+#endif //ATHENA_LLVMGENERATOR_H

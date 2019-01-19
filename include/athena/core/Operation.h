@@ -17,6 +17,8 @@
 #define ATHENA_OPERATION_H
 
 #include <string>
+#include <stack>
+#include "Tensor.h"
 
 namespace athena::core {
     class Operation {
@@ -24,8 +26,9 @@ namespace athena::core {
         std::string mName;
      public:
         explicit Operation(std::string&& name) : mName(std::move(name)) {};
+        Tensor* getResultSize(std::deque<Tensor*> args);
         template <class Generator, typename ...Args>
-        void gen(Generator g, Args... args) {};
+        void gen(Generator g, std::stack<Tensor*> &operationArguments, Args... args) {};
         std::string getName();
     };
 }

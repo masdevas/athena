@@ -15,6 +15,11 @@
 #define ATHENA_GRAPH_H
 
 #include <athena/core/Node.h>
+#include <stack>
+#include <queue>
+#include <deque>
+#include "Tensor.h"
+#include "Node.h"
 
 namespace athena::core {
 
@@ -31,7 +36,12 @@ class Graph {
     Graph& operator=(Graph&& src) noexcept;
     ~Graph();
 
+    std::tuple<std::queue<AbstractNode*>, std::deque<Tensor*> > traverse();
+
 };
+Operation &Node::getAssignedOperation() {
+    return mOperation;
+}
 
 }
 
