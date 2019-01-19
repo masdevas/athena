@@ -35,9 +35,9 @@ size_t TensorShape::getTotalSize() const {
 }
 size_t TensorShape::dim(size_t index) const {
     if (index >= mShape.size()) {
-        throw std::out_of_range(
-            "TensorShape only has " + std::to_string(mShape.size()) + " dimensions. " + std::to_string(index)
-                + " requested.");
+//        throw std::out_of_range(
+//            "TensorShape only has " + std::to_string(mShape.size()) + " dimensions. " + std::to_string(index)
+//                + " requested.");
     }
 
     return mShape[index];

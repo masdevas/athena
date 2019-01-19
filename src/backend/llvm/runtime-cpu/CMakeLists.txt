@@ -64,3 +64,4 @@ else ()
     endif()
 endif ()
 
+add_athena_library(runtime-llvm-cpu INTERFACE)

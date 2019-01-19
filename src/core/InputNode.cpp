@@ -30,8 +30,8 @@ InputNode &InputNode::operator=(InputNode &&src) noexcept {
     return *this;
 }
 
-void InputNode::after(AbstractNode *node) {
-    throw "Error. Input node can not be after something!";
+void InputNode::after(AbstractNode* node) {
+    //throw "Error. Input node can not be after something!";
 }
 InputNode::InputNode(Tensor *tensor) : AbstractNode("Input" + std::to_string(++mNodeCounter), NodeType::INPUT ),
                                        mTensor(tensor) {
