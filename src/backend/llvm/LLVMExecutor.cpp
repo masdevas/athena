@@ -35,7 +35,7 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
         auto currentNode = code.front();
 
         if (currentNode->getType() == athena::core::NodeType::DEFAULT) {
-            auto node = dynamic_cast<core::Node *>(currentNode);
+            auto node = static_cast<core::Node *>(currentNode);
             auto op = node->getAssignedOperation();
 
             auto tensor = data.front();
@@ -45,7 +45,7 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
 
             op.gen(generator, preparedTensors, mainModule);
         } else if (currentNode->getType() == core::NodeType::INPUT) {
-            auto node = dynamic_cast<core::InputNode *>(currentNode);
+            auto node = static_cast<core::InputNode *>(currentNode);
 
             auto tensor = data.front();
             data.pop_front();

@@ -69,24 +69,22 @@ std::tuple<std::queue<AbstractNode *>, std::deque<Tensor *> > Graph::traverse() 
         AbstractNode *currentAbstractNode = dfsStack.top();
 
         if (currentAbstractNode->getType() == NodeType::DEFAULT) {
-            auto currentNode = dynamic_cast<Node *>(currentAbstractNode);
-            if (currentNode) {
-                bool hasUnvisited = false;
-                for (AbstractNode *node : currentNode->mIncomingNodes) {
-                    if (!node->mWasVisitedFlag) {
-                        dfsStack.push(node);
-                        hasUnvisited = true;
-                    }
-                }
-                if (!hasUnvisited) {
-                    graphQueue.push(currentAbstractNode);
-                    Tensor *result = currentNode->mOperation.getResultSize(arguments);
-                    arguments.push_back(result);
-                    dfsStack.pop();
+            auto currentNode = static_cast<Node *>(currentAbstractNode);
+            bool hasUnvisited = false;
+            for (AbstractNode *node : currentNode->mIncomingNodes) {
+                if (!node->mWasVisitedFlag) {
+                    dfsStack.push(node);
+                    hasUnvisited = true;
                 }
             }
+            if (!hasUnvisited) {
+                graphQueue.push(currentAbstractNode);
+                Tensor *result = currentNode->mOperation.getResultSize(arguments);
+                arguments.push_back(result);
+                dfsStack.pop();
+            }
         } else {
-            auto *inputNode = dynamic_cast<InputNode *>(currentAbstractNode);
+            auto *inputNode = static_cast<InputNode *>(currentAbstractNode);
             arguments.push_back(inputNode->getData());
             graphQueue.push(currentAbstractNode);
         }

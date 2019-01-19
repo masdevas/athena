@@ -38,4 +38,8 @@ void Node::after(AbstractNode *node) {
     mIncomingNodes.emplace_back(node);
 }
 
+Operation &Node::getAssignedOperation() {
+    return mOperation;
+}
+
 }
