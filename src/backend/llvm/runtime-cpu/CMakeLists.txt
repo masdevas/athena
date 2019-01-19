@@ -1,33 +1,15 @@
-function(getopenblas)
-    include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
-    find_program(MAKE_EXE NAMES gmake nmake make)
-    externalproject_add(OpenBLAS
+function(getboost)
+    find_package(Boost COMPONENTS numeric)
 
-            GIT_REPOSITORY "https://github.com/xianyi/OpenBLAS.git"
-            GIT_TAG "master"
+    if(NOT BLAS_FOUND)
+        if (NOT WIN32)
+            execute_process(COMMAND ${PROJECT_SOURCE_DIR}/scripts/boost.sh 1.68.0 ${PROJECT_SOURCE_DIR}/libs)
+            set(BOOST_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/libs/boost)
+        endif()
+    endif()
 
-            UPDATE_COMMAND ""
-            PATCH_COMMAND ""
-
-            PREFIX ${PROJECT_SOURCE_DIR}/libs
-            SOURCE_DIR "openblas"
-            INSTALL_DIR "openblas"
-
-            CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
-
-            BUILD_IN_SOURCE TRUE
-            BUILD_COMMAND cmake --build . --config Release
-
-            INSTALL_DIR ${PROJECT_SOURCE_DIR}/libs/src/openblas
-            )
-    externalproject_get_property(OpenBLAS SOURCE_DIR)
-    add_dependencies(athena OpenBLAS)
-    target_include_directories(athena PUBLIC
-            ${PROJECT_SOURCE_DIR}/libs/src/openblas/include)
-    target_compile_definitions(athena PUBLIC -DFORCE_OPENBLAS)
-    set(BLAS_LIBRARIES ${PROJECT_SOURCE_DIR}/libs/src/openblas/lib/libopenblas.a
-            PARENT_SCOPE)
-endfunction(getopenblas)
+    target_include_directories(runtime-llvm-cpu PUBLIC ${BOOST_INCLUDE_DIRS})
+endfunction(getboost)
 
 function(getblis)
     include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
@@ -62,25 +44,23 @@ endfunction(getblis)
 option(FORCE_BLIS "Require library to use BLIS" OFF)
 option(FORCE_OPENBLAS "Require library to use OpenBLAS" OFF)
 
+add_library(runtime-llvm-cpu STATIC add.cpp)
 
 if (FORCE_BLIS)
     message(STATUS "BLIS will be downloaded and compiled")
     getblis()
 
-elseif (FORCE_OPENBLAS)
-    message(STATUS "OpenBLAS will be downloaded and compiled")
-    getopenblas()
+elseif (FORCE_UBLAS)
+    message(STATUS "Boost will be downloaded and compiled")
+    getboost()
 else ()
     if (APPLE)
         set(BLA_VENDOR Apple)
         target_compile_definitions(athena PUBLIC -DAPPLE_ACCELERATE)
         message(STATUS "Apple Accelerate Framework will be used")
-    endif ()
-    find_package(BLAS)
-    if (NOT BLAS_FOUND)
-        message(STATUS "No BLAS installation found. OpenBLAS will be downloaded and compiled")
-        getopenblas()
+    else()
+        message(STATUS "No BLAS installation found. Boost will be downloaded and compiled")
+        getboost()
     endif()
 endif ()
 
-add_library(runtime-llvm-cpu INTERFACE)
