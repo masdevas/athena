@@ -1,5 +1,5 @@
 /*
- * Copyright (c) ${YEAR} Athena. All rights reserved.
+ * Copyright (c) 2019 Athena. All rights reserved.
  * https://athenaframework.ml
  *
  * Licensed under MIT license.
@@ -10,5 +10,4 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 

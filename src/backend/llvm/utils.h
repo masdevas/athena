@@ -10,26 +10,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#ifndef ATHENA_LLVMEXECUTOR_H
-#define ATHENA_LLVMEXECUTOR_H
 
-#include <athena/core/Executor.h>
+#ifndef ATHENA_UTILS_H
+#define ATHENA_UTILS_H
+
+#include <llvm/IR/Function.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
-#include <athena/core/Allocator.h>
 
-namespace athena::backend::llvm {
+namespace athena::backend::llvm::impl {
 
-class LLVMExecutor : public athena::core::Executor {
- private:
-    ::llvm::LLVMContext mLLVMContext;
-    std::shared_ptr<::llvm::Module> mMainModule;
-    std::unique_ptr<core::Allocator> mAllocator;
- public:
-    void prepare(athena::core::Graph& graph) override;
-    void execute() override {};
-};
+::llvm::Function *create_fadd_decl(::llvm::LLVMContext &ctx, ::llvm::Module &module);
 
 }
 
-#endif //ATHENA_LLVMEXECUTOR_H
+#endif //ATHENA_UTILS_H

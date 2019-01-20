@@ -5,7 +5,10 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 add_subdirectory(runtime-cpu)
 
-add_athena_library(backend-llvm STATIC LLVMExecutor.cpp)
+add_athena_library(backend-llvm STATIC
+        LLVMExecutor.cpp
+        LLVMGenerator.cpp
+        utils.cpp)
 
 target_include_directories(backend-llvm PUBLIC ${LLVM_INCLUDE_DIRS})
 target_compile_definitions(backend-llvm PUBLIC ${LLVM_DEFINITIONS})

@@ -1,0 +1,1 @@
+add_athena_library(athena-ops STATIC AddOperation.cpp)

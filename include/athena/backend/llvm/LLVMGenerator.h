@@ -13,8 +13,24 @@
 #ifndef ATHENA_LLVMGENERATOR_H
 #define ATHENA_LLVMGENERATOR_H
 
+#include <athena/core/AbstractGenerator.h>
+#include <athena/core/Allocator.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/IRBuilder.h>
+
 namespace athena::backend::llvm {
-class LLVMGenerator {
+class LLVMGenerator : public core::AbstractGenerator {
+ private:
+    std::shared_ptr<::llvm::Module> mModule;
+    ::llvm::LLVMContext &mContext;
+    ::llvm::IRBuilder<> mBuilder;
+
+    core::Allocator &mAllocator;
+ public:
+    explicit LLVMGenerator(::llvm::LLVMContext &ctx,
+                            std::shared_ptr<::llvm::Module> module,
+                            core::Allocator &allocator);
+    void generateAdd(core::Tensor &a, core::Tensor &b, core::Tensor &c) override;
 
 };
 }
