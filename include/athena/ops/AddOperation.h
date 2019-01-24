@@ -24,7 +24,7 @@ class AddOperation : public core::Operation {
  public:
     AddOperation() : Operation("add") {}
 
-    void gen(core::AbstractGenerator g, std::stack<core::Tensor*> &operationArguments) override;
+    void gen(core::AbstractGenerator &g, std::stack<core::Tensor*> &operationArguments) override;
 };
 }
 #endif //ATHENA_ADDOPERATION_H

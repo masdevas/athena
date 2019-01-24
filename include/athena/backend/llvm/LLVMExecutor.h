@@ -14,15 +14,16 @@
 #define ATHENA_LLVMEXECUTOR_H
 
 #include <athena/core/Executor.h>
+#include <athena/core/Allocator.h>
+#include <athena/backend/llvm/AthenaJIT.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
-#include <athena/core/Allocator.h>
 
 namespace athena::backend::llvm {
 
 class LLVMExecutor : public athena::core::Executor {
  private:
-    ::llvm::LLVMContext mLLVMContext;
+    AthenaJIT mJITCompiler;
     std::shared_ptr<::llvm::Module> mMainModule;
     std::unique_ptr<core::Allocator> mAllocator;
  public:
