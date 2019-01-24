@@ -15,7 +15,7 @@
 
 namespace athena::ops {
 
-void AddOperation::gen(core::AbstractGenerator g, std::stack<core::Tensor *> &operationArguments) {
+void AddOperation::gen(core::AbstractGenerator &g, std::stack<core::Tensor *> &operationArguments) {
     core::Tensor *a = operationArguments.top();
     operationArguments.pop();
     core::Tensor *b = operationArguments.top();

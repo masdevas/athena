@@ -8,6 +8,7 @@ add_subdirectory(runtime-cpu)
 add_athena_library(backend-llvm STATIC
         LLVMExecutor.cpp
         LLVMGenerator.cpp
+        AthenaJIT.cpp
         utils.cpp)
 
 target_include_directories(backend-llvm PUBLIC ${LLVM_INCLUDE_DIRS})

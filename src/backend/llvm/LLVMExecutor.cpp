@@ -41,7 +41,7 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
             preparedTensors.push(tensor);
             // todo Result tensor also needs to be allocated. Consider removing InputNode::gen and calling generator directly
 
-            op.gen(generator, preparedTensors, mMainModule);
+            op.gen(generator, preparedTensors);
         } else if (currentNode->getType() == core::NodeType::INPUT) {
             auto node = static_cast<core::InputNode *>(currentNode);
 
