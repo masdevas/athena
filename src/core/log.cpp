@@ -14,6 +14,7 @@
 #include <athena/core/AbstractLoger.h>
 #include <athena/core/Logger.h>
 #include <iostream>
+#include <memory>
 
 namespace athena {
 namespace {
