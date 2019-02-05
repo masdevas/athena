@@ -36,6 +36,10 @@ class Tensor {
 
     Tensor& operator=(const Tensor& rhs) = default;
     Tensor& operator=(Tensor&& rhs) noexcept = default;
+    /**
+     * Returns subtensor like a new object
+     * @return Reference to new Tensor on the same memory
+     */
     Tensor& operator[](size_t index);
 
     DataType getDataType() const;

@@ -51,6 +51,10 @@ class TensorShape {
      */
     size_t dimensions() const;
 
+    /**
+     * Returns clone of mShape without first element
+     * @return Clone of mShape without first element
+     */
     TensorShape subshape() const;
 };
 }
