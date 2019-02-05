@@ -49,7 +49,9 @@ class TensorShape {
      * Returns number of dimensions in the shape
      * @return Number of dimensions
      */
-    size_t dimesions() const;
+    size_t dimensions() const;
+
+    TensorShape subshape() const;
 };
 }
 #endif //ATHENA_TENSORSHAPE_H

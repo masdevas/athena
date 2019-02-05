@@ -43,7 +43,10 @@ size_t TensorShape::dim(size_t index) const {
 
     return mShape[index];
 }
-size_t TensorShape::dimesions() const {
+size_t TensorShape::dimensions() const {
     return mShape.size();
+}
+TensorShape TensorShape::subshape() const {
+    return TensorShape(std::vector<size_t>(mShape.begin() + 1, mShape.end()));
 }
 }

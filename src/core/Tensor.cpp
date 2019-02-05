@@ -15,7 +15,12 @@
 
 namespace athena::core {
 Tensor& Tensor::operator[](size_t index) {
-
+    if (index > mShape.dimensions()) {
+        // Error
+    }
+    size_t newVirtualAddress = mVirtualAddress +
+        mShape.getTotalSize() / mShape.dim(0) * index;
+    return *(new Tensor(mDataType, newVirtualAddress, mShape.subshape()));
 }
 
 DataType Tensor::getDataType() const {
