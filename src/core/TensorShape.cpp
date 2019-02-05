@@ -15,6 +15,7 @@
 #include <string>
 #include <stdexcept>
 
+namespace athena::core {
 TensorShape::TensorShape(const TensorShape &rhs) {
     mShape = rhs.mShape;
 }
@@ -44,4 +45,5 @@ size_t TensorShape::dim(size_t index) const {
 }
 size_t TensorShape::dimesions() const {
     return mShape.size();
+}
 }

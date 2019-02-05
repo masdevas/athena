@@ -1,5 +1,3 @@
-#include <utility>
-
 /*
  * Copyright (c) 2018 Athena. All rights reserved.
  * https://athenaframework.ml
@@ -16,13 +14,16 @@
 #ifndef ATHENA_TENSORSHAPE_H
 #define ATHENA_TENSORSHAPE_H
 
+#include <utility>
 #include <vector>
+
+namespace athena::core {
 class TensorShape {
  private:
     std::vector<size_t> mShape;
  public:
     explicit TensorShape(std::vector<size_t> shape) : mShape(std::move(shape)) {};
-    TensorShape(const TensorShape& rhs);
+    TensorShape(const TensorShape &rhs);
     TensorShape(const TensorShape &&rhs) noexcept;
 
     /**
@@ -50,5 +51,5 @@ class TensorShape {
      */
     size_t dimesions() const;
 };
-
+}
 #endif //ATHENA_TENSORSHAPE_H

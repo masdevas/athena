@@ -1,5 +1,3 @@
-#include <utility>
-
 /*
  * Copyright (c) 2018 Athena. All rights reserved.
  * https://athenaframework.ml
@@ -18,6 +16,7 @@
 
 #include <string>
 #include <stack>
+#include <utility>
 #include "Tensor.h"
 
 namespace athena::core {
