@@ -16,9 +16,9 @@
 
 namespace athena::core {
 enum class DataType : int {
-    FLOAT = 0,
-    DOUBLE = 1,
-    INT = 2
+    DOUBLE = 0,
+    FLOAT = 1,
+    HALF = 2
 };
 }
 
