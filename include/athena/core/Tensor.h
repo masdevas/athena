@@ -36,10 +36,11 @@ class Tensor {
 
     Tensor& operator=(const Tensor& rhs) = default;
     Tensor& operator=(Tensor&& rhs) noexcept = default;
+    Tensor& operator[](size_t index);
 
     DataType getDataType() const;
     size_t getVirtualAddress() const;
-    const Tensor& getShape() const;
+    const TensorShape& getShape() const;
 };
 }
 

@@ -14,12 +14,16 @@
 #ifndef ATHENA_DATATYPE_H
 #define ATHENA_DATATYPE_H
 
+#include <cstddef>
+
 namespace athena::core {
 enum class DataType : int {
     DOUBLE = 0,
     FLOAT = 1,
     HALF = 2
 };
+
+size_t sizeOfDataType(const DataType& dataType);
 }
 
 #endif //ATHENA_DATATYPE_H

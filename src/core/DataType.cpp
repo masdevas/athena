@@ -11,22 +11,17 @@
  * the License.
  */
 
-#include <athena/core/Tensor.h>
+#include <athena/core/DataType.h>
 
 namespace athena::core {
-Tensor& Tensor::operator[](size_t index) {
-
-}
-
-DataType Tensor::getDataType() const {
-    return mDataType;
-}
-
-size_t Tensor::getVirtualAddress() const {
-    return mVirtualAddress;
-}
-
-const TensorShape& Tensor::getShape() const {
-    return mShape;
+size_t sizeOfDataType(const DataType& dataType) {
+    switch (dataType) {
+        case DataType::DOUBLE:
+            return 8ULL;
+        case DataType::FLOAT:
+            return 4ULL;
+        case DataType::HALF:
+            return 2ULL;
+    }
 }
 }
