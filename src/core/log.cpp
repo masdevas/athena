@@ -11,17 +11,9 @@
  * the License.
  */
 #include <athena/core/log.h>
-#include <athena/core/AbstractLoger.h>
-#include <athena/core/Logger.h>
-#include <iostream>
-#include <memory>
+
 
 namespace athena {
-namespace {
-std::unique_ptr<core::AbstractLogger> mLog = std::make_unique<core::Logger>(std::cout);
-std::unique_ptr<core::AbstractLogger> mErr = std::make_unique<core::Logger>(std::cerr);
-}
-
 core::AbstractLogger &log() {
     return *mLog;
 }
