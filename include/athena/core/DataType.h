@@ -11,12 +11,19 @@
  * the License.
  */
 
-#include <athena/core/Operation.h>
+#ifndef ATHENA_DATATYPE_H
+#define ATHENA_DATATYPE_H
+
+#include <cstddef>
+
 namespace athena::core {
-std::string Operation::getName() {
-    return mName;
+enum class DataType : int {
+    DOUBLE = 0,
+    FLOAT = 1,
+    HALF = 2
+};
+
+size_t sizeOfDataType(const DataType& dataType);
 }
-athena::core::Tensor *Operation::getResultSize(std::deque<Tensor *> args) {
-    return nullptr; //TODO
-}
-}
+
+#endif //ATHENA_DATATYPE_H

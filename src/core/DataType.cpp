@@ -11,12 +11,17 @@
  * the License.
  */
 
-#include <athena/core/Operation.h>
+#include <athena/core/DataType.h>
+
 namespace athena::core {
-std::string Operation::getName() {
-    return mName;
-}
-athena::core::Tensor *Operation::getResultSize(std::deque<Tensor *> args) {
-    return nullptr; //TODO
+size_t sizeOfDataType(const DataType& dataType) {
+    switch (dataType) {
+        case DataType::DOUBLE:
+            return 8ULL;
+        case DataType::FLOAT:
+            return 4ULL;
+        case DataType::HALF:
+            return 2ULL;
+    }
 }
 }
