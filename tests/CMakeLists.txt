@@ -29,7 +29,7 @@ function(get_gtest)
 endfunction(get_gtest)
 
 find_package(GTest)
-
+find_package(Threads)
 
 if (NOT ${GTEST_FOUND})
     get_gtest()

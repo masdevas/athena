@@ -14,16 +14,18 @@
 #include <gtest/gtest.h>
 #include <athena/core/TensorShape.h>
 
+namespace athena::core {
 TEST(TensorShapeTest, Creation) {
     TensorShape({1, 2, 3});
 }
 
 TEST(TensorShapeTest, Dimension) {
     TensorShape shape({1, 2, 3, 4});
-    ASSERT_EQ(shape.dimesions(), 4);
+    ASSERT_EQ(shape.dimensions(), 4);
 }
 
 TEST(TensorShapeTest, TotalSize) {
     TensorShape shape({1, 2, 3, 4});
-    ASSERT_EQ(shape.getTotalSize(), 1*2*3*4);
+    ASSERT_EQ(shape.getTotalSize(), 1 * 2 * 3 * 4);
+}
 }
