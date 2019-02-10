@@ -13,12 +13,29 @@
 #ifndef ATHENA_LOG_H
 #define ATHENA_LOG_H
 
-#include "AbstractLoger.h"
+#include <athena/core/AbstractLoger.h>
+#include <athena/core/Logger.h>
+#include <iostream>
+#include <memory>
 
-
-namespace athena {
+namespace athena::core {
 core::AbstractLogger &log();
 core::AbstractLogger &err();
+
+template <typename LoggerType, typename... Args>
+void setStream(std::unique_ptr<core::AbstractLogger>& stream, Args&&... args) {
+    stream.reset(new LoggerType(std::forward<Args>(args)...));
+}
+
+template <typename LoggerType, typename... Args>
+void setLogStream(Args&&... args) {
+    setStream<LoggerType>(log(), std::forward<Args>(args)...);
+}
+
+template <typename LoggerType, typename... Args>
+void setErrStream(Args&&... args) {
+    setStream<LoggerType>(err(), std::forward<Args>(args)...);
+}
 }
 
 #endif //ATHENA_LOG_H

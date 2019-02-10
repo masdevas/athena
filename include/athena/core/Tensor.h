@@ -14,9 +14,37 @@
 #ifndef ATHENA_TENSOR_H
 #define ATHENA_TENSOR_H
 
+#include <cstddef>
+#include <memory>
+#include "DataType.h"
+#include "TensorShape.h"
+
 namespace athena::core {
 class Tensor {
+ private:
+    DataType mDataType;
+    size_t mVirtualAddress;
+    TensorShape mShape;
+ public:
+    Tensor(DataType dataType, size_t virtualAddress, TensorShape shape)
+        : mDataType(dataType),
+          mVirtualAddress(virtualAddress),
+          mShape(std::move(shape)) {}
+    Tensor(const Tensor& rhs) = default;
+    Tensor(Tensor&& rhs) noexcept = default;
+    ~Tensor() = default;
 
+    Tensor& operator=(const Tensor& rhs) = default;
+    Tensor& operator=(Tensor&& rhs) noexcept = default;
+    /**
+     * Returns subtensor like a new object
+     * @return Reference to new Tensor on the same memory
+     */
+    Tensor& operator[](size_t index);
+
+    DataType getDataType() const;
+    size_t getVirtualAddress() const;
+    const TensorShape& getShape() const;
 };
 }
 

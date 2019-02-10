@@ -23,6 +23,7 @@ class Logger : public AbstractLogger {
 
  public:
     explicit Logger(std::ostream &stream) : mOutStream(stream) {};
+    ~Logger() override = default;
 
     AbstractLogger &streamImpl(const std::string &data) override;
     AbstractLogger &streamImpl(const char *data) override;

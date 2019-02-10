@@ -28,7 +28,7 @@ class AbstractLogger {
     AbstractLogger(AbstractLogger &&) noexcept = default;
     AbstractLogger &operator=(const AbstractLogger &) = default;
     AbstractLogger &operator=(AbstractLogger &&) noexcept = default;
-    ~AbstractLogger() = default;
+    virtual ~AbstractLogger() = default;
 
     template<typename T>
     AbstractLogger &operator<<(const T &data) {

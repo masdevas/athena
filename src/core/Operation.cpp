@@ -12,9 +12,11 @@
  */
 
 #include <athena/core/Operation.h>
-std::string athena::core::Operation::getName() {
+namespace athena::core {
+std::string Operation::getName() {
     return mName;
 }
-athena::core::Tensor *athena::core::Operation::getResultSize(std::deque<Tensor *> args) {
-    return new Tensor();
+athena::core::Tensor *Operation::getResultSize(std::deque<Tensor *> args) {
+    return nullptr; //TODO
+}
 }
