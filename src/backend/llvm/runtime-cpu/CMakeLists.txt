@@ -1,7 +1,7 @@
 function(getboost)
-#    find_package(Boost)
+    find_package(Boost)
 
-#    if(NOT ${BOOST_FOUND})
+    if(NOT ${BOOST_FOUND})
         include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
         externalproject_add(boost
                 URL https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
@@ -11,7 +11,7 @@ function(getboost)
                 INSTALL_COMMAND ""
         )
         add_dependencies(runtime-llvm-cpu boost)
-#    endif()
+    endif()
 
     target_include_directories(runtime-llvm-cpu PUBLIC ${BOOST_INCLUDE_DIRS})
 endfunction(getboost)
@@ -24,9 +24,13 @@ function(getblis)
             GIT_REPOSITORY "https://github.com/flame/blis.git"
             GIT_TAG "master"
 
-            PREFIX ${PROJECT_SOURCE_DIR}/third_party
+            UPDATE_COMMAND ""
+            PATCH_COMMAND ""
 
-            CONFIGURE_COMMAND ./configure --prefix=${INSTALL_DIR} --enable-cblas auto
+            PREFIX ${PROJECT_SOURCE_DIR}/third_party/
+            INSTALL_DIR "blis/lib/"
+
+            CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR> --enable-cblas auto
 
             BUILD_IN_SOURCE TRUE
             BUILD_COMMAND ${MAKE_EXE}
@@ -35,9 +39,8 @@ function(getblis)
             )
     externalproject_get_property(blis INSTALL_DIR)
     add_dependencies(runtime-llvm-cpu blis)
-#    target_include_directories(athena PUBLIC ${PROJECT_SOURCE_DIR}/libs/src/blis/include/blis/include/blis)
-#    target_compile_definitions(athena PUBLIC -DFORCE_BLIS)
     target_include_directories(runtime-llvm-cpu PUBLIC ${INSTALL_DIR}/include)
+    target_compile_definitions(runtime-llvm-cpu PUBLIC BLIS)
     set(BLAS_LIBRARIES ${PROJECT_SOURCE_DIR}/libs/src/blis/include/blis/lib/libblis.a
             PARENT_SCOPE)
 endfunction(getblis)
