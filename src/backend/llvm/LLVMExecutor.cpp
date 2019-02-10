@@ -12,20 +12,18 @@
  */
 
 #include <athena/backend/llvm/LLVMExecutor.h>
-#include <athena/core/AbstractNode.h>
-#include <athena/core/Node.h>
 #include <athena/core/InputNode.h>
 #include <athena/backend/llvm/LLVMGenerator.h>
 
 namespace athena::backend::llvm {
 
 void LLVMExecutor::prepare(athena::core::Graph &graph) {
-    mainModule = std::make_shared<::llvm::Module>("AthenaMain", context);
+    mMainModule = std::make_shared<::llvm::Module>("AthenaMain", mJITCompiler.getContext());
 
     // todo consider initializing some optimizers
 
     // todo Consider passing parameters with generator and dropping
-    LLVMGenerator generator;
+    LLVMGenerator generator(mJITCompiler.getContext(), mMainModule, *mAllocator);
 
     auto[code, data] = graph.traverse();
 
@@ -43,14 +41,14 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
             preparedTensors.push(tensor);
             // todo Result tensor also needs to be allocated. Consider removing InputNode::gen and calling generator directly
 
-            op.gen(generator, preparedTensors, mainModule);
+            op.gen(generator, preparedTensors);
         } else if (currentNode->getType() == core::NodeType::INPUT) {
             auto node = static_cast<core::InputNode *>(currentNode);
 
             auto tensor = data.front();
             data.pop_front();
 
-            node->gen(generator, tensor, mainModule);
+            node->gen(generator, tensor);
 
             preparedTensors.push(tensor);
         }

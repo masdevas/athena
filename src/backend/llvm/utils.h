@@ -1,5 +1,5 @@
 /*
- * Copyright (c) ${YEAR} Athena. All rights reserved.
+ * Copyright (c) 2019 Athena. All rights reserved.
  * https://athenaframework.ml
  *
  * Licensed under MIT license.
@@ -11,4 +11,17 @@
  * the License.
  */
 
+#ifndef ATHENA_UTILS_H
+#define ATHENA_UTILS_H
 
+#include <llvm/IR/Function.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+
+namespace athena::backend::llvm::impl {
+
+::llvm::Function *create_fadd_decl(::llvm::LLVMContext &ctx, ::llvm::Module &module);
+
+}
+
+#endif //ATHENA_UTILS_H

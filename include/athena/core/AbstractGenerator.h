@@ -1,5 +1,5 @@
 /*
- * Copyright (c) ${YEAR} Athena. All rights reserved.
+ * Copyright (c) 2019 Athena. All rights reserved.
  * https://athenaframework.ml
  *
  * Licensed under MIT license.
@@ -10,5 +10,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+#ifndef ATHENA_ABSTRACTGENERATOR_H
+#define ATHENA_ABSTRACTGENERATOR_H
+
+#include <athena/core/Tensor.h>
 
 
+namespace athena::core {
+
+class AbstractGenerator {
+ public:
+    virtual void generateAdd(Tensor &a, Tensor &b, Tensor &c) = 0;
+};
+
+}
+
+#endif //ATHENA_ABSTRACTGENERATOR_H

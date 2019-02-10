@@ -10,3 +10,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
+#include <athena/backend/llvm/runtime/add.h>
+
+void fadd(void *a, size_t ca, void *b, size_t cb, void *c) {
+
+    auto af = reinterpret_cast<float*>(a);
+    auto bf = reinterpret_cast<float*>(b);
+    auto cf = reinterpret_cast<float*>(c);
+
+    for (int i = 0; i < ca; i++) {
+        cf[i] = af[i] + bf[i];
+    }
+
+}
+
