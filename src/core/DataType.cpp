@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Athena. All rights reserved.
+ * Copyright (c) 2018 Athena. All rights reserved.
  * https://athenaframework.ml
  *
  * Licensed under MIT license.
@@ -10,19 +10,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <athena/core/log.h>
 
-namespace athena {
-namespace {
-std::unique_ptr<core::AbstractLogger> mLog = std::make_unique<core::Logger>(std::cout);
-std::unique_ptr<core::AbstractLogger> mErr = std::make_unique<core::Logger>(std::cerr);
-}
+#include <athena/core/DataType.h>
 
-core::AbstractLogger &log() {
-    return *mLog;
-}
-
-core::AbstractLogger &err() {
-    return *mErr;
+namespace athena::core {
+size_t sizeOfDataType(const DataType& dataType) {
+    switch (dataType) {
+        case DataType::DOUBLE:
+            return 8ULL;
+        case DataType::FLOAT:
+            return 4ULL;
+        case DataType::HALF:
+            return 2ULL;
+    }
 }
 }

@@ -1,11 +1,16 @@
 function(getboost)
-    find_package(Boost COMPONENTS numeric)
+    find_package(Boost)
 
-    if(NOT BLAS_FOUND)
-        if (NOT WIN32)
-            execute_process(COMMAND ${PROJECT_SOURCE_DIR}/scripts/boost.sh 1.68.0 ${PROJECT_SOURCE_DIR}/libs)
-            set(BOOST_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/libs/boost)
-        endif()
+    if(NOT ${BOOST_FOUND})
+        include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
+        externalproject_add(boost
+                URL https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
+                PREFIX ${PROJECT_SOURCE_DIR}/third_party
+                CONFIGURE_COMMAND ""
+                BUILD_COMMAND ""
+                INSTALL_COMMAND ""
+        )
+        add_dependencies(runtime-llvm-cpu boost)
     endif()
 
     target_include_directories(runtime-llvm-cpu PUBLIC ${BOOST_INCLUDE_DIRS})
@@ -22,27 +27,28 @@ function(getblis)
             UPDATE_COMMAND ""
             PATCH_COMMAND ""
 
-            PREFIX ${PROJECT_SOURCE_DIR}/libs/src/
-            SOURCE_DIR "blis"
-            INSTALL_DIR "blis"
+            PREFIX ${PROJECT_SOURCE_DIR}/third_party/
+            INSTALL_DIR "blis/lib/"
 
-            CONFIGURE_COMMAND ./configure --prefix=${PROJECT_SOURCE_DIR}/libs/src/blis/include/blis/ --enable-cblas auto
+            CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR> --enable-cblas auto
 
             BUILD_IN_SOURCE TRUE
-            BUILD_COMMAND "make"
+            BUILD_COMMAND ${MAKE_EXE}
 
             INSTALL_COMMAND ${MAKE_EXE} install
             )
-    externalproject_get_property(blis SOURCE_DIR)
-    add_dependencies(athena blis)
-    target_include_directories(athena PUBLIC ${PROJECT_SOURCE_DIR}/libs/src/blis/include/blis/include/blis)
-    target_compile_definitions(athena PUBLIC -DFORCE_BLIS)
+    externalproject_get_property(blis INSTALL_DIR)
+    add_dependencies(runtime-llvm-cpu blis)
+    target_include_directories(runtime-llvm-cpu PUBLIC ${INSTALL_DIR}/include)
+    target_compile_definitions(runtime-llvm-cpu PUBLIC BLIS)
     set(BLAS_LIBRARIES ${PROJECT_SOURCE_DIR}/libs/src/blis/include/blis/lib/libblis.a
             PARENT_SCOPE)
 endfunction(getblis)
 
 option(FORCE_BLIS "Require library to use BLIS" OFF)
-option(FORCE_OPENBLAS "Require library to use OpenBLAS" OFF)
+option(FORCE_ULAS "Require library to use uBLAS" OFF)
+
+add_athena_library(runtime-llvm-cpu SHARED add.cpp)
 
 if (FORCE_BLIS)
     message(STATUS "BLIS will be downloaded and compiled")
@@ -54,12 +60,10 @@ elseif (FORCE_UBLAS)
 else ()
     if (APPLE)
         set(BLA_VENDOR Apple)
-        target_compile_definitions(athena PUBLIC -DAPPLE_ACCELERATE)
+        target_compile_definitions(runtime-llvm-cpu PUBLIC -DAPPLE_ACCELERATE)
         message(STATUS "Apple Accelerate Framework will be used")
     else()
         message(STATUS "No BLAS installation found. Boost will be downloaded and compiled")
         getboost()
     endif()
 endif ()
-
-add_athena_library(runtime-llvm-cpu STATIC add.cpp)

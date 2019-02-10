@@ -1,5 +1,3 @@
-#include <utility>
-
 /*
  * Copyright (c) 2018 Athena. All rights reserved.
  * https://athenaframework.ml
@@ -18,8 +16,8 @@
 
 #include <string>
 #include <stack>
-#include <athena/core/Tensor.h>
-#include <athena/core/AbstractGenerator.h>
+#include <utility>
+#include "Tensor.h"
 
 namespace athena::core {
     class Operation {

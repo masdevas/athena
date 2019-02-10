@@ -13,5 +13,6 @@ add_athena_library(athena-core STATIC
         Logger.cpp
         Operation.cpp
         FatalError.cpp
-        AbstractGenerator.cpp
+        DataType.cpp
+        Tensor.cpp
         )
