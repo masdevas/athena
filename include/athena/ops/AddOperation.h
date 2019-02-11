@@ -10,17 +10,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <athena/core/log.h>
 
-namespace athena::core {
 
-const std::unique_ptr<LogHolder> logHolder = std::make_unique<LogHolder>();
+#ifndef ATHENA_ADDOPERATION_H
+#define ATHENA_ADDOPERATION_H
 
-core::AbstractLogger &log() {
-    return *(logHolder->mLog);
+#include <athena/core/Operation.h>
+#include <athena/core/Tensor.h>
+#include <athena/core/AbstractGenerator.h>
+
+namespace athena::ops {
+class AddOperation : public core::Operation {
+ public:
+    AddOperation() : Operation("add") {}
+
+    void gen(core::AbstractGenerator &g, std::stack<core::Tensor*> &operationArguments) override;
+};
 }
-
-core::AbstractLogger &err() {
-    return *(logHolder->mErr);
-}
-}
+#endif //ATHENA_ADDOPERATION_H

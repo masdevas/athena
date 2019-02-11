@@ -11,24 +11,21 @@
  * the License.
  */
 
-#ifndef ATHENA_OPERATION_H
-#define ATHENA_OPERATION_H
-
+#include <gtest/gtest.h>
+#include <athena/core/TensorShape.h>
 #include <string>
-#include <stack>
-#include <utility>
-#include "Tensor.h"
+#include "athena/core/log.h"
 
 namespace athena::core {
-    class Operation {
-     protected:
-        std::string mName;
-     public:
-        explicit Operation(std::string&& name) : mName(std::move(name)) {};
-        Tensor* getResultSize(std::deque<Tensor*> args);
-        virtual void gen(AbstractGenerator &g, std::stack<Tensor*> &operationArguments) {};
-        std::string getName();
-    };
+TEST(TensorLog, SetCout) {
+    setLogStream<Logger>(std::cout);
 }
-
-#endif //ATHENA_OPERATION_H
+TEST(TensorLog, SetStringstream) {
+    std::stringstream ss;
+    setLogStream<Logger>(ss);
+    std::string firstPart = "Hello", secondPart = "Log";
+    std::string fullString = firstPart + secondPart;
+    log() << firstPart << secondPart;
+    ASSERT_EQ(ss.str(), fullString);
+}
+}

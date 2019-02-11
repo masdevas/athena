@@ -1,14 +1,14 @@
 function(get_gtest)
-    configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+    configure_file(CMakeLists.txt.in ${PROJECT_SOURCE_DIR}/third_party/src/googletest-download/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
             RESULT_VARIABLE result
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/third_party/src/googletest-download )
     if(result)
         message(FATAL_ERROR "CMake step for googletest failed: ${result}")
     endif()
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
             RESULT_VARIABLE result
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/third_party/src/googletest-download )
     if(result)
         message(FATAL_ERROR "Build step for googletest failed: ${result}")
     endif()
@@ -19,7 +19,7 @@ function(get_gtest)
 
     # Add googletest directly to our build. This defines
     # the gtest and gtest_main targets.
-    add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
+    add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/src/googletest-src
             ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
             EXCLUDE_FROM_ALL)
 
@@ -34,5 +34,7 @@ find_package(Threads)
 if (NOT ${GTEST_FOUND})
     get_gtest()
 endif()
+
+find_package(Threads)
 
 add_subdirectory(unit)

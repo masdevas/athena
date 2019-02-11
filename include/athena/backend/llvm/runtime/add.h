@@ -10,17 +10,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <athena/core/log.h>
+#ifndef ATHENA_ADD_H
+#define ATHENA_ADD_H
 
-namespace athena::core {
+#if __cplusplus
+#include <cstddef>
+extern "C" {
+#else
+#include <stddef.h>
+#endif
 
-const std::unique_ptr<LogHolder> logHolder = std::make_unique<LogHolder>();
+    void fadd(void *a, size_t ca, void *b, size_t cb, void* c);
 
-core::AbstractLogger &log() {
-    return *(logHolder->mLog);
-}
+#if __cplusplus
+};
+#endif
 
-core::AbstractLogger &err() {
-    return *(logHolder->mErr);
-}
-}
+#endif //ATHENA_ADD_H

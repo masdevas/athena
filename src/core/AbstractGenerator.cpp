@@ -10,17 +10,4 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <athena/core/log.h>
 
-namespace athena::core {
-
-const std::unique_ptr<LogHolder> logHolder = std::make_unique<LogHolder>();
-
-core::AbstractLogger &log() {
-    return *(logHolder->mLog);
-}
-
-core::AbstractLogger &err() {
-    return *(logHolder->mErr);
-}
-}

@@ -10,17 +10,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <athena/core/log.h>
+#ifndef ATHENA_ABSTRACTGENERATOR_H
+#define ATHENA_ABSTRACTGENERATOR_H
+
+#include <athena/core/Tensor.h>
+
 
 namespace athena::core {
 
-const std::unique_ptr<LogHolder> logHolder = std::make_unique<LogHolder>();
+class AbstractGenerator {
+ public:
+    virtual void generateAdd(Tensor &a, Tensor &b, Tensor &c) = 0;
+};
 
-core::AbstractLogger &log() {
-    return *(logHolder->mLog);
 }
 
-core::AbstractLogger &err() {
-    return *(logHolder->mErr);
-}
-}
+#endif //ATHENA_ABSTRACTGENERATOR_H

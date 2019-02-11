@@ -36,7 +36,7 @@ matrix:
         - llvm-toolchain-trusty-6.0
     before_install:
     - export CXX=clang++-6.0 CC=clang-6.0
-    - . ${TRAVIS_BUILD_DIR}/setup_cxx.sh 6.0.1 /usr
+    - . ${TRAVIS_BUILD_DIR}/scripts/setup_cxx.sh 6.0.1 /usr
 
   - os: linux
     name: "linux with gcc 7"

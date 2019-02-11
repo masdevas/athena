@@ -10,17 +10,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <athena/core/log.h>
 
-namespace athena::core {
+#include "utils.h"
 
-const std::unique_ptr<LogHolder> logHolder = std::make_unique<LogHolder>();
+namespace athena::backend::llvm::impl {
 
-core::AbstractLogger &log() {
-    return *(logHolder->mLog);
+::llvm::Function *create_fadd_decl(::llvm::LLVMContext &ctx, ::llvm::Module &module) {
+    std::vector<::llvm::Type*> args(5);
+    ::llvm::FunctionType *FT =
+        ::llvm::FunctionType::get(::llvm::Type::getVoidTy(ctx), args, false);
+
+    ::llvm::Function *F =
+        ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, "fadd", &module);
+
+    return F;
 }
 
-core::AbstractLogger &err() {
-    return *(logHolder->mErr);
-}
 }
