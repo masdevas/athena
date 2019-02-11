@@ -12,17 +12,15 @@
  */
 #include <athena/core/log.h>
 
-namespace athena {
-namespace {
-std::unique_ptr<core::AbstractLogger> mLog = std::make_unique<core::Logger>(std::cout);
-std::unique_ptr<core::AbstractLogger> mErr = std::make_unique<core::Logger>(std::cerr);
-}
+namespace athena::core {
+
+const std::unique_ptr<LogHolder> logHolder = std::make_unique<LogHolder>();
 
 core::AbstractLogger &log() {
-    return *mLog;
+    return *(logHolder->mLog);
 }
 
 core::AbstractLogger &err() {
-    return *mErr;
+    return *(logHolder->mErr);
 }
 }
