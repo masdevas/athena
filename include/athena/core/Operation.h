@@ -17,6 +17,7 @@
 #include <string>
 #include <stack>
 #include <utility>
+#include "AbstractGenerator.h"
 #include "Tensor.h"
 
 namespace athena::core {
