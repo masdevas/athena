@@ -16,7 +16,7 @@
 namespace athena::core {
 Tensor& Tensor::operator[](size_t index) {
     if (index > mShape.dimensions()) {
-        // Error
+        FatalError("Out of range index in Tensor: " + std::to_string(reinterpret_cast<size_t>(this)));
     }
     size_t newVirtualAddress = mVirtualAddress +
         mShape.getTotalSize() / mShape.dim(0) * index;

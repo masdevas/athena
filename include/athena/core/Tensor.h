@@ -18,6 +18,7 @@
 #include <memory>
 #include "DataType.h"
 #include "TensorShape.h"
+#include "FatalError.h"
 
 namespace athena::core {
 class Tensor {
