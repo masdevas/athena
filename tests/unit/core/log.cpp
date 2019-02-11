@@ -13,19 +13,19 @@
 
 #include <gtest/gtest.h>
 #include <athena/core/TensorShape.h>
+#include <string>
+#include "athena/core/log.h"
 
 namespace athena::core {
-TEST(TensorShapeTest, Creation) {
-    TensorShape({1, 2, 3});
+TEST(TensorLog, SetCout) {
+    setLogStream<Logger>(std::cout);
 }
-
-TEST(TensorShapeTest, Dimension) {
-    TensorShape shape({1, 2, 3, 4});
-    ASSERT_EQ(shape.dimensions(), 4);
-}
-
-TEST(TensorShapeTest, TotalSize) {
-    TensorShape shape({1, 2, 3, 4});
-    ASSERT_EQ(shape.getTotalSize(), 1 * 2 * 3 * 4);
+TEST(TensorLog, SetStringstream) {
+    std::stringstream ss;
+    setLogStream<Logger>(ss);
+    std::string firstPart = "Hello", secondPart = "Log";
+    std::string fullString = firstPart + secondPart;
+    log() << firstPart << secondPart;
+    ASSERT_EQ(ss.str(), fullString);
 }
 }

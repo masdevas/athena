@@ -35,4 +35,6 @@ if (NOT ${GTEST_FOUND})
     get_gtest()
 endif()
 
+find_package(Threads)
+
 add_subdirectory(unit)

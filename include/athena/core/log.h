@@ -19,23 +19,45 @@
 #include <memory>
 
 namespace athena::core {
-core::AbstractLogger &log();
-core::AbstractLogger &err();
+class LogHolder {
+    std::unique_ptr<core::AbstractLogger> mLog;
+    std::unique_ptr<core::AbstractLogger> mErr;
 
-template <typename LoggerType, typename... Args>
-void setStream(std::unique_ptr<core::AbstractLogger>& stream, Args&&... args) {
-    stream.reset(new LoggerType(std::forward<Args>(args)...));
-}
+    template <typename LoggerType, typename... Args>
+    void setStream(std::unique_ptr<core::AbstractLogger>& stream, Args&&... args) {
+        stream.reset(new LoggerType(std::forward<Args>(args)...));
+    }
+ public:
+    LogHolder()
+        : mLog(std::make_unique<Logger>(std::cout)),
+          mErr(std::make_unique<Logger>(std::cerr)) {}
+    ~LogHolder() = default;
+    LogHolder(const LogHolder& rhs) = delete;
+    LogHolder(LogHolder&& rhs) noexcept = delete;
+
+    LogHolder& operator=(const LogHolder& rhs) = delete;
+    LogHolder& operator=(LogHolder&& rhs) noexcept = delete;
+
+    template <typename LoggerType, typename... Args>
+    friend void setLogStream(Args&&... args);
+    template <typename LoggerType, typename... Args>
+    friend void setErrStream(Args&&... args);
+    friend core::AbstractLogger &log();
+    friend core::AbstractLogger &err();
+};
+
+extern const std::unique_ptr<LogHolder> logHolder;
 
 template <typename LoggerType, typename... Args>
 void setLogStream(Args&&... args) {
-    setStream<LoggerType>(log(), std::forward<Args>(args)...);
+    logHolder->setStream<LoggerType>(logHolder->mLog, std::forward<Args>(args)...);
 }
-
 template <typename LoggerType, typename... Args>
 void setErrStream(Args&&... args) {
-    setStream<LoggerType>(err(), std::forward<Args>(args)...);
+    logHolder->setStream<LoggerType>(logHolder->mErr, std::forward<Args>(args)...);
 }
+core::AbstractLogger &log();
+core::AbstractLogger &err();
 }
 
 #endif //ATHENA_LOG_H
