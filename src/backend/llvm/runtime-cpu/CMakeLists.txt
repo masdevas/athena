@@ -48,7 +48,7 @@ endfunction(getblis)
 option(FORCE_BLIS "Require library to use BLIS" OFF)
 option(FORCE_ULAS "Require library to use uBLAS" OFF)
 
-add_library(runtime-llvm-cpu SHARED add.cpp)
+add_athena_library(runtime-llvm-cpu SHARED add.cpp)
 
 if (FORCE_BLIS)
     message(STATUS "BLIS will be downloaded and compiled")
