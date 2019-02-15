@@ -12,7 +12,7 @@
  */
 #include <athena/core/log.h>
 
-namespace athena::core {
+namespace athena {
 
 const std::unique_ptr<LogHolder> logHolder = std::make_unique<LogHolder>();
 

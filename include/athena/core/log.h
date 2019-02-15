@@ -18,7 +18,7 @@
 #include <iostream>
 #include <memory>
 
-namespace athena::core {
+namespace athena {
 class LogHolder {
     std::unique_ptr<core::AbstractLogger> mLog;
     std::unique_ptr<core::AbstractLogger> mErr;
@@ -29,8 +29,8 @@ class LogHolder {
     }
  public:
     LogHolder()
-        : mLog(std::make_unique<Logger>(std::cout)),
-          mErr(std::make_unique<Logger>(std::cerr)) {}
+        : mLog(std::make_unique<core::Logger>(std::cout)),
+          mErr(std::make_unique<core::Logger>(std::cerr)) {}
     ~LogHolder() = default;
     LogHolder(const LogHolder& rhs) = delete;
     LogHolder(LogHolder&& rhs) noexcept = delete;
