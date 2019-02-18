@@ -8,7 +8,7 @@ function(set_sanitizers)
     set(OFF_SANITIZERS_FLAG off)
 
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        if(FSANITIZE)
+        if(DEFINED FSANITIZE)
             message("-- Flag FSANITIZE ignored due to build type")
         endif()
         return()
