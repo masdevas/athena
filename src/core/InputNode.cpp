@@ -31,14 +31,20 @@ InputNode &InputNode::operator=(InputNode &&src) noexcept {
 }
 
 void InputNode::after(AbstractNode* node) {
-    //throw "Error. Input node can not be after something!";
+    FatalError("Error. Input node can not be after something!");
 }
+
 InputNode::InputNode(Tensor *tensor) : AbstractNode("Input" + std::to_string(++mNodeCounter), NodeType::INPUT ),
                                        mTensor(tensor) {
 
 }
+
 Tensor *InputNode::getData() {
     return mTensor;
+}
+
+NodeType InputNode::getType() {
+    return NodeType::INPUT;
 }
 
 }

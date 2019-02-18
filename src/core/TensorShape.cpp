@@ -14,6 +14,7 @@
 #include <athena/core/TensorShape.h>
 #include <string>
 #include <stdexcept>
+#include <athena/core/FatalError.h>
 
 namespace athena::core {
 TensorShape::TensorShape(const TensorShape &rhs) {
@@ -36,11 +37,9 @@ size_t TensorShape::getTotalSize() const {
 }
 size_t TensorShape::dim(size_t index) const {
     if (index >= mShape.size()) {
-//        throw std::out_of_range(
-//            "TensorShape only has " + std::to_string(mShape.size()) + " dimensions. " + std::to_string(index)
-//                + " requested.");
+        FatalError("TensorShape only has " + std::to_string(mShape.size()) + " dimensions. "
+            + std::to_string(index) + " requested.");
     }
-
     return mShape[index];
 }
 size_t TensorShape::dimensions() const {

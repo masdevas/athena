@@ -33,7 +33,6 @@ class AbstractNode {
     std::vector<AbstractNode*> mOutgoingNodes;
     std::string mName;
     static size_t mNodeCounter;
-    NodeType mNodeType;
     bool mWasVisitedFlag;
 
  public:
@@ -45,11 +44,8 @@ class AbstractNode {
     AbstractNode& operator=(const AbstractNode& src) = delete;
     AbstractNode& operator=(AbstractNode&& src) noexcept;
     virtual void after(AbstractNode* node) = 0;
+    virtual NodeType getType() = 0;
     void addOutgoingNode(AbstractNode* node);
-
-    NodeType getType() {
-        return mNodeType;
-    }
 };
 
 }

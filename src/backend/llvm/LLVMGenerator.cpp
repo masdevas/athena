@@ -18,13 +18,14 @@
 namespace athena::backend::llvm {
 
 llvm::LLVMGenerator::LLVMGenerator(::llvm::LLVMContext &ctx,
-                                    std::shared_ptr<::llvm::Module> module,
+                                    const std::unique_ptr<::llvm::Module> &module,
                                     core::Allocator &allocator)
-                                    : mModule(std::move(module)),
+                                    : mModule(module),
+                                    mainBlock(::llvm::BasicBlock::Create(ctx, "entry", module->getFunction("jitmain"))),
                                     mContext(ctx),
-                                    mBuilder(::llvm::IRBuilder(ctx)),
+                                    mBuilder(::llvm::IRBuilder(mainBlock)),
                                     mAllocator(allocator) {
-
+    mBuilder.SetInsertPoint(mainBlock);
 }
 void LLVMGenerator::generateAdd(core::Tensor &a, core::Tensor &b, core::Tensor &c) {
 
@@ -41,6 +42,72 @@ void LLVMGenerator::generateAdd(core::Tensor &a, core::Tensor &b, core::Tensor &
     // todo check arg count
 
     std::vector<::llvm::Value *> ArgsV;
-    mBuilder.CreateCall(calledFunction, ArgsV, "faddtmp");
+
+//    ::llvm::Constant* aTensorConst
+//        = ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext), mAllocator.getFastPointer(a));
+//    ArgsV.push_back(aTensorConst);
+    ArgsV.push_back(generateGetFastPointer(a));
+    ::llvm::Constant* aSizeConst
+        = ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext), a.getShape().getTotalSize());
+    ArgsV.push_back(aSizeConst);
+//    ::llvm::Constant* bTensorConst
+//        = ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext), mAllocator.getFastPointer(b));
+//    ArgsV.push_back(bTensorConst);
+    ArgsV.push_back(generateGetFastPointer(b));
+    ::llvm::Constant* bSizeConst
+        = ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext), b.getShape().getTotalSize());
+    ArgsV.push_back(bSizeConst);
+//    ::llvm::Constant* cTensorConst
+//        = ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext), mAllocator.getFastPointer(c));
+//    ArgsV.push_back(cTensorConst);
+    ArgsV.push_back(generateGetFastPointer(c));
+    mBuilder.CreateCall(calledFunction, ArgsV);
+}
+
+void LLVMGenerator::generateAllocation(core::Tensor &a) {
+
+    // todo handle different data types
+
+    ::llvm::Function *calledFunction = mModule->getFunction("allocate");
+
+    if (!calledFunction)
+        calledFunction = impl::create_allocate_decl(mContext, *mModule);
+
+    if (!calledFunction)
+        new core::FatalError("Unknown function referenced");
+
+    // todo check arg count
+
+    std::vector<::llvm::Value *> ArgsV;
+    ::llvm::Constant* allocatorConst
+        = ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext), (size_t)(&mAllocator));
+    ArgsV.push_back(allocatorConst);
+    ::llvm::Constant* tensorConst
+        = ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext), (size_t)(&a));
+    ArgsV.push_back(tensorConst);
+    mBuilder.CreateCall(calledFunction, ArgsV);
+
+}
+
+::llvm::IRBuilder<> &LLVMGenerator::getBuilder() { return mBuilder; }
+
+::llvm::Value *LLVMGenerator::generateGetFastPointer(core::Tensor &t) {
+    ::llvm::Function *calledFunction = mModule->getFunction("get_fast_pointer");
+
+    if (!calledFunction)
+        calledFunction = impl::create_get_fast_pointer_decl(mContext, *mModule);
+
+    if (!calledFunction)
+        new core::FatalError("Unknown function referenced");
+
+    std::vector<::llvm::Value *> ArgsV;
+    ::llvm::Constant* allocatorConst
+        = ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext), (size_t)(&mAllocator));
+    ArgsV.push_back(allocatorConst);
+    ::llvm::Constant* tensorConst
+        = ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext), (size_t)(&t));
+    ArgsV.push_back(tensorConst);
+    auto callInst = mBuilder.CreateCall(calledFunction, ArgsV);
+    return callInst;
 }
 }

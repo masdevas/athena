@@ -22,7 +22,7 @@ AbstractNode::AbstractNode(AbstractNode &&node) noexcept
 }
 
 AbstractNode::AbstractNode(std::string&& name, NodeType type)
-    : mName(std::move(name)), mNodeType(type), mWasVisitedFlag(false) {
+    : mName(std::move(name)), mWasVisitedFlag(false) {
 }
 
 AbstractNode& AbstractNode::operator=(AbstractNode &&src) noexcept {

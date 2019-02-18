@@ -52,7 +52,7 @@ class AthenaJIT {
     const ::llvm::DataLayout &getDataLayout() const { return mDataLayout; }
     ::llvm::LLVMContext &getContext() { return *mContext.getContext(); }
 
-    ::llvm::Error addModule(std::unique_ptr<::llvm::Module> M);
+    ::llvm::Error addModule(std::unique_ptr<::llvm::Module> &M);
     ::llvm::Expected<::llvm::JITEvaluatedSymbol> lookup(::llvm::StringRef Name);
 };
 }

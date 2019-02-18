@@ -10,19 +10,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#ifndef ATHENA_ABSTRACTGENERATOR_H
-#define ATHENA_ABSTRACTGENERATOR_H
 
-#include <athena/core/Tensor.h>
+#include <gtest/gtest.h>
 
-namespace athena::core {
-
-class AbstractGenerator {
- public:
-    virtual void generateAllocation(Tensor &a) = 0;
-    virtual void generateAdd(Tensor &a, Tensor &b, Tensor &c) = 0;
-};
-
+int main(int argc, char** argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
-
-#endif //ATHENA_ABSTRACTGENERATOR_H

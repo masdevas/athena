@@ -21,6 +21,8 @@
 namespace athena::backend::llvm::impl {
 
 ::llvm::Function *create_fadd_decl(::llvm::LLVMContext &ctx, ::llvm::Module &module);
+::llvm::Function *create_allocate_decl(::llvm::LLVMContext &ctx, ::llvm::Module &module);
+::llvm::Function *create_get_fast_pointer_decl(::llvm::LLVMContext &ctx, ::llvm::Module &module);
 
 }
 

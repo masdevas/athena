@@ -24,9 +24,10 @@ namespace athena::core {
  */
 class Allocator {
  public:
+    virtual ~Allocator() = default;
     virtual void allocate(const Tensor&) = 0;
     virtual size_t getRAMPointer() = 0;
-    virtual size_t getFastPointer() = 0;
+    virtual size_t getFastPointer(const Tensor&) = 0;
 };
 
 }

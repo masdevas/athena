@@ -47,7 +47,7 @@ add_athena_library(athena SHARED ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
 
 add_subdirectory(src)
 
-target_link_libraries(athena PUBLIC athena-core backend-llvm)
+target_link_libraries(athena PUBLIC athena-core athena-ops backend-llvm)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     add_subdirectory(tests)

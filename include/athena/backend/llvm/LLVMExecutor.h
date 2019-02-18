@@ -18,17 +18,23 @@
 #include <athena/backend/llvm/AthenaJIT.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
+#include "VMAllocationTable.h"
 
 namespace athena::backend::llvm {
 
 class LLVMExecutor : public athena::core::Executor {
  private:
-    AthenaJIT mJITCompiler;
-    std::shared_ptr<::llvm::Module> mMainModule;
+    std::unique_ptr<AthenaJIT> mJITCompiler;
+    std::unique_ptr<::llvm::Module> mMainModule;
     std::unique_ptr<core::Allocator> mAllocator;
+    VMAllocationTable mVMAllocationTable;
+
  public:
+    LLVMExecutor();
     void prepare(athena::core::Graph& graph) override;
-    void execute() override {};
+    void execute() override;
+    std::unique_ptr<core::Allocator>& getAllocator();
+    void setAllocator(std::unique_ptr<core::Allocator>& allocator);
 };
 
 }

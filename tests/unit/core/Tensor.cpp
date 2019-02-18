@@ -19,7 +19,7 @@ TEST(TensorTest, Creation) {
     auto dataType = DataType::DOUBLE;
     size_t virtualAddress = 12;
     auto shape = TensorShape({2, 5, 8, 12});
-    auto tensor = Tensor({dataType, virtualAddress, shape});
+    auto tensor = Tensor(dataType, shape, virtualAddress);
     ASSERT_EQ(dataType, tensor.getDataType());
     ASSERT_EQ(virtualAddress, tensor.getVirtualAddress());
     ASSERT_EQ(shape.getShape(), tensor.getShape().getShape());
@@ -29,7 +29,7 @@ TEST(TensorTest, GetSubtensor) {
     auto dataType = DataType::DOUBLE;
     size_t virtualAddress = 12;
     auto shape = TensorShape({2, 5, 8, 12});
-    auto tensor = Tensor({dataType, virtualAddress, shape});
+    auto tensor = Tensor(dataType, shape, virtualAddress);
     //tensor[50];   // it's working right (when FatalError())
     size_t indexSubtensor = 1;
     auto& subtensor = tensor[indexSubtensor];
@@ -37,6 +37,6 @@ TEST(TensorTest, GetSubtensor) {
     ASSERT_EQ(subtensor.getVirtualAddress(), virtualAddress +
         indexSubtensor * shape.subshape().getTotalSize());
     ASSERT_EQ(subtensor.getShape().getShape(), shape.subshape().getShape());
-    delete &subtensor;      // it is can make a problem with memory leak in other examples
+    delete &subtensor;      // this can make a problem with memory leak in other examples
 }
 }

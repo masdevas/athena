@@ -33,8 +33,7 @@ class InputNode : public AbstractNode {
     InputNode& operator=(InputNode&& src) noexcept;
     void after(AbstractNode* node) override;
     Tensor* getData();
-    template <class Generator, typename ...Args>
-    void gen(Generator g, Tensor* tensor, Args... args) {};
+    NodeType getType() override;
 };
 
 }

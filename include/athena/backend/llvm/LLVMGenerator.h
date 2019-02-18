@@ -17,20 +17,28 @@
 #include <athena/core/Allocator.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
+#include "VMAllocationTable.h"
 
 namespace athena::backend::llvm {
 class LLVMGenerator : public core::AbstractGenerator {
  private:
-    std::shared_ptr<::llvm::Module> mModule;
+    const std::unique_ptr<::llvm::Module> &mModule;
     ::llvm::LLVMContext &mContext;
+    // todo abatashev: refactor main block
+    ::llvm::BasicBlock *mainBlock;
     ::llvm::IRBuilder<> mBuilder;
 
     core::Allocator &mAllocator;
+
+    //VMAllocationTable mAllocationTable;
+    ::llvm::Value *generateGetFastPointer(core::Tensor &t);
  public:
     explicit LLVMGenerator(::llvm::LLVMContext &ctx,
-                            std::shared_ptr<::llvm::Module> module,
+                            const std::unique_ptr<::llvm::Module> &module,
                             core::Allocator &allocator);
+    void generateAllocation(core::Tensor &a) override;
     void generateAdd(core::Tensor &a, core::Tensor &b, core::Tensor &c) override;
+    ::llvm::IRBuilder<> &getBuilder();
 
 };
 }

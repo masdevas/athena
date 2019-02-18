@@ -16,7 +16,4 @@ namespace athena::core {
 std::string Operation::getName() {
     return mName;
 }
-athena::core::Tensor *Operation::getResultSize(std::deque<Tensor *> args) {
-    return nullptr; //TODO
-}
 }
