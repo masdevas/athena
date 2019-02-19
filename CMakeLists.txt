@@ -1,10 +1,42 @@
 cmake_minimum_required(VERSION 3.12)
 project(athena)
 
+function(set_sanitizers)
+    ## Flags ##
+    set(SEQENCE_SANITIZERS_FLAG seq)
+    set(PARALLEL_SANITIZERS_FLAG par)
+    set(OFF_SANITIZERS_FLAG off)
+
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        if(DEFINED FSANITIZE)
+            message(STATUS "Flag FSANITIZE ignored due to build type")
+        endif()
+        return()
+    elseif(NOT DEFINED FSANITIZE)
+        return()
+    elseif(${FSANITIZE} STREQUAL ${OFF_SANITIZERS_FLAG})
+        return()
+    elseif(${FSANITIZE} STREQUAL ${SEQENCE_SANITIZERS_FLAG})
+        set(SANITIZERS undefined,address,leak)
+    elseif(${FSANITIZE} STREQUAL ${PARALLEL_SANITIZERS_FLAG})
+        set(SANITIZERS undefined,thread)
+    else()
+        message(FATAL_ERROR "Sanitizers: WRONG FLAG")
+    endif()
+    message(STATUS "Sanitizers: ${SANITIZERS}")
+    set(SANITIZERS ${SANITIZERS} PARENT_SCOPE)
+endfunction()
+
 enable_testing()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
+set_sanitizers()
+if(SANITIZERS)
+    set(CMAKE_CXX_FLAGS -fsanitize=${SANITIZERS})
+else()
+    message(STATUS "Sanitizers: off")
+endif()
 
 include(AthenaTarget)
 
@@ -24,3 +56,4 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
         target_compile_options(runUnitCore PUBLIC -g -O0 --coverage -fprofile-arcs -ftest-coverage)
     endif()
 endif()
+
