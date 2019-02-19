@@ -12,6 +12,7 @@
  */
 
 #include <athena/core/DataType.h>
+#include <athena/core/FatalError.h>
 
 namespace athena::core {
 size_t sizeOfDataType(const DataType& dataType) {
@@ -22,6 +23,8 @@ size_t sizeOfDataType(const DataType& dataType) {
             return 4ULL;
         case DataType::HALF:
             return 2ULL;
+        default:
+            FatalError("Size for dataType is not defined");
     }
 }
 }
