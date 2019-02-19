@@ -25,6 +25,7 @@ size_t sizeOfDataType(const DataType& dataType) {
             return 2ULL;
         default:
             FatalError("Size for dataType is not defined");
+            return 0;
     }
 }
 }
