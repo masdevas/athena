@@ -1,0 +1,7 @@
+add_library(runtime-driver STATIC runtime-driver.cpp)
+target_link_libraries(runtime-driver athena-core)
+if (UNIX)
+    target_link_libraries(runtime-driver dl.so)
+else()
+    message(FATAL_ERROR "Dynamic link library does not defined for your OS")
+endif()
