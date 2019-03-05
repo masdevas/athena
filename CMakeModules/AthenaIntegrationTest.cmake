@@ -1,7 +1,7 @@
 function(add_athena_integration_test)
     cmake_parse_arguments(PARSED_ARGS "" "TARGET_NAME" "SRCS;LIBS" ${ARGN})
     add_executable(${PARSED_ARGS_TARGET_NAME} ${modifier} ${PARSED_ARGS_SRCS})
-    if(${PARSED_ARGS_LIBS})
+    if(PARSED_ARGS_LIBS)
         target_link_libraries(${PARSED_ARGS_TARGET_NAME} ${PARSED_ARGS_LIBS})
     endif()
     athena_disable_rtti(${PARSED_ARGS_TARGET_NAME})
