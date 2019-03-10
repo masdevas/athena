@@ -1,4 +1,18 @@
+# coding=utf-8
+# Copyright (c) 2018 Athena. All rights reserved.
+# https://athenaframework.ml
+#
+# Licensed under MIT license.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+#
+
 import sys
+import re
 import os
 import subprocess
 import xml.etree.ElementTree as et
@@ -9,6 +23,7 @@ dev_environment_code = "dev"
 
 commands_tag = "commands"
 set_command_tag = "set"
+value_tag = "value"
 
 alias_attrib_name = "name"
 alias_attrib_env = "env"
@@ -17,7 +32,7 @@ def fatal_error(*args, error_code=1):
     print("(!) Integration test system error:", *args, file=sys.stderr)
     sys.exit(error_code)
 
-def get_env_code():
+def get_env_code() -> str:
     environment = os.environ.get(main_env_var_name)
     if environment is None or environment == "dev":
         return dev_environment_code
@@ -26,17 +41,34 @@ def get_env_code():
     else:
         fatal_error("Undefined value of ATHENA_TEST_ENVIRONMENT:", environment)
 
+def substitute_env_vars(value) -> str:
+    found = re.findall(r'\$[a-zA-Z][\w]*', value)
+    for found_item in found:
+        env_var_name = found_item[1:]
+        env_var = os.environ.get(env_var_name)
+        if env_var is None:
+            fatal_error("Environment variable", "\""+env_var_name+"\"", "exists")
+        value = value.replace(found_item, env_var)
+    return value
+
+def set_env_var_with_value(var_name, value):
+    value = substitute_env_vars(value)
+    os.environ[var_name] = value
+
 def set_env_var(set_command, env_code):
     var_name = set_command.attrib.get(alias_attrib_name)
     if len(set_command) == 0:
         if set_command.attrib.get(alias_attrib_env) is not None:
             fatal_error("Single-line set-command can't have an attribute \"env\"")
-        os.environ[var_name] = set_command.text
+        set_env_var_with_value(var_name, set_command.text)
     else:
         for value in set_command:
-            if value.attrib.get(alias_attrib_env) == env_code:
-                os.environ[var_name] = value.text
-                break
+            if value.tag == value_tag:
+                if value.attrib.get(alias_attrib_env) == env_code:
+                    set_env_var_with_value(var_name, value.text)
+                    break
+            else:
+                fatal_error("Unknown tag", value.tag)
         else:
             fatal_error("Value for variable", "\""+var_name+"\"",
                         "for env","\""+env_code+"\"", "is not defined")
