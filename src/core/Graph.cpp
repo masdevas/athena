@@ -11,12 +11,11 @@
  * the License.
  */
 
-#include <athena/core/Graph.h>
+
 #include <queue>
-#include <deque>
-#include <athena/core/InputNode.h>
-#include <tuple>
 #include <athena/core/Tensor.h>
+#include <athena/core/InputNode.h>
+#include <athena/core/Graph.h>
 
 namespace athena::core {
 Graph::Graph(Graph &&src) noexcept {
@@ -34,28 +33,24 @@ Graph &Graph::operator=(Graph &&src) noexcept {
     return *this;
 }
 Graph::~Graph() {
-    std::queue<AbstractNode *> nodes;
-
-    if (lossFunctionNode != nullptr) {
-        nodes.push(lossFunctionNode);
-    } else {
-        nodes.push(outputNode);
-    }
-
-    while (!nodes.empty()) {
-        AbstractNode *curAbstractNode = nodes.front();
+    delete lossFunctionNode;
+    std::queue<AbstractNode*> nodes;
+    nodes.push(outputNode);
+    while (nodes.size() > 0) {
+        AbstractNode* got_node = nodes.front();
         nodes.pop();
-
-        auto curNode = static_cast<Node*>(curAbstractNode);
-        if (curNode != nullptr && !curNode->mIncomingNodes.empty()) {
-            for(auto node : curNode->mIncomingNodes) {
+        if (got_node->getType() == NodeType::DEFAULT) {
+            Node* current_node = reinterpret_cast<Node*>(got_node);
+            for (auto* node : current_node->mIncomingNodes) {
                 nodes.push(node);
             }
+            delete current_node;
+        } else if (got_node->getType() == NodeType::INPUT) {
+            delete reinterpret_cast<InputNode*>(got_node);
+        } else {
+            FatalError("Graph: Destructor: Type of node is not defined");
         }
-
-        delete curAbstractNode;
     }
-
 }
 std::tuple<std::queue<AbstractNode *>, std::deque<Tensor *> > Graph::traverse() {
     Node *startNode = lossFunctionNode == nullptr ? outputNode : lossFunctionNode;
@@ -79,7 +74,7 @@ std::tuple<std::queue<AbstractNode *>, std::deque<Tensor *> > Graph::traverse() 
             }
             if (!hasUnvisited) {
                 graphQueue.push(currentAbstractNode);
-                Tensor *result = currentNode->mOperation.getResultSize(arguments);
+                Tensor *result = currentNode->getAssignedOperation().getResultSize(arguments);
                 arguments.push_back(result);
                 dfsStack.pop();
             }
@@ -87,6 +82,8 @@ std::tuple<std::queue<AbstractNode *>, std::deque<Tensor *> > Graph::traverse() 
             auto *inputNode = static_cast<InputNode *>(currentAbstractNode);
             arguments.push_back(inputNode->getData());
             graphQueue.push(currentAbstractNode);
+            inputNode->mWasVisitedFlag = true;
+            dfsStack.pop();
         }
     }
 

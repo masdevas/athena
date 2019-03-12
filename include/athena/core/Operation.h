@@ -26,8 +26,8 @@ namespace athena::core {
         std::string mName;
      public:
         explicit Operation(std::string&& name) : mName(std::move(name)) {};
-        Tensor* getResultSize(std::deque<Tensor*> args);
-        virtual void gen(AbstractGenerator &g, std::stack<Tensor*> &operationArguments) {};
+        virtual Tensor* getResultSize(std::deque<Tensor*> args) const = 0;
+        virtual void gen(AbstractGenerator &g, std::stack<Tensor*> &operationArguments) const = 0;
         std::string getName();
     };
 }

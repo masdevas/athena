@@ -10,19 +10,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#ifndef ATHENA_ABSTRACTGENERATOR_H
-#define ATHENA_ABSTRACTGENERATOR_H
 
-#include <athena/core/Tensor.h>
 
-namespace athena::core {
+#ifndef ATHENA_ALLOCATE_H
+#define ATHENA_ALLOCATE_H
 
-class AbstractGenerator {
- public:
-    virtual void generateAllocation(Tensor &a) = 0;
-    virtual void generateAdd(Tensor &a, Tensor &b, Tensor &c) = 0;
-};
+#if __cplusplus
+#include <cstddef>
+extern "C" {
+#else
+#include <stddef.h>
+#endif
 
+void allocate(void *allocator, void *tensor);
+size_t get_fast_pointer(void *allocator, void *tensor);
+
+#if __cplusplus
 }
+#endif
 
-#endif //ATHENA_ABSTRACTGENERATOR_H
+#endif //ATHENA_ALLOCATE_H

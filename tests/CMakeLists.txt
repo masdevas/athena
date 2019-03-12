@@ -25,7 +25,7 @@ function(get_gtest)
 
 
     set(GTEST_INCLUDE_DIRS ${gtest_SOURCE_DIR}/include PARENT_SCOPE)
-    set(GTEST_MAIN_LIBRARIES gtest_main PARENT_SCOPE)
+    set(GTEST_BOTH_LIBRARIES gtest_main gtest PARENT_SCOPE)
 endfunction(get_gtest)
 
 find_package(GTest)

@@ -12,6 +12,8 @@
  */
 
 #include <athena/backend/llvm/AthenaJIT.h>
+
+#include <iostream>
 #include <llvm/Transforms/InstCombine/InstCombine.h>
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Transforms/Scalar/GVN.h>
@@ -40,11 +42,18 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB, ::llvm::DataLayo
 
     return ::llvm::make_unique<AthenaJIT>(std::move(*JTMB), std::move(*DL));
 }
-::llvm::Error AthenaJIT::addModule(std::unique_ptr<::llvm::Module> M) {
+::llvm::Error AthenaJIT::addModule(std::unique_ptr<::llvm::Module> &M) {
+//    M->dump();
     return mOptimizeLayer.add(mExecutionSession.getMainJITDylib(),
                               ::llvm::orc::ThreadSafeModule(std::move(M), mContext));
 }
 ::llvm::Expected<::llvm::JITEvaluatedSymbol> AthenaJIT::lookup(::llvm::StringRef Name) {
+    std::string o;
+    auto stream = ::llvm::raw_string_ostream(o);
+    mExecutionSession.dump(stream);
+    stream.flush();
+    std::cout << o;
+    std::cout.flush();
     return mExecutionSession.lookup({&mExecutionSession.getMainJITDylib()}, mMangle(Name.str()));
 }
 ::llvm::Expected<::llvm::orc::ThreadSafeModule>
@@ -54,7 +63,7 @@ AthenaJIT::optimizeModule(::llvm::orc::ThreadSafeModule TSM,
     auto FPM = ::llvm::make_unique<::llvm::legacy::FunctionPassManager>(TSM.getModule());
 
     // Add some optimizations.
-    FPM->add(::llvm::createInstructionCombiningPass());
+    //FPM->add(::llvm::createInstructionCombiningPass());
     FPM->add(::llvm::createReassociatePass());
     FPM->add(::llvm::createGVNPass());
     FPM->add(::llvm::createCFGSimplificationPass());

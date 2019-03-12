@@ -20,7 +20,7 @@ Tensor& Tensor::operator[](size_t index) {
     }
     size_t newVirtualAddress = mVirtualAddress +
         mShape.getTotalSize() / mShape.dim(0) * index;
-    return *(new Tensor(mDataType, newVirtualAddress, mShape.subshape()));
+    return *(new Tensor(mDataType, mShape.subshape(), newVirtualAddress));
 }
 
 DataType Tensor::getDataType() const {
@@ -33,5 +33,9 @@ size_t Tensor::getVirtualAddress() const {
 
 const TensorShape& Tensor::getShape() const {
     return mShape;
+}
+void Tensor::setVirtualAddress(size_t address) {
+    if (mVirtualAddress == 0) // tensors can not be relocated
+        mVirtualAddress = address;
 }
 }

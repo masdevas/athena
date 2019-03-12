@@ -15,7 +15,6 @@
 #define ATHENA_TENSOR_H
 
 #include <cstddef>
-#include <memory>
 #include "DataType.h"
 #include "TensorShape.h"
 #include "FatalError.h"
@@ -27,7 +26,7 @@ class Tensor {
     size_t mVirtualAddress;
     TensorShape mShape;
  public:
-    Tensor(DataType dataType, size_t virtualAddress, TensorShape shape)
+    Tensor(DataType dataType, TensorShape shape, size_t virtualAddress = 0)
         : mDataType(dataType),
           mVirtualAddress(virtualAddress),
           mShape(std::move(shape)) {}
@@ -45,6 +44,7 @@ class Tensor {
 
     DataType getDataType() const;
     size_t getVirtualAddress() const;
+    void setVirtualAddress(size_t address);
     const TensorShape& getShape() const;
 };
 }

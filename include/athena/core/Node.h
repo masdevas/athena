@@ -14,7 +14,6 @@
 #ifndef ATHENA_NODE_H
 #define ATHENA_NODE_H
 
-#include <vector>
 #include <athena/core/Operation.h>
 #include <athena/core/AbstractNode.h>
 
@@ -30,18 +29,19 @@ class Node : public AbstractNode {
     friend class Graph;
  protected:
     std::vector<AbstractNode*> mIncomingNodes;
-    Operation mOperation;
+    Operation &mOperation;
 
  public:
     Node() = delete;
     Node(const Node& src) = delete;
     Node(Node&& src) noexcept;
-    explicit Node(Operation&& op);
+    explicit Node(Operation &&op);
     ~Node() override = default;
     Node& operator=(const Node& src) = delete;
     Node& operator=(Node&& src) noexcept;
     void after(AbstractNode* node) override;
-    Operation& getAssignedOperation();
+    const Operation& getAssignedOperation();
+    NodeType getType() override;
 };
 
 }

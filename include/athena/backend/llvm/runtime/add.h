@@ -23,7 +23,7 @@ extern "C" {
     void fadd(void *a, size_t ca, void *b, size_t cb, void* c);
 
 #if __cplusplus
-};
+}
 #endif
 
 #endif //ATHENA_ADD_H

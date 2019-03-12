@@ -11,18 +11,19 @@
  * the License.
  */
 
+#include <vector>
 #include <athena/core/Node.h>
 
 namespace athena::core {
 
 Node::Node(Node &&src) noexcept
     : AbstractNode(std::move(src)), mIncomingNodes(std::move(src.mIncomingNodes)),
-      mOperation(std::move(src.mOperation)) {
+      mOperation(src.mOperation) {
 }
 
 Node::Node(Operation &&op)
     : AbstractNode(op.getName() + std::to_string(++mNodeCounter), NodeType::DEFAULT),
-      mOperation(std::move(op)) {
+      mOperation(op) {
 }
 
 Node &Node::operator=(Node &&src) noexcept {
@@ -38,8 +39,12 @@ void Node::after(AbstractNode *node) {
     mIncomingNodes.emplace_back(node);
 }
 
-Operation &Node::getAssignedOperation() {
+const Operation &Node::getAssignedOperation() {
     return mOperation;
+}
+
+NodeType Node::getType() {
+    return NodeType::DEFAULT;
 }
 
 }
