@@ -4,6 +4,7 @@ message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 add_subdirectory(runtime-cpu)
+add_subdirectory(runtime-driver)
 
 add_athena_library(backend-llvm STATIC
         LLVMExecutor.cpp
