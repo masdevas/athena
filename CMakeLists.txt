@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 project(athena)
 
+set(ATHENA_MAJOR_VERSION "0")
+set(ATHENA_MINOR_VERSION "1")
+set(ATHENA_PATCH_VERSION "0")
+
 function(set_sanitizers)
     ## Flags ##
     set(SEQENCE_SANITIZERS_FLAG seq)
@@ -44,6 +48,12 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/null.cpp "")
 add_athena_library(athena SHARED ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
+add_definitions(-DATHENA_MAJOR_VERSION="${ATHENA_MAJOR_VERSION}")
+add_definitions(-DATHENA_MINOR_VERSION="${ATHENA_MINOR_VERSION}")
+add_definitions(-DATHENA_PATCH_VERSION="${ATHENA_PATCH_VERSION}")
+if (DEFINED $ENV{ATHENA_CI_BUILD_NUMBER})
+    add_definitions(-DATHENA_PATCH_VERSION="$ENV{ATHENA_CI_BUILD_NUMBER}")
+endif()
 
 add_subdirectory(src)
 
