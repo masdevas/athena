@@ -14,22 +14,25 @@
 #ifndef ATHENA_OPERATION_H
 #define ATHENA_OPERATION_H
 
-#include <string>
-#include <stack>
-#include <utility>
 #include "AbstractGenerator.h"
 #include "Tensor.h"
 
-namespace athena::core {
-    class Operation {
-     protected:
-        std::string mName;
-     public:
-        explicit Operation(std::string&& name) : mName(std::move(name)) {};
-        virtual Tensor* getResultSize(std::deque<Tensor*> args) const = 0;
-        virtual void gen(AbstractGenerator &g, std::stack<Tensor*> &operationArguments) const = 0;
-        std::string getName();
-    };
-}
+#include <stack>
+#include <string>
+#include <utility>
 
-#endif //ATHENA_OPERATION_H
+namespace athena::core {
+class Operation {
+    protected:
+    std::string mName;
+
+    public:
+    explicit Operation(std::string&& name) : mName(std::move(name)){};
+    virtual Tensor* getResultSize(std::deque<Tensor*> args) const   = 0;
+    virtual void gen(AbstractGenerator& g,
+                     std::stack<Tensor*>& operationArguments) const = 0;
+    std::string getName();
+};
+}  // namespace athena::core
+
+#endif  // ATHENA_OPERATION_H

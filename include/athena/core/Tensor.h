@@ -14,25 +14,27 @@
 #ifndef ATHENA_TENSOR_H
 #define ATHENA_TENSOR_H
 
-#include <cstddef>
 #include "DataType.h"
-#include "TensorShape.h"
 #include "FatalError.h"
+#include "TensorShape.h"
+
+#include <cstddef>
 
 namespace athena::core {
 class Tensor {
- private:
+    private:
     DataType mDataType;
     size_t mVirtualAddress;
     TensorShape mShape;
- public:
+
+    public:
     Tensor(DataType dataType, TensorShape shape, size_t virtualAddress = 0)
         : mDataType(dataType),
           mVirtualAddress(virtualAddress),
           mShape(std::move(shape)) {}
-    Tensor(const Tensor& rhs) = default;
+    Tensor(const Tensor& rhs)     = default;
     Tensor(Tensor&& rhs) noexcept = default;
-    ~Tensor() = default;
+    ~Tensor()                     = default;
 
     Tensor& operator=(const Tensor& rhs) = default;
     Tensor& operator=(Tensor&& rhs) noexcept = default;
@@ -47,6 +49,6 @@ class Tensor {
     void setVirtualAddress(size_t address);
     const TensorShape& getShape() const;
 };
-}
+}  // namespace athena::core
 
-#endif //ATHENA_TENSOR_H
+#endif  // ATHENA_TENSOR_H

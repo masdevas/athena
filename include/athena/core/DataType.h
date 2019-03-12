@@ -17,13 +17,9 @@
 #include <cstddef>
 
 namespace athena::core {
-enum class DataType : int {
-    DOUBLE = 0,
-    FLOAT = 1,
-    HALF = 2
-};
+enum class DataType : int { DOUBLE = 0, FLOAT = 1, HALF = 2 };
 
 size_t sizeOfDataType(const DataType& dataType);
-}
+}  // namespace athena::core
 
-#endif //ATHENA_DATATYPE_H
+#endif  // ATHENA_DATATYPE_H

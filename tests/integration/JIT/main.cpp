@@ -33,7 +33,7 @@ bool testVectorSum() {
     InputNode* aInp = new InputNode(&a);
     InputNode* bInp = new InputNode(&b);
 
-//    auto &&addOp = std::make_unique<AddOperation>();
+    //    auto &&addOp = std::make_unique<AddOperation>();
     AddOperation addOp;
     Node* add = new Node(std::move(addOp));
 
@@ -53,22 +53,22 @@ bool testVectorSum() {
 
     // Assert
 
-//    auto pRes = (float*)executor.getAllocator()->getFastPointer(result);
-//    if (abs(pRes[0] - 5.0) > 0.1) {
-//        std::cout << "Element 0 is wrong"
-//                  << "\n";
-//        return 1;
-//    }
-//    if (abs(pRes[1] - 7.0) > 0.1) {
-//        std::cout << "Element 1 is wrong"
-//                  << "\n";
-//        return 1;
-//    }
-//    if (abs(pRes[2] - 9.0) > 0.1) {
-//        std::cout << "Element 2 is wrong"
-//                  << "\n";
-//        return 1;
-//    }
+    //    auto pRes = (float*)executor.getAllocator()->getFastPointer(result);
+    //    if (abs(pRes[0] - 5.0) > 0.1) {
+    //        std::cout << "Element 0 is wrong"
+    //                  << "\n";
+    //        return 1;
+    //    }
+    //    if (abs(pRes[1] - 7.0) > 0.1) {
+    //        std::cout << "Element 1 is wrong"
+    //                  << "\n";
+    //        return 1;
+    //    }
+    //    if (abs(pRes[2] - 9.0) > 0.1) {
+    //        std::cout << "Element 2 is wrong"
+    //                  << "\n";
+    //        return 1;
+    //    }
     return true;
 }
 

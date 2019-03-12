@@ -19,10 +19,10 @@
 namespace athena::core {
 
 class Executor {
- public:
+    public:
     virtual void prepare(Graph &graph) = 0;
-    virtual void execute() = 0;
+    virtual void execute()             = 0;
 };
 
-}
-#endif //ATHENA_EXECUTOR_H
+}  // namespace athena::core
+#endif  // ATHENA_EXECUTOR_H

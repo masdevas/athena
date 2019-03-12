@@ -20,10 +20,10 @@ extern "C" {
 #include <stddef.h>
 #endif
 
-    void fadd(void *a, size_t ca, void *b, size_t cb, void* c);
+void fadd(void *a, size_t ca, void *b, size_t cb, void *c);
 
 #if __cplusplus
 }
 #endif
 
-#endif //ATHENA_ADD_H
+#endif  // ATHENA_ADD_H

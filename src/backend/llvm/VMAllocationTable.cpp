@@ -21,7 +21,6 @@ void VMAllocationTable::registerTensor(Tensor *tensor) {
     }
 }
 Tensor *VMAllocationTable::lookup(size_t address) {
-
     if (address >= mNextCell) {
         return nullptr;
     }
@@ -29,9 +28,10 @@ Tensor *VMAllocationTable::lookup(size_t address) {
     Tensor *result = nullptr;
 
     for (auto &record : mRegisteredTensors) {
-        if (record.address <= address
-            && record.address + record.tensor->getShape().getTotalSize() > address) {
-            result = record.tensor; // todo extract subtensor
+        if (record.address <= address &&
+            record.address + record.tensor->getShape().getTotalSize() >
+                address) {
+            result = record.tensor;  // todo extract subtensor
             break;
         }
     }

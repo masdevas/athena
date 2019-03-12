@@ -28,4 +28,4 @@ size_t sizeOfDataType(const DataType& dataType) {
             return 0;
     }
 }
-}
+}  // namespace athena::core

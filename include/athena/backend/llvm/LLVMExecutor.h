@@ -13,23 +13,25 @@
 #ifndef ATHENA_LLVMEXECUTOR_H
 #define ATHENA_LLVMEXECUTOR_H
 
-#include <athena/core/Executor.h>
-#include <athena/core/Allocator.h>
+#include "VMAllocationTable.h"
+
 #include <athena/backend/llvm/AthenaJIT.h>
+#include <athena/core/Allocator.h>
+#include <athena/core/Executor.h>
+
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
-#include "VMAllocationTable.h"
 
 namespace athena::backend::llvm {
 
 class LLVMExecutor : public athena::core::Executor {
- private:
+    private:
     std::unique_ptr<AthenaJIT> mJITCompiler;
     std::unique_ptr<::llvm::Module> mMainModule;
     std::unique_ptr<core::Allocator> mAllocator;
     VMAllocationTable mVMAllocationTable;
 
- public:
+    public:
     LLVMExecutor();
     void prepare(athena::core::Graph& graph) override;
     void execute() override;
@@ -37,6 +39,6 @@ class LLVMExecutor : public athena::core::Executor {
     void setAllocator(std::unique_ptr<core::Allocator>& allocator);
 };
 
-}
+}  // namespace athena::backend::llvm
 
-#endif //ATHENA_LLVMEXECUTOR_H
+#endif  // ATHENA_LLVMEXECUTOR_H

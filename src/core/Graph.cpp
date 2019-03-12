@@ -11,49 +11,51 @@
  * the License.
  */
 
+#include <athena/core/Graph.h>
+#include <athena/core/InputNode.h>
+#include <athena/core/Tensor.h>
 
 #include <queue>
-#include <athena/core/Tensor.h>
-#include <athena/core/InputNode.h>
-#include <athena/core/Graph.h>
 
 namespace athena::core {
 Graph::Graph(Graph &&src) noexcept {
-    outputNode = src.outputNode;
-    lossFunctionNode = src.lossFunctionNode;
+    outputNode           = src.outputNode;
+    lossFunctionNode     = src.lossFunctionNode;
     src.lossFunctionNode = nullptr;
-    src.outputNode = nullptr;
+    src.outputNode       = nullptr;
 }
 Graph &Graph::operator=(Graph &&src) noexcept {
-    outputNode = src.outputNode;
-    lossFunctionNode = src.lossFunctionNode;
+    outputNode           = src.outputNode;
+    lossFunctionNode     = src.lossFunctionNode;
     src.lossFunctionNode = nullptr;
-    src.outputNode = nullptr;
+    src.outputNode       = nullptr;
 
     return *this;
 }
 Graph::~Graph() {
     delete lossFunctionNode;
-    std::queue<AbstractNode*> nodes;
+    std::queue<AbstractNode *> nodes;
     nodes.push(outputNode);
     while (nodes.size() > 0) {
-        AbstractNode* got_node = nodes.front();
+        AbstractNode *got_node = nodes.front();
         nodes.pop();
         if (got_node->getType() == NodeType::DEFAULT) {
-            Node* current_node = reinterpret_cast<Node*>(got_node);
-            for (auto* node : current_node->mIncomingNodes) {
+            Node *current_node = reinterpret_cast<Node *>(got_node);
+            for (auto *node : current_node->mIncomingNodes) {
                 nodes.push(node);
             }
             delete current_node;
         } else if (got_node->getType() == NodeType::INPUT) {
-            delete reinterpret_cast<InputNode*>(got_node);
+            delete reinterpret_cast<InputNode *>(got_node);
         } else {
             FatalError("Graph: Destructor: Type of node is not defined");
         }
     }
 }
-std::tuple<std::queue<AbstractNode *>, std::deque<Tensor *> > Graph::traverse() {
-    Node *startNode = lossFunctionNode == nullptr ? outputNode : lossFunctionNode;
+std::tuple<std::queue<AbstractNode *>, std::deque<Tensor *> >
+Graph::traverse() {
+    Node *startNode =
+        lossFunctionNode == nullptr ? outputNode : lossFunctionNode;
 
     std::stack<AbstractNode *> dfsStack;
     dfsStack.push(startNode);
@@ -64,7 +66,7 @@ std::tuple<std::queue<AbstractNode *>, std::deque<Tensor *> > Graph::traverse() 
         AbstractNode *currentAbstractNode = dfsStack.top();
 
         if (currentAbstractNode->getType() == NodeType::DEFAULT) {
-            auto currentNode = static_cast<Node *>(currentAbstractNode);
+            auto currentNode  = static_cast<Node *>(currentAbstractNode);
             bool hasUnvisited = false;
             for (AbstractNode *node : currentNode->mIncomingNodes) {
                 if (!node->mWasVisitedFlag) {
@@ -74,7 +76,9 @@ std::tuple<std::queue<AbstractNode *>, std::deque<Tensor *> > Graph::traverse() 
             }
             if (!hasUnvisited) {
                 graphQueue.push(currentAbstractNode);
-                Tensor *result = currentNode->getAssignedOperation().getResultSize(arguments);
+                Tensor *result =
+                    currentNode->getAssignedOperation().getResultSize(
+                        arguments);
                 arguments.push_back(result);
                 dfsStack.pop();
             }
@@ -89,4 +93,4 @@ std::tuple<std::queue<AbstractNode *>, std::deque<Tensor *> > Graph::traverse() 
 
     return std::make_tuple(graphQueue, arguments);
 }
-}
+}  // namespace athena::core

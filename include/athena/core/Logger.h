@@ -14,15 +14,16 @@
 #define ATHENA_LOGGER_H
 
 #include <athena/core/AbstractLoger.h>
+
 #include <ostream>
 
 namespace athena::core {
 class Logger : public AbstractLogger {
- private:
+    private:
     std::ostream &mOutStream;
 
- public:
-    explicit Logger(std::ostream &stream) : mOutStream(stream) {};
+    public:
+    explicit Logger(std::ostream &stream) : mOutStream(stream){};
     ~Logger() override = default;
 
     AbstractLogger &streamImpl(const std::string &data) override;
@@ -30,5 +31,5 @@ class Logger : public AbstractLogger {
     AbstractLogger &streamImpl(const std::string_view &data) override;
     AbstractLogger &streamImpl(const Error &data) override;
 };
-}
-#endif //ATHENA_LOGGER_H
+}  // namespace athena::core
+#endif  // ATHENA_LOGGER_H

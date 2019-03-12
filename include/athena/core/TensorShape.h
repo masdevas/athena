@@ -19,10 +19,12 @@
 
 namespace athena::core {
 class TensorShape {
- private:
+    private:
     std::vector<size_t> mShape;
- public:
-    explicit TensorShape(std::vector<size_t> shape) : mShape(std::move(shape)) {};
+
+    public:
+    explicit TensorShape(std::vector<size_t> shape)
+        : mShape(std::move(shape)){};
     TensorShape(const TensorShape &rhs);
     TensorShape(const TensorShape &&rhs) noexcept;
 
@@ -57,5 +59,5 @@ class TensorShape {
      */
     TensorShape subshape() const;
 };
-}
-#endif //ATHENA_TENSORSHAPE_H
+}  // namespace athena::core
+#endif  // ATHENA_TENSORSHAPE_H

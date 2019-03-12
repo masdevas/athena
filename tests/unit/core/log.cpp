@@ -11,15 +11,15 @@
  * the License.
  */
 
-#include <gtest/gtest.h>
-#include <athena/core/TensorShape.h>
-#include <string>
 #include "athena/core/log.h"
 
+#include <athena/core/TensorShape.h>
+
+#include <gtest/gtest.h>
+#include <string>
+
 namespace athena::core {
-TEST(TensorLog, SetCout) {
-    setLogStream<Logger>(std::cout);
-}
+TEST(TensorLog, SetCout) { setLogStream<Logger>(std::cout); }
 TEST(TensorLog, SetStringstream) {
     std::stringstream ss;
     setLogStream<Logger>(ss);
@@ -28,4 +28,4 @@ TEST(TensorLog, SetStringstream) {
     log() << firstPart << secondPart;
     ASSERT_EQ(ss.str(), fullString);
 }
-}
+}  // namespace athena::core

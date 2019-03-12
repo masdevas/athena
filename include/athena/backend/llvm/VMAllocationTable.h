@@ -12,8 +12,9 @@
 #ifndef ATHENA_VMALLOCATIONTABLE_H
 #define ATHENA_VMALLOCATIONTABLE_H
 
-#include <vector>
 #include <athena/core/Tensor.h>
+
+#include <vector>
 
 namespace athena::backend::llvm {
 
@@ -23,19 +24,19 @@ struct AllocationTableRecord {
 };
 
 class VMAllocationTable {
- private:
+    private:
     std::vector<AllocationTableRecord> mRegisteredTensors;
     size_t mNextCell;
 
- public:
-    VMAllocationTable() : mNextCell(1) {};
-    ~VMAllocationTable() = default;
-    VMAllocationTable(const VMAllocationTable&) = delete;
-    VMAllocationTable& operator=(const VMAllocationTable&) = delete;
+    public:
+    VMAllocationTable() : mNextCell(1){};
+    ~VMAllocationTable()                         = default;
+    VMAllocationTable(const VMAllocationTable &) = delete;
+    VMAllocationTable &operator=(const VMAllocationTable &) = delete;
 
     void registerTensor(core::Tensor *tensor);
     core::Tensor *lookup(size_t address);
 };
-}
+}  // namespace athena::backend::llvm
 
-#endif //ATHENA_VMALLOCATIONTABLE_H
+#endif  // ATHENA_VMALLOCATIONTABLE_H

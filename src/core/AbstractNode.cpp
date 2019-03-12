@@ -17,17 +17,16 @@ namespace athena::core {
 
 size_t AbstractNode::mNodeCounter = 0;
 
-AbstractNode::AbstractNode(AbstractNode &&node) noexcept
-    : mOutgoingNodes(std::move(node.mOutgoingNodes)), mName(std::move(node.mName)) {
-}
+AbstractNode::AbstractNode(AbstractNode&& node) noexcept
+    : mOutgoingNodes(std::move(node.mOutgoingNodes)),
+      mName(std::move(node.mName)) {}
 
 AbstractNode::AbstractNode(std::string&& name, NodeType type)
-    : mName(std::move(name)), mWasVisitedFlag(false) {
-}
+    : mName(std::move(name)), mWasVisitedFlag(false) {}
 
-AbstractNode& AbstractNode::operator=(AbstractNode &&src) noexcept {
+AbstractNode& AbstractNode::operator=(AbstractNode&& src) noexcept {
     mOutgoingNodes = std::move(src.mOutgoingNodes);
-    mName = std::move(src.mName);
+    mName          = std::move(src.mName);
     return *this;
 }
 
@@ -35,4 +34,4 @@ void AbstractNode::addOutgoingNode(AbstractNode* node) {
     mOutgoingNodes.emplace_back(node);
 }
 
-}
+}  // namespace athena::core
