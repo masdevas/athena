@@ -13,7 +13,5 @@
 
 #include <athena/core/Operation.h>
 namespace athena::core {
-std::string Operation::getName() {
-    return mName;
-}
-}
+std::string Operation::getName() { return mName; }
+}  // namespace athena::core

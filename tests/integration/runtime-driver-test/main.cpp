@@ -11,10 +11,11 @@
  * the License.
  */
 
+#include "athena/backend/llvm/runtime-driver/runtime-driver.h"
+
+#include <cassert>
 #include <iostream>
 #include <string>
-#include <cassert>
-#include "athena/backend/llvm/runtime-driver/runtime-driver.h"
 
 std::string kPathToRuntimeCPU;
 const std::string kPathToRuntimeCPUName = "PATH_TO_RUNTIME_CPU";
@@ -42,17 +43,15 @@ void test_using_functions() {
     std::string nameLibrary(kPathToRuntimeCPU);
     constexpr size_t size = 3;
     float vector_first[] = {1.0, 2.0, 3.0}, vector_second[] = {4.0, 5.0, 6.0},
-        vector_res[size];
+          vector_res[size];
     fadd(vector_first, size, vector_second, size, vector_res);
     assert(vector_res[0] == 5.0);
     assert(vector_res[1] == 7.0);
     assert(vector_res[2] == 9.0);
 }
-}
+}  // namespace athena::backend
 
-void init() {
-    kPathToRuntimeCPU = ::getenv(kPathToRuntimeCPUName.data());
-}
+void init() { kPathToRuntimeCPU = ::getenv(kPathToRuntimeCPUName.data()); }
 
 int main() {
     init();

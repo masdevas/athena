@@ -11,21 +11,18 @@
  * the License.
  */
 
-#include <athena/core/TensorShape.h>
-#include <string>
-#include <stdexcept>
 #include <athena/core/FatalError.h>
+#include <athena/core/TensorShape.h>
+
+#include <stdexcept>
+#include <string>
 
 namespace athena::core {
-TensorShape::TensorShape(const TensorShape &rhs) {
-    mShape = rhs.mShape;
-}
+TensorShape::TensorShape(const TensorShape &rhs) { mShape = rhs.mShape; }
 TensorShape::TensorShape(const TensorShape &&rhs) noexcept {
     mShape = rhs.mShape;
 }
-const std::vector<size_t> &TensorShape::getShape() const {
-    return mShape;
-}
+const std::vector<size_t> &TensorShape::getShape() const { return mShape; }
 size_t TensorShape::getTotalSize() const {
     size_t totalSize = 1;
 
@@ -37,15 +34,13 @@ size_t TensorShape::getTotalSize() const {
 }
 size_t TensorShape::dim(size_t index) const {
     if (index >= mShape.size()) {
-        FatalError("TensorShape only has " + std::to_string(mShape.size()) + " dimensions. "
-            + std::to_string(index) + " requested.");
+        FatalError("TensorShape only has " + std::to_string(mShape.size()) +
+                   " dimensions. " + std::to_string(index) + " requested.");
     }
     return mShape[index];
 }
-size_t TensorShape::dimensions() const {
-    return mShape.size();
-}
+size_t TensorShape::dimensions() const { return mShape.size(); }
 TensorShape TensorShape::subshape() const {
     return TensorShape(std::vector<size_t>(mShape.begin() + 1, mShape.end()));
 }
-}
+}  // namespace athena::core

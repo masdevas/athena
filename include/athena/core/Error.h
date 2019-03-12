@@ -13,27 +13,29 @@
 #ifndef ATHENA_ERROR_H
 #define ATHENA_ERROR_H
 
-#include <string_view>
 #include <ostream>
+#include <string_view>
 
 namespace athena::core {
 
 class Error {
- protected:
+    protected:
     std::string_view mErrorMessage;
     bool mHasError;
- public:
-    Error() : mErrorMessage(), mHasError(false) {};
-    explicit Error(std::string_view message) : mErrorMessage(message), mHasError(true) {};
-    Error(const Error &error) = default;
+
+    public:
+    Error() : mErrorMessage(), mHasError(false){};
+    explicit Error(std::string_view message)
+        : mErrorMessage(message), mHasError(true){};
+    Error(const Error &error)     = default;
     Error(Error &&error) noexcept = default;
     Error &operator=(const Error &error) = default;
     Error &operator=(Error &&error) noexcept = default;
-    ~Error() = default;
+    ~Error()                                 = default;
 
     operator bool() const;
-    friend std::ostream& operator<< (std::ostream& stream, const Error& err);
+    friend std::ostream &operator<<(std::ostream &stream, const Error &err);
 };
-}
+}  // namespace athena::core
 
-#endif //ATHENA_ERROR_H
+#endif  // ATHENA_ERROR_H

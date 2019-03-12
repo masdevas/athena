@@ -11,7 +11,6 @@
  * the License.
  */
 
-
 #ifndef ATHENA_ABSTRACTNODE_H
 #define ATHENA_ABSTRACTNODE_H
 
@@ -22,32 +21,30 @@ namespace athena::core {
 
 class Graph;
 
-enum class NodeType {
-    INPUT,
-    DEFAULT
-};
+enum class NodeType { INPUT, DEFAULT };
 
 class AbstractNode {
     friend class Graph;
- protected:
+
+    protected:
     std::vector<AbstractNode*> mOutgoingNodes;
     std::string mName;
     static size_t mNodeCounter;
     bool mWasVisitedFlag;
 
- public:
-    AbstractNode() = delete;
-    AbstractNode(const AbstractNode &node) = delete;
-    AbstractNode(AbstractNode &&node) noexcept;
+    public:
+    AbstractNode()                         = delete;
+    AbstractNode(const AbstractNode& node) = delete;
+    AbstractNode(AbstractNode&& node) noexcept;
     explicit AbstractNode(std::string&& name, NodeType type);
     virtual ~AbstractNode() = default;
     AbstractNode& operator=(const AbstractNode& src) = delete;
-    AbstractNode& operator=(AbstractNode&& src) noexcept;
+    AbstractNode& operator                 =(AbstractNode&& src) noexcept;
     virtual void after(AbstractNode* node) = 0;
-    virtual NodeType getType() = 0;
+    virtual NodeType getType()             = 0;
     void addOutgoingNode(AbstractNode* node);
 };
 
-}
+}  // namespace athena::core
 
-#endif //ATHENA_ABSTRACTNODE_H
+#endif  // ATHENA_ABSTRACTNODE_H

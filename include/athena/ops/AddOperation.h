@@ -11,21 +11,21 @@
  * the License.
  */
 
-
 #ifndef ATHENA_ADDOPERATION_H
 #define ATHENA_ADDOPERATION_H
 
+#include <athena/core/AbstractGenerator.h>
 #include <athena/core/Operation.h>
 #include <athena/core/Tensor.h>
-#include <athena/core/AbstractGenerator.h>
 
 namespace athena::ops {
 class AddOperation : public core::Operation {
- public:
+    public:
     AddOperation() : Operation("add") {}
 
-    core::Tensor* getResultSize(std::deque<core::Tensor*> args) const override;
-    void gen(core::AbstractGenerator &g, std::stack<core::Tensor*> &operationArguments) const override;
+    core::Tensor *getResultSize(std::deque<core::Tensor *> args) const override;
+    void gen(core::AbstractGenerator &g,
+             std::stack<core::Tensor *> &operationArguments) const override;
 };
-}
-#endif //ATHENA_ADDOPERATION_H
+}  // namespace athena::ops
+#endif  // ATHENA_ADDOPERATION_H

@@ -13,14 +13,11 @@
 
 #include <athena/core/Error.h>
 
-
 namespace athena::core {
 
-Error::operator bool() const {
-    return mHasError;
-}
+Error::operator bool() const { return mHasError; }
 std::ostream &operator<<(std::ostream &stream, const Error &err) {
     stream << err.mErrorMessage << "\n";
     return stream;
 }
-}
+}  // namespace athena::core

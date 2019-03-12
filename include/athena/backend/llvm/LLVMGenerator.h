@@ -13,15 +13,17 @@
 #ifndef ATHENA_LLVMGENERATOR_H
 #define ATHENA_LLVMGENERATOR_H
 
+#include "VMAllocationTable.h"
+
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/Allocator.h>
-#include <llvm/IR/Module.h>
+
 #include <llvm/IR/IRBuilder.h>
-#include "VMAllocationTable.h"
+#include <llvm/IR/Module.h>
 
 namespace athena::backend::llvm {
 class LLVMGenerator : public core::AbstractGenerator {
- private:
+    private:
     const std::unique_ptr<::llvm::Module> &mModule;
     ::llvm::LLVMContext &mContext;
     // todo abatashev: refactor main block
@@ -30,17 +32,18 @@ class LLVMGenerator : public core::AbstractGenerator {
 
     core::Allocator &mAllocator;
 
-    //VMAllocationTable mAllocationTable;
+    // VMAllocationTable mAllocationTable;
     ::llvm::Value *generateGetFastPointer(core::Tensor &t);
- public:
+
+    public:
     explicit LLVMGenerator(::llvm::LLVMContext &ctx,
-                            const std::unique_ptr<::llvm::Module> &module,
-                            core::Allocator &allocator);
+                           const std::unique_ptr<::llvm::Module> &module,
+                           core::Allocator &allocator);
     void generateAllocation(core::Tensor &a) override;
-    void generateAdd(core::Tensor &a, core::Tensor &b, core::Tensor &c) override;
+    void generateAdd(core::Tensor &a, core::Tensor &b,
+                     core::Tensor &c) override;
     ::llvm::IRBuilder<> &getBuilder();
-
 };
-}
+}  // namespace athena::backend::llvm
 
-#endif //ATHENA_LLVMGENERATOR_H
+#endif  // ATHENA_LLVMGENERATOR_H

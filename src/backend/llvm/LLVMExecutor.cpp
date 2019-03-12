@@ -27,8 +27,8 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
 
     // todo consider initializing some optimizers
 
-    ::llvm::FunctionType *FT =
-        ::llvm::FunctionType::get(::llvm::Type::getVoidTy(mJITCompiler->getContext()), false);
+    ::llvm::FunctionType *FT = ::llvm::FunctionType::get(
+        ::llvm::Type::getVoidTy(mJITCompiler->getContext()), false);
     ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, "jitmain",
                              *mMainModule);
 
@@ -44,7 +44,7 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
 
         if (currentNode->getType() == athena::core::NodeType::DEFAULT) {
             auto node = static_cast<core::Node *>(currentNode);
-            auto &op   = node->getAssignedOperation();
+            auto &op  = node->getAssignedOperation();
 
             auto tensor = data.front();
             data.pop_front();
@@ -90,14 +90,13 @@ LLVMExecutor::LLVMExecutor() {
     LLVMInitializeNativeAsmPrinter();
     LLVMInitializeNativeAsmParser();
     auto JTMB = ::llvm::orc::JITTargetMachineBuilder::detectHost();
-    if (!JTMB)
-        JTMB.takeError(); // todo properly handle errors
+    if (!JTMB) JTMB.takeError();  // todo properly handle errors
 
     auto DL = JTMB->getDefaultDataLayoutForTarget();
-    if (!DL)
-        DL.takeError();
+    if (!DL) DL.takeError();
 
-    mJITCompiler = ::llvm::make_unique<AthenaJIT>(std::move(*JTMB), std::move(*DL));
+    mJITCompiler =
+        ::llvm::make_unique<AthenaJIT>(std::move(*JTMB), std::move(*DL));
 }
 
 std::unique_ptr<core::Allocator> &LLVMExecutor::getAllocator() {

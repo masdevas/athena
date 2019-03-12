@@ -16,26 +16,21 @@
 namespace athena::core {
 Tensor& Tensor::operator[](size_t index) {
     if (index > mShape.dimensions()) {
-        FatalError("Out of range index in Tensor: " + std::to_string(reinterpret_cast<size_t>(this)));
+        FatalError("Out of range index in Tensor: " +
+                   std::to_string(reinterpret_cast<size_t>(this)));
     }
-    size_t newVirtualAddress = mVirtualAddress +
-        mShape.getTotalSize() / mShape.dim(0) * index;
+    size_t newVirtualAddress =
+        mVirtualAddress + mShape.getTotalSize() / mShape.dim(0) * index;
     return *(new Tensor(mDataType, mShape.subshape(), newVirtualAddress));
 }
 
-DataType Tensor::getDataType() const {
-    return mDataType;
-}
+DataType Tensor::getDataType() const { return mDataType; }
 
-size_t Tensor::getVirtualAddress() const {
-    return mVirtualAddress;
-}
+size_t Tensor::getVirtualAddress() const { return mVirtualAddress; }
 
-const TensorShape& Tensor::getShape() const {
-    return mShape;
-}
+const TensorShape& Tensor::getShape() const { return mShape; }
 void Tensor::setVirtualAddress(size_t address) {
-    if (mVirtualAddress == 0) // tensors can not be relocated
+    if (mVirtualAddress == 0)  // tensors can not be relocated
         mVirtualAddress = address;
 }
-}
+}  // namespace athena::core

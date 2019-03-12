@@ -11,26 +11,27 @@
  * the License.
  */
 
-#include <vector>
 #include <athena/core/Node.h>
+
+#include <vector>
 
 namespace athena::core {
 
 Node::Node(Node &&src) noexcept
-    : AbstractNode(std::move(src)), mIncomingNodes(std::move(src.mIncomingNodes)),
-      mOperation(src.mOperation) {
-}
+    : AbstractNode(std::move(src)),
+      mIncomingNodes(std::move(src.mIncomingNodes)),
+      mOperation(src.mOperation) {}
 
 Node::Node(Operation &&op)
-    : AbstractNode(op.getName() + std::to_string(++mNodeCounter), NodeType::DEFAULT),
-      mOperation(op) {
-}
+    : AbstractNode(op.getName() + std::to_string(++mNodeCounter),
+                   NodeType::DEFAULT),
+      mOperation(op) {}
 
 Node &Node::operator=(Node &&src) noexcept {
     mIncomingNodes = std::move(src.mIncomingNodes);
     mOutgoingNodes = std::move(src.mOutgoingNodes);
-    mOperation = std::move(src.mOperation);
-    mName = std::move(src.mName);
+    mOperation     = std::move(src.mOperation);
+    mName          = std::move(src.mName);
     return *this;
 }
 
@@ -39,12 +40,8 @@ void Node::after(AbstractNode *node) {
     mIncomingNodes.emplace_back(node);
 }
 
-const Operation &Node::getAssignedOperation() {
-    return mOperation;
-}
+const Operation &Node::getAssignedOperation() { return mOperation; }
 
-NodeType Node::getType() {
-    return NodeType::DEFAULT;
-}
+NodeType Node::getType() { return NodeType::DEFAULT; }
 
-}
+}  // namespace athena::core

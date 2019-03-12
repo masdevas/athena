@@ -11,25 +11,26 @@
  * the License.
  */
 
-
 #ifndef ATHENA_RUNTIME_DRIVER_H
 #define ATHENA_RUNTIME_DRIVER_H
 
-#include <dlfcn.h>
-#include <string_view>
-#include <string>
 #include <athena/core/FatalError.h>
+
+#include <dlfcn.h>
+#include <string>
+#include <string_view>
 
 namespace athena::backend {
 class RuntimeDriver {
     void* mLibraryHandle;
-    void (*mFaddPointer)(void *a, size_t ca, void *b, size_t cb, void* c);
+    void (*mFaddPointer)(void* a, size_t ca, void* b, size_t cb, void* c);
 
     void* getFunction(std::string_view nameFunction);
- public:
+
+    public:
     RuntimeDriver();
     RuntimeDriver(std::string_view nameLibrary);
-    RuntimeDriver(const RuntimeDriver& rhs) = delete;
+    RuntimeDriver(const RuntimeDriver& rhs)     = delete;
     RuntimeDriver(RuntimeDriver&& rhs) noexcept = default;
     ~RuntimeDriver();
 
@@ -41,7 +42,7 @@ class RuntimeDriver {
     void reload(std::string_view nameLibrary);
     bool isLoaded() const;
 
-    void fadd(void *a, size_t ca, void *b, size_t cb, void* c) {
+    void fadd(void* a, size_t ca, void* b, size_t cb, void* c) {
         mFaddPointer(a, ca, b, cb, c);
     }
 };
@@ -49,10 +50,10 @@ class RuntimeDriver {
 extern RuntimeDriver kRuntimeDriver;
 
 extern "C" {
-void inline fadd(void *a, size_t ca, void *b, size_t cb, void *c) {
+void inline fadd(void* a, size_t ca, void* b, size_t cb, void* c) {
     kRuntimeDriver.fadd(a, ca, b, cb, c);
 }
 }
-}
+}  // namespace athena::backend
 
-#endif //ATHENA_RUNTIME_DRIVER_H
+#endif  // ATHENA_RUNTIME_DRIVER_H

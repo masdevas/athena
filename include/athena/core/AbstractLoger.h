@@ -13,34 +13,35 @@
 #ifndef ATHENA_ABSTRACTLOGER_H
 #define ATHENA_ABSTRACTLOGER_H
 
-#include <string_view>
-#include <string>
 #include <athena/core/Error.h>
+
+#include <string>
+#include <string_view>
 
 namespace athena::core {
 
 class Error;
 
 class AbstractLogger {
- public:
-    AbstractLogger() = default;
-    AbstractLogger(const AbstractLogger &) = default;
+    public:
+    AbstractLogger()                           = default;
+    AbstractLogger(const AbstractLogger &)     = default;
     AbstractLogger(AbstractLogger &&) noexcept = default;
     AbstractLogger &operator=(const AbstractLogger &) = default;
     AbstractLogger &operator=(AbstractLogger &&) noexcept = default;
-    virtual ~AbstractLogger() = default;
+    virtual ~AbstractLogger()                             = default;
 
-    template<typename T>
+    template <typename T>
     AbstractLogger &operator<<(const T &data) {
         return streamImpl(data);
     }
 
- protected:
-    virtual AbstractLogger &streamImpl(const std::string &data) = 0;
+    protected:
+    virtual AbstractLogger &streamImpl(const std::string &data)      = 0;
     virtual AbstractLogger &streamImpl(const std::string_view &data) = 0;
-    virtual AbstractLogger &streamImpl(const Error &data) = 0;
-    virtual AbstractLogger &streamImpl(const char *data) = 0;
+    virtual AbstractLogger &streamImpl(const Error &data)            = 0;
+    virtual AbstractLogger &streamImpl(const char *data)             = 0;
 };
 
-}
-#endif //ATHENA_ABSTRACTLOGER_H
+}  // namespace athena::core
+#endif  // ATHENA_ABSTRACTLOGER_H

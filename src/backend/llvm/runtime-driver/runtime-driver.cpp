@@ -11,31 +11,28 @@
  * the License.
  */
 
-
 #include <athena/backend/llvm/runtime-driver/runtime-driver.h>
 
 namespace athena::backend {
 
 RuntimeDriver kRuntimeDriver;
 
-RuntimeDriver::RuntimeDriver() : mLibraryHandle(nullptr) {
-}
+RuntimeDriver::RuntimeDriver() : mLibraryHandle(nullptr) {}
 RuntimeDriver::RuntimeDriver(std::string_view nameLibrary) {
     load(nameLibrary);
 }
-RuntimeDriver::~RuntimeDriver() {
-    unload();
-}
+RuntimeDriver::~RuntimeDriver() { unload(); }
 RuntimeDriver& RuntimeDriver::operator=(RuntimeDriver&& rhs) noexcept {
     unload();
-    mLibraryHandle = rhs.mLibraryHandle;
-    mFaddPointer = rhs.mFaddPointer;
+    mLibraryHandle     = rhs.mLibraryHandle;
+    mFaddPointer       = rhs.mFaddPointer;
     rhs.mLibraryHandle = nullptr;
-    rhs.mFaddPointer = nullptr;
+    rhs.mFaddPointer   = nullptr;
     return *this;
 }
 void* RuntimeDriver::getFunction(std::string_view nameFunction) {
-    if (void* function = dlsym(mLibraryHandle, nameFunction.data()); !function) {
+    if (void* function = dlsym(mLibraryHandle, nameFunction.data());
+        !function) {
         ::athena::core::FatalError("RuntimeDriver: " + std::string(dlerror()));
         return nullptr;
     } else {
@@ -43,11 +40,13 @@ void* RuntimeDriver::getFunction(std::string_view nameFunction) {
     }
 }
 void RuntimeDriver::load(std::string_view nameLibrary) {
-    if (mLibraryHandle = dlopen(nameLibrary.data(), RTLD_LAZY); !mLibraryHandle) {
+    if (mLibraryHandle = dlopen(nameLibrary.data(), RTLD_LAZY);
+        !mLibraryHandle) {
         ::athena::core::FatalError("RuntimeDriver: " + std::string(dlerror()));
     }
-    mFaddPointer = reinterpret_cast<void (*)(void*, size_t, void*, size_t, void*)>(
-        getFunction("fadd"));
+    mFaddPointer =
+        reinterpret_cast<void (*)(void*, size_t, void*, size_t, void*)>(
+            getFunction("fadd"));
 }
 void RuntimeDriver::unload() {
     if (mLibraryHandle && dlclose(mLibraryHandle)) {
@@ -59,7 +58,5 @@ void RuntimeDriver::reload(std::string_view nameLibrary) {
     unload();
     load(nameLibrary);
 }
-bool RuntimeDriver::isLoaded() const {
-    return mLibraryHandle != nullptr;
-}
-}
+bool RuntimeDriver::isLoaded() const { return mLibraryHandle != nullptr; }
+}  // namespace athena::backend

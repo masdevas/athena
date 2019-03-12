@@ -11,7 +11,6 @@
  * the License.
  */
 
-
 #ifndef ATHENA_ALLOCATE_H
 #define ATHENA_ALLOCATE_H
 
@@ -29,4 +28,4 @@ size_t get_fast_pointer(void *allocator, void *tensor);
 }
 #endif
 
-#endif //ATHENA_ALLOCATE_H
+#endif  // ATHENA_ALLOCATE_H

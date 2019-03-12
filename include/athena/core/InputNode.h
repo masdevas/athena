@@ -14,27 +14,27 @@
 #ifndef ATHENA_INPUTNODE_H
 #define ATHENA_INPUTNODE_H
 
-#include "Tensor.h"
 #include "AbstractNode.h"
+#include "Tensor.h"
 
 namespace athena::core {
 
 class InputNode : public AbstractNode {
- private:
-    Tensor *mTensor;
+    private:
+    Tensor* mTensor;
 
- public:
-    InputNode() = delete;
-    InputNode(const InputNode &node) = delete;
-    InputNode(InputNode &&node) noexcept;
-    explicit InputNode(Tensor *tensor);
+    public:
+    InputNode()                      = delete;
+    InputNode(const InputNode& node) = delete;
+    InputNode(InputNode&& node) noexcept;
+    explicit InputNode(Tensor* tensor);
     ~InputNode() override = default;
     InputNode& operator=(const InputNode& src) = delete;
-    InputNode& operator=(InputNode&& src) noexcept;
+    InputNode& operator                        =(InputNode&& src) noexcept;
     void after(AbstractNode* node) override;
     Tensor* getData();
     NodeType getType() override;
 };
 
-}
-#endif //ATHENA_INPUTNODE_H
+}  // namespace athena::core
+#endif  // ATHENA_INPUTNODE_H

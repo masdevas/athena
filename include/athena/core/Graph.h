@@ -14,28 +14,29 @@
 #ifndef ATHENA_GRAPH_H
 #define ATHENA_GRAPH_H
 
-#include <queue>
-#include <deque>
 #include <athena/core/Node.h>
+
+#include <deque>
+#include <queue>
 
 namespace athena::core {
 
 class Graph {
- private:
+    private:
     Node* outputNode;
     Node* lossFunctionNode;
 
- public:
-    Graph() : outputNode(nullptr), lossFunctionNode(nullptr) {};
-    Graph(Node *outNode) : outputNode(outNode), lossFunctionNode(nullptr) {};
+    public:
+    Graph() : outputNode(nullptr), lossFunctionNode(nullptr){};
+    Graph(Node* outNode) : outputNode(outNode), lossFunctionNode(nullptr){};
     Graph(const Graph&) = delete;
     Graph(Graph&& src) noexcept;
     Graph& operator=(const Graph&) = delete;
-    Graph& operator=(Graph&& src) noexcept;
+    Graph& operator                =(Graph&& src) noexcept;
     ~Graph();
     std::tuple<std::queue<AbstractNode*>, std::deque<Tensor*> > traverse();
 };
 
-}
+}  // namespace athena::core
 
-#endif //ATHENA_GRAPH_H
+#endif  // ATHENA_GRAPH_H

@@ -12,21 +12,22 @@
  */
 #ifndef ATHENA_FATALERROR_H
 #define ATHENA_FATALERROR_H
-#include <string_view>
+#include "Logger.h"
+
 #include <athena/core/Error.h>
 #include <athena/core/log.h>
-#include "Logger.h"
-#include <iostream>
 
+#include <iostream>
+#include <string_view>
 
 namespace athena::core {
 class FatalError : public Error {
- public:
+    public:
     explicit FatalError(std::string_view error) : Error(error) {
         err() << mErrorMessage;
         exit(1);
     }
 };
-}
+}  // namespace athena::core
 
-#endif //ATHENA_FATALERROR_H
+#endif  // ATHENA_FATALERROR_H

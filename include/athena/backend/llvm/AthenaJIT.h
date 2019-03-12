@@ -11,11 +11,9 @@
  * the License.
  */
 
-
 #ifndef ATHENA_ATHENAJIT_H
 #define ATHENA_ATHENAJIT_H
 
-#include <llvm/IR/Module.h>
 #include <llvm/ADT/StringRef.h>
 #include <llvm/ExecutionEngine/JITSymbol.h>
 #include <llvm/ExecutionEngine/Orc/CompileUtils.h>
@@ -28,12 +26,12 @@
 #include <llvm/ExecutionEngine/SectionMemoryManager.h>
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
 #include <memory>
-
 
 namespace athena::backend::llvm {
 class AthenaJIT {
- private:
+    private:
     ::llvm::orc::ExecutionSession mExecutionSession;
     ::llvm::orc::RTDyldObjectLinkingLayer mObjectLayer;
     ::llvm::orc::IRCompileLayer mCompileLayer;
@@ -43,9 +41,11 @@ class AthenaJIT {
     ::llvm::orc::MangleAndInterner mMangle;
     ::llvm::orc::ThreadSafeContext mContext;
 
-    static ::llvm::Expected<::llvm::orc::ThreadSafeModule>
-    optimizeModule(::llvm::orc::ThreadSafeModule TSM, const ::llvm::orc::MaterializationResponsibility &R);
- public:
+    static ::llvm::Expected<::llvm::orc::ThreadSafeModule> optimizeModule(
+        ::llvm::orc::ThreadSafeModule TSM,
+        const ::llvm::orc::MaterializationResponsibility &R);
+
+    public:
     AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB, ::llvm::DataLayout DL);
 
     static ::llvm::Expected<std::unique_ptr<AthenaJIT>> create();
@@ -55,6 +55,6 @@ class AthenaJIT {
     ::llvm::Error addModule(std::unique_ptr<::llvm::Module> &M);
     ::llvm::Expected<::llvm::JITEvaluatedSymbol> lookup(::llvm::StringRef Name);
 };
-}
+}  // namespace athena::backend::llvm
 
-#endif //ATHENA_ATHENAJIT_H
+#endif  // ATHENA_ATHENAJIT_H

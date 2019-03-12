@@ -30,4 +30,4 @@ AbstractLogger &Logger::streamImpl(const Error &data) {
     mOutStream << data;
     return *this;
 }
-}
+}  // namespace athena::core

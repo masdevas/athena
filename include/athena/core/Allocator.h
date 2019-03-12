@@ -15,6 +15,7 @@
 #define ATHENA_ALLOCATOR_H
 
 #include <athena/core/Tensor.h>
+
 #include <cstddef>
 
 namespace athena::core {
@@ -23,13 +24,13 @@ namespace athena::core {
  * Interface used by backend to manage memory
  */
 class Allocator {
- public:
-    virtual ~Allocator() = default;
-    virtual void allocate(const Tensor&) = 0;
-    virtual size_t getRAMPointer() = 0;
+    public:
+    virtual ~Allocator()                         = default;
+    virtual void allocate(const Tensor&)         = 0;
+    virtual size_t getRAMPointer()               = 0;
     virtual size_t getFastPointer(const Tensor&) = 0;
 };
 
-}
+}  // namespace athena::core
 
-#endif //ATHENA_ALLOCATOR_H
+#endif  // ATHENA_ALLOCATOR_H
