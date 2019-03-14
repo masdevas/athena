@@ -15,4 +15,5 @@ add_athena_library(athena-core STATIC
         FatalError.cpp
         DataType.cpp
         Tensor.cpp
+        libinfo.cpp
         )
