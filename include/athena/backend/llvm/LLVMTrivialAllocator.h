@@ -27,7 +27,7 @@ class LLVMTrivialAllocator : public athena::core::Allocator {
 
     public:
     void allocate(const athena::core::Tensor&) override;
-    size_t getRAMPointer() override;
+    size_t getRAMPointer(const athena::core::Tensor&) override;
     size_t getFastPointer(const athena::core::Tensor&) override;
 };
 }  // namespace athena::backend::llvm

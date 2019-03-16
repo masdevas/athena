@@ -16,4 +16,5 @@ add_athena_library(athena-core STATIC
         DataType.cpp
         Tensor.cpp
         libinfo.cpp
+        AbstractLoader.cpp
         )

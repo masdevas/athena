@@ -1,0 +1,68 @@
+/*
+ * Copyright (c) 2019 Athena. All rights reserved.
+ * https://athenaframework.ml
+ *
+ * Licensed under MIT license.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+#include <athena/loaders/MemoryLoader/MemoryLoader.h>
+
+#include <cstring>
+
+namespace athena::loaders {
+
+MemoryLoader::MemoryLoader(MemoryLoader &&src) {
+    this->mData = src.mData;
+    this->mSize = src.mSize;
+    src.mSize   = 0;
+    src.mData   = nullptr;
+}
+
+MemoryLoader &MemoryLoader::operator=(athena::loaders::MemoryLoader &&src) {
+    if (&src == this) {
+        return *this;
+    }
+
+    this->mData = src.mData;
+    this->mSize = src.mSize;
+    src.mSize   = 0;
+    src.mData   = nullptr;
+
+    return *this;
+}
+
+void MemoryLoader::load(core::Allocator *allocator, core::Tensor *tensor) {
+    auto pointer = reinterpret_cast<void *>(allocator->getRAMPointer(*tensor));
+#ifdef DEBUG
+    assert(mSize <= tensor->getShape().getTotalSize() *
+                        core::sizeOfDataType(tensor->getDataType()));
+#endif
+    std::memmove(pointer, mData, mSize);
+}
+
+}  // namespace athena::loaders
+
+extern "C" {
+void MemoryLoaderLoad(void *loader, void *allocator, void *tensor) {
+    auto pLoader    = reinterpret_cast<athena::loaders::MemoryLoader *>(loader);
+    auto pAllocator = reinterpret_cast<athena::core::Allocator *>(allocator);
+    auto pTensor    = reinterpret_cast<athena::core::Tensor *>(tensor);
+
+#ifdef DEBUG
+    assert(pLoader != nullptr);
+    assert(pAllocator != nullptr);
+    assert(pTensor != nullptr);
+#endif
+    pLoader->load(pAllocator, pTensor);
+}
+
+void *CreateMemoryLoader(void *data, size_t size) {
+    return new athena::loaders::MemoryLoader(data, size);
+}
+}
