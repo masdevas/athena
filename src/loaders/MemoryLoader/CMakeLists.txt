@@ -1,0 +1,1 @@
+add_athena_library(MemoryLoader STATIC MemoryLoader.cpp)

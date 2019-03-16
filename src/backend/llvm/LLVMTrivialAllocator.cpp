@@ -23,7 +23,9 @@ void LLVMTrivialAllocator::allocate(const athena::core::Tensor& tensor) {
         athena::core::sizeOfDataType(tensor.getDataType())));
     mAllocatedMap[tensor.getVirtualAddress()] = mem;
 }
-size_t LLVMTrivialAllocator::getRAMPointer() { return 0; }
+size_t LLVMTrivialAllocator::getRAMPointer(const athena::core::Tensor& t) {
+    return (size_t)mAllocatedMap[t.getVirtualAddress()];
+}
 size_t LLVMTrivialAllocator::getFastPointer(const athena::core::Tensor& t) {
     return (size_t)mAllocatedMap[t.getVirtualAddress()];
 }
