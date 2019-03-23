@@ -29,6 +29,11 @@ if (DEFINED $ENV{ATHENA_CI_BUILD_NUMBER})
     add_definitions(-DATHENA_PATCH_VERSION="$ENV{ATHENA_CI_BUILD_NUMBER}")
 endif()
 
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    message(STATUS "Debug build contains assertions")
+    add_definitions(-DDEBUG)
+endif()
+
 add_subdirectory(src)
 
 target_link_libraries(athena PUBLIC athena-core athena-ops backend-llvm)

@@ -25,8 +25,6 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
                                                    mJITCompiler->getContext());
     mMainModule->setDataLayout(mJITCompiler->getDataLayout());
 
-    // todo consider initializing some optimizers
-
     ::llvm::FunctionType *FT = ::llvm::FunctionType::get(
         ::llvm::Type::getVoidTy(mJITCompiler->getContext()), false);
     ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, "jitmain",
@@ -80,7 +78,9 @@ void LLVMExecutor::execute() {
     }
 
     auto sym = mJITCompiler->lookup("jitmain");
-    assert(sym && "Failed to codegen function");
+#ifdef DEBUG
+    assert(sym && "Failed to find jitmain function");
+#endif
     auto mainFunction = (void (*)())(intptr_t)sym.get().getAddress();
     mainFunction();
 }
@@ -89,14 +89,15 @@ LLVMExecutor::LLVMExecutor() {
     ::llvm::InitializeNativeTarget();
     LLVMInitializeNativeAsmPrinter();
     LLVMInitializeNativeAsmParser();
-    auto JTMB = ::llvm::orc::JITTargetMachineBuilder::detectHost();
-    if (!JTMB) JTMB.takeError();  // todo properly handle errors
 
-    auto DL = JTMB->getDefaultDataLayoutForTarget();
-    if (!DL) DL.takeError();
+    auto compiler = AthenaJIT::create();
 
-    mJITCompiler =
-        ::llvm::make_unique<AthenaJIT>(std::move(*JTMB), std::move(*DL));
+    if (!compiler) {
+        ::llvm::consumeError(compiler.takeError());
+        new core::FatalError("Unable to create JIT compiler");
+    }
+
+    mJITCompiler = std::move(compiler.get());
 }
 
 std::unique_ptr<core::Allocator> &LLVMExecutor::getAllocator() {
