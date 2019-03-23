@@ -44,26 +44,14 @@ void LLVMGenerator::generateAdd(core::Tensor &a, core::Tensor &b,
 
     std::vector<::llvm::Value *> ArgsV;
 
-    //    ::llvm::Constant* aTensorConst
-    //        = ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext),
-    //        mAllocator.getFastPointer(a));
-    //    ArgsV.push_back(aTensorConst);
     ArgsV.push_back(generateGetFastPointer(a));
     ::llvm::Constant *aSizeConst = ::llvm::ConstantInt::get(
         ::llvm::Type::getInt64Ty(mContext), a.getShape().getTotalSize());
     ArgsV.push_back(aSizeConst);
-    //    ::llvm::Constant* bTensorConst
-    //        = ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext),
-    //        mAllocator.getFastPointer(b));
-    //    ArgsV.push_back(bTensorConst);
     ArgsV.push_back(generateGetFastPointer(b));
     ::llvm::Constant *bSizeConst = ::llvm::ConstantInt::get(
         ::llvm::Type::getInt64Ty(mContext), b.getShape().getTotalSize());
     ArgsV.push_back(bSizeConst);
-    //    ::llvm::Constant* cTensorConst
-    //        = ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext),
-    //        mAllocator.getFastPointer(c));
-    //    ArgsV.push_back(cTensorConst);
     ArgsV.push_back(generateGetFastPointer(c));
     mBuilder.CreateCall(calledFunction, ArgsV);
 }

@@ -14,6 +14,7 @@
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 
 #include <cstring>
+#include <cassert>
 
 namespace athena::loaders {
 
