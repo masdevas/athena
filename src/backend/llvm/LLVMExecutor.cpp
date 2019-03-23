@@ -18,6 +18,8 @@
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/Support/TargetSelect.h"
 
+#include <cassert>
+
 namespace athena::backend::llvm {
 
 void LLVMExecutor::prepare(athena::core::Graph &graph) {
