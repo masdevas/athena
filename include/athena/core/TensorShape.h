@@ -14,25 +14,46 @@
 #ifndef ATHENA_TENSORSHAPE_H
 #define ATHENA_TENSORSHAPE_H
 
+#include <athena/core/ShapeView.h>
+
 #include <utility>
+#include <initializer_list>
 #include <vector>
+#include "FatalError.h"
 
 namespace athena::core {
 class TensorShape {
     private:
     std::vector<size_t> mShape;
+    size_t mTotalSize;
+    size_t calculateTotalSize();
 
     public:
-    explicit TensorShape(std::vector<size_t> shape)
-        : mShape(std::move(shape)){};
-    TensorShape(const TensorShape &rhs);
-    TensorShape(const TensorShape &&rhs) noexcept;
+    using Iterator = std::vector<size_t>::const_iterator;
+    TensorShape(std::initializer_list<size_t> rhs);
+    TensorShape(std::vector<size_t> rhs);
+    template <typename CopyableIterator>
+    TensorShape(CopyableIterator begin, CopyableIterator end);
+    TensorShape(const TensorShape &rhs) = default;
+    TensorShape(TensorShape &&rhs) noexcept = default;
+    ~TensorShape() = default;
+
+    TensorShape& operator=(const TensorShape& rhs) = default;
+    TensorShape& operator=(TensorShape&& rhs) = default;
+    size_t operator[](size_t);
+    bool operator==(const TensorShape& rhs) const;
+    bool operator==(const ShapeView& rhs) const;
+    bool operator!=(const TensorShape& rhs) const;
+    bool operator!=(const ShapeView& rhs) const;
 
     /**
      * Returns shape as std::vector
      * @return vector containing sizes for every dimension
      */
     const std::vector<size_t> &getShape() const;
+    ShapeView getShapeView() const;
+    TensorShape getSubShape(size_t offset = 1) const;
+    ShapeView getSubShapeView(size_t offset = 1) const;
 
     /**
      * Returns number of elements in Tensor
@@ -57,7 +78,15 @@ class TensorShape {
      * Returns clone of mShape without first element
      * @return Clone of mShape without first element
      */
-    TensorShape subshape() const;
+     Iterator begin() const;
+     Iterator end() const;
 };
+
+template<typename CopyableIterator>
+TensorShape::TensorShape(CopyableIterator begin, CopyableIterator end)
+    : mShape(begin, end), mTotalSize(calculateTotalSize()) {
+}
+
 }  // namespace athena::core
+
 #endif  // ATHENA_TENSORSHAPE_H

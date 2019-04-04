@@ -16,7 +16,7 @@
 #include <athena/core/Graph.h>
 #include <athena/core/InputNode.h>
 #include <athena/core/Node.h>
-#include <athena/core/Tensor.h>
+#include <athena/core/inner/Tensor.h>
 #include <athena/ops/AddOperation.h>
 
 using namespace athena::core;
@@ -25,22 +25,22 @@ using namespace athena::backend::llvm;
 
 bool testVectorSum() {
     // Arrange
-    TensorShape vector({3});
-    Tensor a(DataType::FLOAT, vector);
-    Tensor b(DataType::FLOAT, vector);
-    Tensor result(DataType::FLOAT, vector);
+    TensorShape shape({3});
 
-    InputNode* aInp = new InputNode(&a);
-    InputNode* bInp = new InputNode(&b);
+    DummyLoader dummyLoader;
+
+    Graph graph;
+    InputNode aInp(shape, DataType::FLOAT, dummyLoader);
+    InputNode bInp(shape, DataType::FLOAT, dummyLoader);
+    graph.addNode(aInp);
+    graph.addNode(bInp);
 
     //    auto &&addOp = std::make_unique<AddOperation>();
     AddOperation addOp;
-    Node* add = new Node(std::move(addOp));
-
-    add->after(aInp);
-    add->after(bInp);
-
-    Graph graph(add);
+    Node add(shape, DataType::FLOAT, addOp);
+    graph.addNode(add);
+    add.after(aInp, 1);
+    add.after(bInp, 2);
 
     LLVMExecutor executor;
     std::unique_ptr<Allocator> trivialAllocator =

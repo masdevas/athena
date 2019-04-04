@@ -14,8 +14,9 @@
 #ifndef ATHENA_OPERATION_H
 #define ATHENA_OPERATION_H
 
-#include "AbstractGenerator.h"
-#include "Tensor.h"
+#include <athena/core/AbstractGenerator.h>
+#include <athena/core/inner/Tensor.h>
+#include <athena/core/FatalError.h>
 
 #include <stack>
 #include <string>
@@ -28,10 +29,26 @@ class Operation {
 
     public:
     explicit Operation(std::string&& name) : mName(std::move(name)){};
-    virtual Tensor* getResultSize(std::deque<Tensor*> args) const   = 0;
+    virtual inner::Tensor* getResultTensor(
+        std::deque<inner::Tensor*> args) const   = 0;
     virtual void gen(AbstractGenerator& g,
-                     std::stack<Tensor*>& operationArguments) const = 0;
-    std::string getName();
+                     std::stack<inner::Tensor*>& operationArguments) const = 0;
+    std::string getName() const;
+};
+
+class OperationDummy : public Operation {
+ public:
+    explicit OperationDummy(std::string name) : Operation(std::move(name)){};
+
+    [[noreturn]] inner::Tensor* getResultTensor(
+        std::deque<inner::Tensor*> args) const override {
+        FatalError(1, "NOT IMPL");
+    }
+
+    void gen(AbstractGenerator& g,
+             std::stack<inner::Tensor*>& operationArguments) const override {
+        FatalError(1, "NOT IMPL");
+    }
 };
 }  // namespace athena::core
 

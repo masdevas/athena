@@ -1,20 +1,3 @@
-add_athena_library(athena-core STATIC
-        Graph.cpp
-        TensorShape.cpp
-        Executor.cpp
-        Node.cpp
-        InputNode.cpp
-        AbstractNode.cpp
-        Tensor.cpp
-        Allocator.cpp
-        Error.cpp
-        AbstractLogger.cpp
-        log.cpp
-        Logger.cpp
-        Operation.cpp
-        FatalError.cpp
-        DataType.cpp
-        Tensor.cpp
-        libinfo.cpp
-        AbstractLoader.cpp
-        )
+file(GLOB_RECURSE CORE_SRC "*.cpp")
+
+add_athena_library(athena-core STATIC ${CORE_SRC})

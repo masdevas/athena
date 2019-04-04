@@ -13,7 +13,6 @@
 #ifndef ATHENA_LLVMEXECUTOR_H
 #define ATHENA_LLVMEXECUTOR_H
 
-#include "VMAllocationTable.h"
 
 #include <athena/backend/llvm/AthenaJIT.h>
 #include <athena/core/Allocator.h>
@@ -29,7 +28,6 @@ class LLVMExecutor : public athena::core::Executor {
     std::unique_ptr<AthenaJIT> mJITCompiler;
     std::unique_ptr<::llvm::Module> mMainModule;
     std::unique_ptr<core::Allocator> mAllocator;
-    VMAllocationTable mVMAllocationTable;
 
     public:
     LLVMExecutor();

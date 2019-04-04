@@ -13,14 +13,14 @@
 #ifndef ATHENA_ABSTRACTGENERATOR_H
 #define ATHENA_ABSTRACTGENERATOR_H
 
-#include <athena/core/Tensor.h>
+#include <athena/core/inner/Tensor.h>
 
 namespace athena::core {
 
 class AbstractGenerator {
     public:
-    virtual void generateAllocation(Tensor &a)                = 0;
-    virtual void generateAdd(Tensor &a, Tensor &b, Tensor &c) = 0;
+    virtual void generateAllocation(inner::Tensor &a)                = 0;
+    virtual void generateAdd(inner::Tensor &a, inner::Tensor &b, inner::Tensor &c) = 0;
 };
 
 }  // namespace athena::core

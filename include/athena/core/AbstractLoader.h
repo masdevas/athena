@@ -15,14 +15,30 @@
 #define ATHENA_ABSTRACTLOADER_H
 
 #include <athena/core/Allocator.h>
+#include <string>
 #include <string_view>
 
 namespace athena::core {
 class AbstractLoader {
     public:
-    virtual void load(Allocator *, Tensor *) = 0;
-    virtual std::string_view getLoadCName() = 0;
-    virtual std::string_view getCreateCName() = 0;
+    virtual void load(Allocator *, inner::Tensor *) = 0;
+    virtual std::string_view getLoadCName() const = 0;
+    virtual std::string_view getCreateCName() const = 0;
+};
+
+class DummyLoader : public AbstractLoader {
+ public:
+    void load(Allocator *, inner::Tensor *tensor) override {
+
+    }
+    std::string_view getLoadCName() const override {
+        static const std::string loadName = "DummyLoad";
+        return loadName;
+    }
+    virtual std::string_view getCreateCName() const override {
+        static const std::string createName = "DummyCreate";
+        return createName;
+    }
 };
 }  // namespace athena::core
 

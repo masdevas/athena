@@ -18,29 +18,59 @@
 #include <string>
 
 namespace athena::core {
-TensorShape::TensorShape(const TensorShape &rhs) { mShape = rhs.mShape; }
-TensorShape::TensorShape(const TensorShape &&rhs) noexcept {
-    mShape = rhs.mShape;
+TensorShape::TensorShape(std::initializer_list<size_t> rhs) : mShape(std::move(rhs)),
+    mTotalSize(calculateTotalSize()) {
 }
-const std::vector<size_t> &TensorShape::getShape() const { return mShape; }
-size_t TensorShape::getTotalSize() const {
+TensorShape::TensorShape(std::vector<size_t> rhs) : mShape(std::move(rhs)),
+    mTotalSize(calculateTotalSize()) {
+}
+size_t TensorShape::operator[](size_t index) {
+    return dim(index);
+}
+bool TensorShape::operator==(const TensorShape& rhs) const {
+    return ShapeView(*this) == ShapeView(rhs);
+}
+bool TensorShape::operator==(const ShapeView& rhs) const {
+    return ShapeView(*this) == rhs;
+}
+bool TensorShape::operator!=(const TensorShape& rhs) const {
+    return !(*this == rhs);
+}
+bool TensorShape::operator!=(const ShapeView& rhs) const {
+    return !(*this == rhs);
+}
+size_t TensorShape::calculateTotalSize() {
     size_t totalSize = 1;
-
     for (auto size : mShape) {
         totalSize *= size;
     }
-
     return mShape.empty() ? 0 : totalSize;
 }
+const std::vector<size_t> &TensorShape::getShape() const {
+    return mShape;
+}
+ShapeView TensorShape::getShapeView() const {
+    return ShapeView(mShape.begin(), mShape.end());
+}
+TensorShape TensorShape::getSubShape(size_t offset) const {
+    return TensorShape(mShape.begin() + offset, mShape.end());
+}
+ShapeView TensorShape::getSubShapeView(size_t offset) const {
+    return ShapeView(mShape.begin() + offset, mShape.end());
+}
+size_t TensorShape::getTotalSize() const {
+    return mTotalSize;
+}
 size_t TensorShape::dim(size_t index) const {
-    if (index >= mShape.size()) {
-        FatalError("TensorShape only has " + std::to_string(mShape.size()) +
-                   " dimensions. " + std::to_string(index) + " requested.");
-    }
     return mShape[index];
 }
-size_t TensorShape::dimensions() const { return mShape.size(); }
-TensorShape TensorShape::subshape() const {
-    return TensorShape(std::vector<size_t>(mShape.begin() + 1, mShape.end()));
+size_t TensorShape::dimensions() const {
+    return mShape.size();
+}
+TensorShape::Iterator TensorShape::begin() const {
+    return mShape.begin();
+}
+TensorShape::Iterator TensorShape::end() const {
+    return mShape.end();
 }
 }  // namespace athena::core

@@ -23,11 +23,15 @@
 namespace athena::core {
 class FatalError : public Error {
     public:
-    explicit FatalError(std::string_view error) : Error(error) {
-        err() << mErrorMessage;
-        exit(1);
-    }
+    template <typename ...Args>
+    explicit FatalError(int32_t errorCode, Args... messages);
 };
+template <typename ...Args>
+FatalError::FatalError(int32_t errorCode, Args... messages)
+    : Error(errorCode, messages...) {
+    err() << mErrorMessage;
+    exit(errorCode);
+}
 }  // namespace athena::core
 
 #endif  // ATHENA_FATALERROR_H

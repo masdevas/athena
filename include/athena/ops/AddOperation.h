@@ -16,16 +16,17 @@
 
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/Operation.h>
-#include <athena/core/Tensor.h>
+#include <athena/core/inner/Tensor.h>
 
 namespace athena::ops {
 class AddOperation : public core::Operation {
     public:
     AddOperation() : Operation("add") {}
 
-    core::Tensor *getResultSize(std::deque<core::Tensor *> args) const override;
+    core::inner::Tensor *getResultTensor(
+        std::deque<core::inner::Tensor *> args) const override;
     void gen(core::AbstractGenerator &g,
-             std::stack<core::Tensor *> &operationArguments) const override;
+             std::stack<core::inner::Tensor *> &operationArguments) const override;
 };
 }  // namespace athena::ops
 #endif  // ATHENA_ADDOPERATION_H

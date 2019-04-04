@@ -29,8 +29,8 @@ llvm::LLVMGenerator::LLVMGenerator(
       mAllocator(allocator) {
     mBuilder.SetInsertPoint(mainBlock);
 }
-void LLVMGenerator::generateAdd(core::Tensor &a, core::Tensor &b,
-                                core::Tensor &c) {
+void LLVMGenerator::generateAdd(core::inner::Tensor &a, core::inner::Tensor &b,
+                                core::inner::Tensor &c) {
     // todo handle different data types
 
     ::llvm::Function *calledFunction = mModule->getFunction("fadd");
@@ -38,7 +38,9 @@ void LLVMGenerator::generateAdd(core::Tensor &a, core::Tensor &b,
     if (!calledFunction)
         calledFunction = impl::create_fadd_decl(mContext, *mModule);
 
-    if (!calledFunction) new core::FatalError("Unknown function referenced");
+    if (!calledFunction) {
+        core::FatalError(1, "Unknown function referenced");
+    }
 
     // todo check arg count
 
@@ -46,17 +48,17 @@ void LLVMGenerator::generateAdd(core::Tensor &a, core::Tensor &b,
 
     ArgsV.push_back(generateGetFastPointer(a));
     ::llvm::Constant *aSizeConst = ::llvm::ConstantInt::get(
-        ::llvm::Type::getInt64Ty(mContext), a.getShape().getTotalSize());
+        ::llvm::Type::getInt64Ty(mContext), a.getShapeView().getTotalSize());
     ArgsV.push_back(aSizeConst);
     ArgsV.push_back(generateGetFastPointer(b));
     ::llvm::Constant *bSizeConst = ::llvm::ConstantInt::get(
-        ::llvm::Type::getInt64Ty(mContext), b.getShape().getTotalSize());
+        ::llvm::Type::getInt64Ty(mContext), b.getShapeView().getTotalSize());
     ArgsV.push_back(bSizeConst);
     ArgsV.push_back(generateGetFastPointer(c));
     mBuilder.CreateCall(calledFunction, ArgsV);
 }
 
-void LLVMGenerator::generateAllocation(core::Tensor &a) {
+void LLVMGenerator::generateAllocation(core::inner::Tensor &a) {
     // todo handle different data types
 
     ::llvm::Function *calledFunction = mModule->getFunction("allocate");
@@ -64,7 +66,9 @@ void LLVMGenerator::generateAllocation(core::Tensor &a) {
     if (!calledFunction)
         calledFunction = impl::create_allocate_decl(mContext, *mModule);
 
-    if (!calledFunction) new core::FatalError("Unknown function referenced");
+    if (!calledFunction) {
+        core::FatalError(1, "Unknown function referenced");
+    }
 
     // todo check arg count
 
@@ -80,13 +84,15 @@ void LLVMGenerator::generateAllocation(core::Tensor &a) {
 
 ::llvm::IRBuilder<> &LLVMGenerator::getBuilder() { return mBuilder; }
 
-::llvm::Value *LLVMGenerator::generateGetFastPointer(core::Tensor &t) {
+::llvm::Value *LLVMGenerator::generateGetFastPointer(core::inner::Tensor &t) {
     ::llvm::Function *calledFunction = mModule->getFunction("get_fast_pointer");
 
     if (!calledFunction)
         calledFunction = impl::create_get_fast_pointer_decl(mContext, *mModule);
 
-    if (!calledFunction) new core::FatalError("Unknown function referenced");
+    if (!calledFunction) {
+        core::FatalError(1, "Unknown function referenced");
+    }
 
     std::vector<::llvm::Value *> ArgsV;
     ::llvm::Constant *allocatorConst = ::llvm::ConstantInt::get(

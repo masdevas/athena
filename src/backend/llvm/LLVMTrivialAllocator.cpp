@@ -17,16 +17,16 @@
 #include <memory>
 
 namespace athena::backend::llvm {
-void LLVMTrivialAllocator::allocate(const athena::core::Tensor& tensor) {
+void LLVMTrivialAllocator::allocate(const athena::core::inner::Tensor& tensor) {
     auto mem = reinterpret_cast<void*>(mAllocator.allocate(
-        tensor.getShape().getTotalSize() *
+        tensor.getShapeView().getTotalSize() *
         athena::core::sizeOfDataType(tensor.getDataType())));
-    mAllocatedMap[tensor.getVirtualAddress()] = mem;
+    mAllocatedMap[tensor.getAddress()] = mem;
 }
-size_t LLVMTrivialAllocator::getRAMPointer(const athena::core::Tensor& t) {
-    return (size_t)mAllocatedMap[t.getVirtualAddress()];
+size_t LLVMTrivialAllocator::getRAMPointer(const athena::core::inner::Tensor& t) {
+    return (size_t)mAllocatedMap[t.getAddress()];
 }
-size_t LLVMTrivialAllocator::getFastPointer(const athena::core::Tensor& t) {
-    return (size_t)mAllocatedMap[t.getVirtualAddress()];
+size_t LLVMTrivialAllocator::getFastPointer(const athena::core::inner::Tensor& t) {
+    return (size_t)mAllocatedMap[t.getAddress()];
 }
 }  // namespace athena::backend::llvm

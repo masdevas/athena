@@ -13,35 +13,21 @@
 
 #include <athena/core/Node.h>
 
-#include <vector>
-
 namespace athena::core {
-
-Node::Node(Node &&src) noexcept
-    : AbstractNode(std::move(src)),
-      mIncomingNodes(std::move(src.mIncomingNodes)),
-      mOperation(src.mOperation) {}
-
-Node::Node(Operation &&op)
-    : AbstractNode(op.getName() + std::to_string(++mNodeCounter),
-                   NodeType::DEFAULT),
-      mOperation(op) {}
-
-Node &Node::operator=(Node &&src) noexcept {
-    mIncomingNodes = std::move(src.mIncomingNodes);
-    mOutgoingNodes = std::move(src.mOutgoingNodes);
-    mOperation     = std::move(src.mOperation);
-    mName          = std::move(src.mName);
-    return *this;
+Node::Node(TensorShape shape, DataType dataType, const Operation &operation, std::string name)
+    : AbstractNode(std::move(shape), dataType, std::move(name)), mOperation(&operation) {
 }
-
-void Node::after(AbstractNode *node) {
-    node->addOutgoingNode(node);
-    mIncomingNodes.emplace_back(node);
+Node::~Node() {
+    saveInGraph(false);
 }
-
-const Operation &Node::getAssignedOperation() { return mOperation; }
-
-NodeType Node::getType() { return NodeType::DEFAULT; }
-
-}  // namespace athena::core
+NodeType Node::getType() const {
+    return NodeType::DEFAULT;
+}
+const Operation& Node::getOperation() const {
+    return *mOperation;
+}
+void Node::clear() {
+    AbstractNode::clear();
+    mOperation = nullptr;
+}
+}

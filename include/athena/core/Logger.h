@@ -13,7 +13,7 @@
 #ifndef ATHENA_LOGGER_H
 #define ATHENA_LOGGER_H
 
-#include <athena/core/AbstractLoger.h>
+#include <athena/core/AbstractLogger.h>
 
 #include <ostream>
 

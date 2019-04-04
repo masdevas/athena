@@ -12,7 +12,7 @@
  */
 
 #include <athena/backend/llvm/LLVMTrivialAllocator.h>
-#include <athena/core/Tensor.h>
+#include <athena/core/inner/Tensor.h>
 #include <athena/core/TensorShape.h>
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 
@@ -21,7 +21,7 @@
 TEST(LoadersTest, MemoryLoaderSingleLoad) {
     // Arrange
     athena::core::TensorShape shape({1});
-    athena::core::Tensor tensor(athena::core::DataType::FLOAT, shape, 1);
+    athena::core::inner::Tensor tensor(athena::core::DataType::FLOAT, shape);
 
     athena::backend::llvm::LLVMTrivialAllocator allocator;
     allocator.allocate(tensor);
@@ -43,7 +43,7 @@ TEST(LoadersTest, MemoryLoaderSingleLoad) {
 TEST(LoadersTest, MemoryLoaderComplexLoad) {
     // Arrange
     athena::core::TensorShape shape({2, 3});
-    athena::core::Tensor tensor(athena::core::DataType::FLOAT, shape, 1);
+    athena::core::inner::Tensor tensor(athena::core::DataType::FLOAT, shape);
 
     athena::backend::llvm::LLVMTrivialAllocator allocator;
     allocator.allocate(tensor);
@@ -103,7 +103,7 @@ TEST(LoadersTest, MemoryLoaderCCreateBind) {
 TEST(LoadersTest, MemoryLoaderCLoadBind) {
     // Arrange
     athena::core::TensorShape shape({1});
-    athena::core::Tensor tensor(athena::core::DataType::FLOAT, shape, 1);
+    athena::core::inner::Tensor tensor(athena::core::DataType::FLOAT, shape);
 
     athena::backend::llvm::LLVMTrivialAllocator allocator;
     allocator.allocate(tensor);

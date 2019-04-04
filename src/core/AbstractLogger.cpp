@@ -10,4 +10,4 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <athena/core/AbstractLoger.h>
+#include <athena/core/AbstractLogger.h>

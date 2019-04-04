@@ -13,8 +13,6 @@
 #ifndef ATHENA_LLVMGENERATOR_H
 #define ATHENA_LLVMGENERATOR_H
 
-#include "VMAllocationTable.h"
-
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/Allocator.h>
 
@@ -32,16 +30,16 @@ class LLVMGenerator : public core::AbstractGenerator {
 
     core::Allocator &mAllocator;
 
-    // VMAllocationTable mAllocationTable;
-    ::llvm::Value *generateGetFastPointer(core::Tensor &t);
+    // AllocationTable mAllocationTable;
+    ::llvm::Value *generateGetFastPointer(core::inner::Tensor &t);
 
     public:
     explicit LLVMGenerator(::llvm::LLVMContext &ctx,
                            const std::unique_ptr<::llvm::Module> &module,
                            core::Allocator &allocator);
-    void generateAllocation(core::Tensor &a) override;
-    void generateAdd(core::Tensor &a, core::Tensor &b,
-                     core::Tensor &c) override;
+    void generateAllocation(core::inner::Tensor &a) override;
+    void generateAdd(core::inner::Tensor &a, core::inner::Tensor &b,
+                     core::inner::Tensor &c) override;
     ::llvm::IRBuilder<> &getBuilder();
 };
 }  // namespace athena::backend::llvm

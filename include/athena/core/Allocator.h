@@ -14,7 +14,7 @@
 #ifndef ATHENA_ALLOCATOR_H
 #define ATHENA_ALLOCATOR_H
 
-#include <athena/core/Tensor.h>
+#include <athena/core/inner/Tensor.h>
 
 #include <cstddef>
 
@@ -26,9 +26,9 @@ namespace athena::core {
 class Allocator {
     public:
     virtual ~Allocator()                         = default;
-    virtual void allocate(const Tensor&)         = 0;
-    virtual size_t getRAMPointer(const Tensor&)  = 0;
-    virtual size_t getFastPointer(const Tensor&) = 0;
+    virtual void allocate(const inner::Tensor&)         = 0;
+    virtual size_t getRAMPointer(const inner::Tensor&)  = 0;
+    virtual size_t getFastPointer(const inner::Tensor&) = 0;
 };
 
 }  // namespace athena::core

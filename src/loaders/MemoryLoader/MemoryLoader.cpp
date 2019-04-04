@@ -38,10 +38,10 @@ MemoryLoader &MemoryLoader::operator=(athena::loaders::MemoryLoader &&src) {
     return *this;
 }
 
-void MemoryLoader::load(core::Allocator *allocator, core::Tensor *tensor) {
+void MemoryLoader::load(core::Allocator *allocator, core::inner::Tensor *tensor) {
     auto pointer = reinterpret_cast<void *>(allocator->getRAMPointer(*tensor));
 #ifdef DEBUG
-    assert(mSize <= tensor->getShape().getTotalSize() *
+    assert(mSize <= tensor->getShapeView().getTotalSize() *
                         core::sizeOfDataType(tensor->getDataType()));
 #endif
     std::memmove(pointer, mData, mSize);
@@ -53,7 +53,7 @@ extern "C" {
 void MemoryLoaderLoad(void *loader, void *allocator, void *tensor) {
     auto pLoader    = reinterpret_cast<athena::loaders::MemoryLoader *>(loader);
     auto pAllocator = reinterpret_cast<athena::core::Allocator *>(allocator);
-    auto pTensor    = reinterpret_cast<athena::core::Tensor *>(tensor);
+    auto pTensor    = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
 
 #ifdef DEBUG
     assert(pLoader != nullptr);

@@ -33,7 +33,7 @@ RuntimeDriver& RuntimeDriver::operator=(RuntimeDriver&& rhs) noexcept {
 void* RuntimeDriver::getFunction(std::string_view nameFunction) {
     if (void* function = dlsym(mLibraryHandle, nameFunction.data());
         !function) {
-        ::athena::core::FatalError("RuntimeDriver: " + std::string(dlerror()));
+        ::athena::core::FatalError(1, "RuntimeDriver: " + std::string(dlerror()));
         return nullptr;
     } else {
         return function;
@@ -42,7 +42,7 @@ void* RuntimeDriver::getFunction(std::string_view nameFunction) {
 void RuntimeDriver::load(std::string_view nameLibrary) {
     if (mLibraryHandle = dlopen(nameLibrary.data(), RTLD_LAZY);
         !mLibraryHandle) {
-        ::athena::core::FatalError("RuntimeDriver: " + std::string(dlerror()));
+        ::athena::core::FatalError(1, "RuntimeDriver: " + std::string(dlerror()));
     }
     mFaddPointer =
         reinterpret_cast<void (*)(void*, size_t, void*, size_t, void*)>(
@@ -50,7 +50,7 @@ void RuntimeDriver::load(std::string_view nameLibrary) {
 }
 void RuntimeDriver::unload() {
     if (mLibraryHandle && dlclose(mLibraryHandle)) {
-        ::athena::core::FatalError("RuntimeDriver: " + std::string(dlerror()));
+        ::athena::core::FatalError(1, "RuntimeDriver: " + std::string(dlerror()));
     }
     mLibraryHandle = nullptr;
 }

@@ -14,27 +14,28 @@
 #ifndef ATHENA_INPUTNODE_H
 #define ATHENA_INPUTNODE_H
 
-#include "AbstractNode.h"
-#include "Tensor.h"
+#include <athena/core/AbstractNode.h>
+#include <athena/core/AbstractLoader.h>
 
 namespace athena::core {
-
 class InputNode : public AbstractNode {
-    private:
-    Tensor* mTensor;
+ private:
+    const AbstractLoader *mLoader;
+ public:
+    InputNode() = delete;
+    InputNode(const InputNode& rhs) = default;
+    InputNode(InputNode&& rhs) noexcept = default;
+    InputNode(TensorShape shape, DataType dataType,
+              const AbstractLoader& loader, std::string name = "");
+    ~InputNode() override;
 
-    public:
-    InputNode()                      = delete;
-    InputNode(const InputNode& node) = delete;
-    InputNode(InputNode&& node) noexcept;
-    explicit InputNode(Tensor* tensor);
-    ~InputNode() override = default;
-    InputNode& operator=(const InputNode& src) = delete;
-    InputNode& operator                        =(InputNode&& src) noexcept;
-    void after(AbstractNode* node) override;
-    Tensor* getData();
-    NodeType getType() override;
+    InputNode &operator=(const InputNode& rhs) = default;
+    InputNode &operator=(InputNode&& rhs) noexcept = default;
+
+    NodeType getType() const override;
+    const AbstractLoader& getLoader() const;
+    void clear() override;
 };
+}
 
-}  // namespace athena::core
-#endif  // ATHENA_INPUTNODE_H
+#endif //ATHENA_INPUTNODE_H

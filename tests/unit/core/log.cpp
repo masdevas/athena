@@ -19,7 +19,9 @@
 #include <string>
 
 namespace athena::core {
-TEST(TensorLog, SetCout) { setLogStream<Logger>(std::cout); }
+TEST(TensorLog, SetCout) {
+    setLogStream<Logger>(std::cout);
+}
 TEST(TensorLog, SetStringstream) {
     std::stringstream ss;
     setLogStream<Logger>(ss);

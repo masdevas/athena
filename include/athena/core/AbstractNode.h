@@ -14,37 +14,53 @@
 #ifndef ATHENA_ABSTRACTNODE_H
 #define ATHENA_ABSTRACTNODE_H
 
+#include <athena/core/DataType.h>
+#include <athena/core/NodeType.h>
+#include <athena/core/Clear.h>
+#include <athena/core/inner/Tensor.h>
+#include <athena/core/inner/IndexFunctions.h>
+
 #include <string>
-#include <vector>
+#include <string_view>
 
 namespace athena::core {
-
-class Graph;
-
-enum class NodeType { INPUT, DEFAULT };
+using EdgeMark = size_t;
 
 class AbstractNode {
-    friend class Graph;
-
-    protected:
-    std::vector<AbstractNode*> mOutgoingNodes;
+ protected:
+    inner::Tensor mTensor;
     std::string mName;
-    static size_t mNodeCounter;
-    bool mWasVisitedFlag;
+    size_t mGraphIndex;
+    size_t mNodeIndex;
+    size_t mInputsCount;
+    void fullClear();
+ public:
+    AbstractNode() = delete;
+    AbstractNode(const AbstractNode& rhs);
+    AbstractNode(AbstractNode&& rhs) noexcept;
+    AbstractNode(TensorShape shape, DataType dataType, std::string name);
+    virtual ~AbstractNode();
 
-    public:
-    AbstractNode()                         = delete;
-    AbstractNode(const AbstractNode& node) = delete;
-    AbstractNode(AbstractNode&& node) noexcept;
-    explicit AbstractNode(std::string&& name, NodeType type);
-    virtual ~AbstractNode() = default;
-    AbstractNode& operator=(const AbstractNode& src) = delete;
-    AbstractNode& operator                 =(AbstractNode&& src) noexcept;
-    virtual void after(AbstractNode* node) = 0;
-    virtual NodeType getType()             = 0;
-    void addOutgoingNode(AbstractNode* node);
+    AbstractNode &operator=(const AbstractNode& rhs);
+    AbstractNode &operator=(AbstractNode&& rhs) noexcept;
+
+    void after(const AbstractNode& node, EdgeMark mark) const;
+    void before(const AbstractNode& node, EdgeMark mark) const;
+    ShapeView getShapeView() const;
+    ShapeView getSubShapeView(size_t offset = 1) const;
+    DataType getDataType() const;
+    virtual NodeType getType() const = 0;
+    size_t getNodeIndex() const;
+    size_t getGraphIndex() const;
+    size_t getInputsCount() const;
+    std::string_view getName() const;
+    std::string& name();
+    void removeFromGraph();
+    void saveInGraph(bool isRepairedNode = true);
+    virtual void clear();
+    friend void inner::setGraphIndex(AbstractNode &node, size_t graphIndex);
+    friend void inner::incrementInputCount(athena::core::AbstractNode& node);
 };
+}
 
-}  // namespace athena::core
-
-#endif  // ATHENA_ABSTRACTNODE_H
+#endif //ATHENA_ABSTRACTNODE_H

@@ -15,7 +15,7 @@
 #define ATHENA_LLVMTRIVIALALLOCATOR_H
 
 #include <athena/core/Allocator.h>
-#include <athena/core/Tensor.h>
+#include <athena/core/inner/Tensor.h>
 
 #include <unordered_map>
 
@@ -26,9 +26,9 @@ class LLVMTrivialAllocator : public athena::core::Allocator {
     std::allocator<uint8_t> mAllocator;
 
     public:
-    void allocate(const athena::core::Tensor&) override;
-    size_t getRAMPointer(const athena::core::Tensor&) override;
-    size_t getFastPointer(const athena::core::Tensor&) override;
+    void allocate(const athena::core::inner::Tensor&) override;
+    size_t getRAMPointer(const athena::core::inner::Tensor&) override;
+    size_t getFastPointer(const athena::core::inner::Tensor&) override;
 };
 }  // namespace athena::backend::llvm
 

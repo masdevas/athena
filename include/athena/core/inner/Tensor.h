@@ -14,40 +14,39 @@
 #ifndef ATHENA_TENSOR_H
 #define ATHENA_TENSOR_H
 
-#include "DataType.h"
-#include "FatalError.h"
-#include "TensorShape.h"
+#include <athena/core/inner/AllocationRecord.h>
 
-#include <cstddef>
-
-namespace athena::core {
+namespace athena::core::inner {
 class Tensor {
     private:
-    DataType mDataType;
-    size_t mVirtualAddress;
-    TensorShape mShape;
+    using RegisteredTensors = std::vector<inner::AllocationRecord>;
+    size_t mRecordIndex;
+    size_t mShapeOffset;
+    size_t mAddressOffset;
+    size_t mShapePartialProduct;
+    Tensor(size_t recordIndex, size_t shapeOffset, size_t addressOffset,
+        size_t shapePartialProduct);
 
     public:
-    Tensor(DataType dataType, TensorShape shape, size_t virtualAddress = 0)
-        : mDataType(dataType),
-          mVirtualAddress(virtualAddress),
-          mShape(std::move(shape)) {}
-    Tensor(const Tensor& rhs)     = default;
+    Tensor() = delete;
+    Tensor(const Tensor& rhs);
     Tensor(Tensor&& rhs) noexcept = default;
-    ~Tensor()                     = default;
+    Tensor(DataType dataType, TensorShape shape);
+    ~Tensor() = default;
 
-    Tensor& operator=(const Tensor& rhs) = default;
+    Tensor& operator=(const Tensor& rhs);
     Tensor& operator=(Tensor&& rhs) noexcept = default;
     /**
      * Returns subtensor like a new object
      * @return Reference to new Tensor on the same memory
      */
-    Tensor& operator[](size_t index);
+    Tensor operator[](size_t index) const;
 
     DataType getDataType() const;
-    size_t getVirtualAddress() const;
-    void setVirtualAddress(size_t address);
-    const TensorShape& getShape() const;
+    ShapeView getShapeView() const;
+    ShapeView getSubShapeView(size_t offset = 1) const;
+    size_t getAddress() const;
+    void clear();
 };
 }  // namespace athena::core
 

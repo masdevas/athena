@@ -31,12 +31,14 @@ class MemoryLoader : public core::AbstractLoader {
     MemoryLoader &operator=(const MemoryLoader &) = default;
     MemoryLoader &operator=(MemoryLoader &&src);
 
-    virtual void load(core::Allocator *, core::Tensor *) override;
-    virtual std::string_view getLoadCName() override {
-        return "MemoryLoaderLoad";
+    virtual void load(core::Allocator *, core::inner::Tensor *) override;
+    std::string_view getLoadCName() const override {
+        static const std::string loadName = "MemoryLoaderLoad";
+        return loadName;
     };
-    virtual std::string_view getCreateCName() override {
-        return "CreateMemoryLoader";
+    std::string_view getCreateCName() const override {
+        static const std::string createName = "CreateMemoryLoader";
+        return createName;
     };
 };
 }  // namespace athena::loaders

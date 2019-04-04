@@ -18,34 +18,23 @@
 #include <athena/core/Operation.h>
 
 namespace athena::core {
-
-class Graph;
-
-/**
- * The class represents a single node of a computation graph. It has a name, a
- * set of incoming nodes, and a set of outgoing nodes. It also encapsulates
- * Operation.
- */
 class Node : public AbstractNode {
-    friend class Graph;
+ protected:
+    const Operation *mOperation;
+ public:
+    Node() = delete;
+    Node(const Node& rhs) = default;
+    Node(Node&& rhs) noexcept = default;
+    Node(TensorShape shape, DataType dataType, const Operation &operation, std::string name = "");
+    ~Node() override;
 
-    protected:
-    std::vector<AbstractNode*> mIncomingNodes;
-    Operation& mOperation;
+    Node &operator=(const Node& rhs) = default;
+    Node &operator=(Node&& rhs) noexcept = default;
 
-    public:
-    Node()                = delete;
-    Node(const Node& src) = delete;
-    Node(Node&& src) noexcept;
-    explicit Node(Operation&& op);
-    ~Node() override = default;
-    Node& operator=(const Node& src) = delete;
-    Node& operator                   =(Node&& src) noexcept;
-    void after(AbstractNode* node) override;
-    const Operation& getAssignedOperation();
-    NodeType getType() override;
+    NodeType getType() const override;
+    const Operation& getOperation() const;
+    void clear() override;
 };
+}
 
-}  // namespace athena::core
-
-#endif  // ATHENA_NODE_H
+#endif //ATHENA_NODE

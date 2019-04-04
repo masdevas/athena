@@ -16,20 +16,20 @@
 namespace athena::ops {
 
 void AddOperation::gen(core::AbstractGenerator &g,
-                       std::stack<core::Tensor *> &operationArguments) const {
-    core::Tensor *c = operationArguments.top();
+                       std::stack<core::inner::Tensor *> &operationArguments) const {
+    core::inner::Tensor *c = operationArguments.top();
     operationArguments.pop();
-    core::Tensor *b = operationArguments.top();
+    core::inner::Tensor *b = operationArguments.top();
     operationArguments.pop();
-    core::Tensor *a = operationArguments.top();
+    core::inner::Tensor *a = operationArguments.top();
     operationArguments.pop();
 
     g.generateAdd(*a, *b, *c);
 }
-core::Tensor *AddOperation::getResultSize(
-    std::deque<core::Tensor *> args) const {
-    core::TensorShape shape(args[0]->getShape());
-    core::Tensor *res = new core::Tensor(args[0]->getDataType(), shape);
+core::inner::Tensor *AddOperation::getResultTensor(
+    std::deque<core::inner::Tensor *> args) const {
+    core::ShapeView shapeView(args[0]->getShapeView());
+    core::inner::Tensor *res = new core::inner::Tensor(args[0]->getDataType(), shapeView.toShape());
     return res;
 }
 

@@ -13,19 +13,19 @@
 
 #include <athena/backend/llvm/runtime/allocate.h>
 #include <athena/core/Allocator.h>
-#include <athena/core/Tensor.h>
+#include <athena/core/inner/Tensor.h>
 
 extern "C" {
 void allocate(void *allocator, void *tensor) {
     auto pAllocator = reinterpret_cast<athena::core::Allocator *>(allocator);
-    auto pTensor    = reinterpret_cast<athena::core::Tensor *>(tensor);
+    auto pTensor    = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
 
     pAllocator->allocate(*pTensor);
 }
 
 size_t get_fast_pointer(void *allocator, void *tensor) {
     auto pAllocator = reinterpret_cast<athena::core::Allocator *>(allocator);
-    auto pTensor    = reinterpret_cast<athena::core::Tensor *>(tensor);
+    auto pTensor    = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
 
     return pAllocator->getFastPointer(*pTensor);
 }

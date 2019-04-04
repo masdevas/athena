@@ -10,7 +10,6 @@ add_athena_library(backend-llvm STATIC
         LLVMExecutor.cpp
         LLVMGenerator.cpp
         AthenaJIT.cpp
-        VMAllocationTable.cpp
         LLVMTrivialAllocator.cpp
         utils.cpp)
 
