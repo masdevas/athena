@@ -14,11 +14,11 @@
 #ifndef ATHENA_ABSTRACTNODE_H
 #define ATHENA_ABSTRACTNODE_H
 
+#include <athena/core/Clear.h>
 #include <athena/core/DataType.h>
 #include <athena/core/NodeType.h>
-#include <athena/core/Clear.h>
+#include <athena/core/inner/InnerFunctions.h>
 #include <athena/core/inner/Tensor.h>
-#include <athena/core/inner/IndexFunctions.h>
 
 #include <string>
 #include <string_view>
@@ -27,13 +27,14 @@ namespace athena::core {
 using EdgeMark = size_t;
 
 class AbstractNode {
+ private:
+    void fullClear();
  protected:
     inner::Tensor mTensor;
     std::string mName;
     size_t mGraphIndex;
     size_t mNodeIndex;
     size_t mInputsCount;
-    void fullClear();
  public:
     AbstractNode() = delete;
     AbstractNode(const AbstractNode& rhs);
@@ -48,6 +49,7 @@ class AbstractNode {
     void before(const AbstractNode& node, EdgeMark mark) const;
     ShapeView getShapeView() const;
     ShapeView getSubShapeView(size_t offset = 1) const;
+
     DataType getDataType() const;
     virtual NodeType getType() const = 0;
     size_t getNodeIndex() const;
@@ -55,11 +57,13 @@ class AbstractNode {
     size_t getInputsCount() const;
     std::string_view getName() const;
     std::string& name();
+    void setShape(const TensorShape& shape);
     void removeFromGraph();
     void saveInGraph(bool isRepairedNode = true);
     virtual void clear();
     friend void inner::setGraphIndex(AbstractNode &node, size_t graphIndex);
     friend void inner::incrementInputCount(athena::core::AbstractNode& node);
+    friend inner::Tensor &inner::getTensorFromNode(AbstractNode &node);
 };
 }
 

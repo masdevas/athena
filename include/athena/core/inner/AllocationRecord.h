@@ -22,11 +22,12 @@ struct AllocationRecord {
  private:
     DataType mDataType;
     TensorShape mShape;
-
  public:
     AllocationRecord(DataType dataType, TensorShape shape);
     DataType getDataType() const;
+    const TensorShape& getShape() const;
     ShapeView getShapeView(size_t offset = 0) const;
+    size_t getSize() const;
 };
 }
 

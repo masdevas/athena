@@ -12,19 +12,49 @@
  */
 
 #include <athena/core/Graph.h>
-#include <athena/core/inner/IndexFunctions.h>
+#include <athena/core/Traversal.h>
 #include <athena/core/inner/GlobalTables.h>
+#include <athena/core/inner/InnerFunctions.h>
 
 #include <algorithm>
 #include <queue>
 
 namespace athena::core {
+template <typename TemplateNodeType>
+void initVisitsOf(const OwningStorage& storage, std::unordered_map<size_t, inner::NodeState>& visits) {
+    for (auto& node : std::get<std::vector<TemplateNodeType>>(storage)) {
+        visits[node.getNodeIndex()] = inner::NodeState{0};
+    }
+}
+void initVisitsOf(const SyncStorage& storage, std::unordered_map<size_t, inner::NodeState>& visits) {
+    for (auto& index : storage) {
+        visits[index] = inner::NodeState{0};
+    }
+}
+void initVisits(std::unordered_map<size_t, inner::NodeState>& visits, const OwningStorage& owningStorage,
+                const SyncStorage& syncStorage) {
+    initVisitsOf(syncStorage, visits);
+    initVisitsOf<InputNode>(owningStorage, visits);
+    initVisitsOf<Node>(owningStorage, visits);
+}
+void initQueue(std::queue<size_t>& queue, const OwningStorage& owningStorage,
+               const SyncStorage& syncStorage) {
+    for (auto& inputNode : std::get<std::vector<InputNode>>(owningStorage)) {
+        queue.push(inputNode.getNodeIndex());
+    }
+    for (auto& nodeIndex : syncStorage) {
+        if (inner::getNodeTable()[nodeIndex]->getType() == NodeType::INPUT) {
+            queue.push(nodeIndex);
+        }
+    }
+}
 Graph::Graph() : mGraphIndex(inner::getGraphTable().registerRecord(this)) {
 }
 Graph::Graph(Graph&& rhs) noexcept : mSyncStorage(std::move(rhs.mSyncStorage)),
                                      mOwningStorage(std::move(rhs.mOwningStorage)),
                                      mTopology(std::move(rhs.mTopology)),
-                                     mGraphIndex(rhs.mGraphIndex) {
+                                     mGraphIndex(rhs.mGraphIndex),
+                                     mTraversal(std::move(rhs.mTraversal)) {
     inner::getGraphTable()[mGraphIndex] = this;
     rhs.fullClear();
 }
@@ -41,6 +71,7 @@ Graph &Graph::operator=(Graph&& rhs) noexcept {
     mOwningStorage = std::move(rhs.mOwningStorage);
     mTopology = std::move(rhs.mTopology);
     mGraphIndex = rhs.mGraphIndex;
+    mTraversal = std::move(rhs.mTraversal);
     inner::getGraphTable()[mGraphIndex] = this;
     rhs.fullClear();
     return *this;
@@ -51,19 +82,12 @@ void Graph::saveRealNode(TemplateNodeType& node, bool isRepairedNode, bool isEra
         mSyncStorage.erase(node.getNodeIndex());
     }
     std::get<std::vector<TemplateNodeType>>(mOwningStorage).emplace_back(std::move(node));
-    inner::setGraphIndex(node, inner::kKUndefinedIndex);
     if (isRepairedNode) {
         TemplateNodeType newNode(std::get<std::vector<TemplateNodeType>>(mOwningStorage).back());
         node = std::move(newNode);
     }
 }
-template <typename TemplateNodeType>
-void Graph::initVisitsOf(std::unordered_map<size_t, inner::NodeState>& visits) const {
-    auto& nodes = std::get<std::vector<TemplateNodeType>>(mOwningStorage);
-    for (auto& node : nodes) {
-        visits[node.getNodeIndex()] = inner::NodeState{0};
-    }
-}
+
 void Graph::fullClear() {
     clear();
     mGraphIndex = inner::kKUndefinedIndex;
@@ -83,17 +107,21 @@ void Graph::addNode(AbstractNode &node) {
     }
     mSyncStorage.insert(node.getNodeIndex());
     inner::setGraphIndex(node, mGraphIndex);
+    inner::setTraversalValidity(mTraversal, false);
 }
 void Graph::saveNode(AbstractNode &node, bool isRepairedNode, bool isErase) {
     if (node.getGraphIndex() != mGraphIndex) {
         FatalError(1, "saveNode() in Graph : ", this, ". GraphIndex : ", mGraphIndex, ". Saving Node in the graph to which it does not belong");
     }
-    if (node.getType() == NodeType::DEFAULT) {
-        saveRealNode(static_cast<Node&>(node), isRepairedNode, isErase);
-    } else if (node.getType() == NodeType::INPUT) {
-        saveRealNode(static_cast<InputNode&>(node), isRepairedNode, isErase);
-    } else {
-        FatalError(1, "saveNode() in Graph : ", this, ". GraphIndex : ", mGraphIndex, ". Undefined node type");
+    switch (node.getType()) {
+        case NodeType::DEFAULT:
+            saveRealNode(static_cast<Node&>(node), isRepairedNode, isErase);
+            break;
+        case NodeType::INPUT:
+            saveRealNode(static_cast<InputNode&>(node), isRepairedNode, isErase);
+            break;
+        default:
+            FatalError(1, "saveNode() in Graph : ", this, ". GraphIndex : ", mGraphIndex, ". Undefined node type");
     }
 }
 void Graph::saveNode(AbstractNode &node, bool isRepairedNode) {
@@ -112,6 +140,7 @@ void Graph::removeNode(AbstractNode &node) {
         return nodeIndex == edge.startNodeIndex || nodeIndex == edge.endNodeIndex;
     };
     mTopology.erase(std::remove_if(mTopology.begin(), mTopology.end(), removePredicate), mTopology.end());
+    inner::setTraversalValidity(mTraversal, false);
 }
 void Graph::link(const AbstractNode &startNode, const AbstractNode &endNode, EdgeMark mark) {
     if (endNode.getType() == NodeType::INPUT) {
@@ -120,6 +149,7 @@ void Graph::link(const AbstractNode &startNode, const AbstractNode &endNode, Edg
     if (startNode.getGraphIndex() == endNode.getGraphIndex() && startNode.getGraphIndex() == mGraphIndex) {
         mTopology.emplace_back(startNode.getNodeIndex(), endNode.getNodeIndex(), mark);
         inner::incrementInputCount(*inner::getNodeTable()[endNode.getNodeIndex()]);
+        inner::setTraversalValidity(mTraversal, false);
     } else {
         FatalError(1, "link() in Graph : ", this, ". GraphIndex : ", mGraphIndex, ". Nodes belong to different graphs");
     }
@@ -129,6 +159,8 @@ void Graph::clear() {
     mTopology.clear();
     OwningStorage emptyStorage;
     mOwningStorage.swap(emptyStorage);
+    inner::getClusters(mTraversal).clear();
+    inner::setTraversalValidity(mTraversal, false);
 }
 size_t Graph::countOwningNodes() const {
     return std::get<std::vector<Node>>(mOwningStorage).size()
@@ -140,17 +172,19 @@ size_t Graph::countSyncNodes() const {
 size_t Graph::getGraphIndex() const {
     return mGraphIndex;
 }
-Traversal Graph::traverse(bool isRepairedNodes) {
-    Traversal traversal;
-    saveAllSyncNodes(isRepairedNodes);
+bool Graph::isValidTraversal() const {
+    return mTraversal.isValidTraversal();
+}
+const Traversal& Graph::traverse() {
+    if (mTraversal.isValidTraversal()) {
+        return mTraversal;
+    }
+    inner::getClusters(mTraversal).clear();
     std::sort(mTopology.begin(), mTopology.end());
     std::queue<size_t> currentQueue, newQueue;
     std::unordered_map<size_t, inner::NodeState> visits;
-    initVisitsOf<InputNode>(visits);    // TODO Is this need ?
-    initVisitsOf<Node>(visits);
-    for (auto& inputNode : std::get<std::vector<InputNode>>(mOwningStorage)) {
-        currentQueue.push(inputNode.getNodeIndex());
-    }
+    initVisits(visits, mOwningStorage, mSyncStorage);
+    initQueue(currentQueue, mOwningStorage, mSyncStorage);
     while (true) {
         inner::Cluster cluster{0};
         while (!currentQueue.empty()) {
@@ -172,27 +206,30 @@ Traversal Graph::traverse(bool isRepairedNodes) {
                 ++edgeIterator;
             }
             AbstractNode *node = inner::getNodeTable()[nodeIndex];
-            inner::setGraphIndex(*node, inner::kKUndefinedIndex);
-            if (node->getType() == NodeType::INPUT) {
-                cluster.get<InputNode>().emplace_back(
-                    std::move(*static_cast<InputNode*>(node)),
-                    std::move(visits[nodeIndex].input), std::move(visits[nodeIndex].output));
-            } else if (node->getType() == NodeType::DEFAULT) {
-                cluster.get<Node>().emplace_back(
-                    std::move(*static_cast<Node*>(node)),
-                    std::move(visits[nodeIndex].input), std::move(visits[nodeIndex].output));
+            switch (node->getType()) {
+                case NodeType::DEFAULT:
+                    cluster.get<Node>().emplace_back(node->getNodeIndex(),
+                                                     std::move(visits[nodeIndex].input), std::move(visits[nodeIndex].output));
+                    break;
+                case NodeType::INPUT:
+                    cluster.get<InputNode>().emplace_back(node->getNodeIndex(),
+                                                          std::move(visits[nodeIndex].input), std::move(visits[nodeIndex].output));
+                    break;
+                default:
+                    FatalError(1, "Undefined NodeType in traverse()");
+
             }
             ++cluster.nodeCount;
         }
         if (cluster.nodeCount > 0) {
-            traversal.clusters.emplace_back(std::move(cluster));
+            inner::getClusters(mTraversal).emplace_back(std::move(cluster));
         }
         std::swap(currentQueue, newQueue);
         if (currentQueue.empty()) {
             break;
         }
     }
-    clear();
-    return traversal;
+    inner::setTraversalValidity(mTraversal, true);
+    return mTraversal;
 }
 }

@@ -11,8 +11,8 @@
  * the License.
  */
 
-#include <athena/core/inner/IndexFunctions.h>
 #include <athena/core/AbstractNode.h>
+#include <athena/core/Graph.h>
 
 namespace athena::core::inner {
 void setGraphIndex(AbstractNode &node, size_t graphIndex) {
@@ -20,5 +20,20 @@ void setGraphIndex(AbstractNode &node, size_t graphIndex) {
 }
 void incrementInputCount(AbstractNode &node) {
     ++node.mInputsCount;
+}
+Tensor &getTensorFromNode(AbstractNode &node) {
+    return node.mTensor;
+}
+Traversal &getTraversal(Graph &graph) {
+    return graph.mTraversal;
+}
+Clusters &getClusters(Graph &graph) {
+    return getClusters(getTraversal(graph));
+}
+Clusters &getClusters(Traversal &traversal) {
+    return traversal.clusters;
+}
+void setTraversalValidity(Traversal &traversal, bool flag) {
+    traversal.mIsValidTraversal = flag;
 }
 }

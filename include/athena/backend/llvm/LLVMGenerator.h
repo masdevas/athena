@@ -14,6 +14,7 @@
 #define ATHENA_LLVMGENERATOR_H
 
 #include <athena/core/AbstractGenerator.h>
+#include <athena/core/AbstractLoader.h>
 #include <athena/core/Allocator.h>
 
 #include <llvm/IR/IRBuilder.h>
@@ -40,6 +41,8 @@ class LLVMGenerator : public core::AbstractGenerator {
     void generateAllocation(core::inner::Tensor &a) override;
     void generateAdd(core::inner::Tensor &a, core::inner::Tensor &b,
                      core::inner::Tensor &c) override;
+    void generateLoad(const core::AbstractLoader &loader,
+                      core::inner::Tensor &tensor);
     ::llvm::IRBuilder<> &getBuilder();
 };
 }  // namespace athena::backend::llvm

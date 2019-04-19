@@ -10,6 +10,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 #ifndef ATHENA_LOG_H
 #define ATHENA_LOG_H
 

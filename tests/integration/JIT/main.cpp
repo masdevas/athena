@@ -17,27 +17,32 @@
 #include <athena/core/InputNode.h>
 #include <athena/core/Node.h>
 #include <athena/core/inner/Tensor.h>
+#include <athena/loaders/MemoryLoader/MemoryLoader.h>
 #include <athena/ops/AddOperation.h>
 
 using namespace athena::core;
 using namespace athena::ops;
 using namespace athena::backend::llvm;
+using namespace athena::loaders;
 
 bool testVectorSum() {
     // Arrange
     TensorShape shape({3});
 
-    DummyLoader dummyLoader;
+    float aData[] = {1, 2, 3};
+    float bData[] = {4, 5, 6};
+
+    MemoryLoader aLoader(aData, 3 * sizeof(float));
+    MemoryLoader bLoader(bData, 3 * sizeof(float));
 
     Graph graph;
-    InputNode aInp(shape, DataType::FLOAT, dummyLoader);
-    InputNode bInp(shape, DataType::FLOAT, dummyLoader);
+    InputNode aInp(shape, DataType::FLOAT, aLoader);
+    InputNode bInp(shape, DataType::FLOAT, bLoader);
     graph.addNode(aInp);
     graph.addNode(bInp);
 
-    //    auto &&addOp = std::make_unique<AddOperation>();
     AddOperation addOp;
-    Node add(shape, DataType::FLOAT, addOp);
+    Node add(shape, DataType::FLOAT, addOp, "vector_add_1");
     graph.addNode(add);
     add.after(aInp, 1);
     add.after(bInp, 2);
@@ -53,22 +58,23 @@ bool testVectorSum() {
 
     // Assert
 
-    //    auto pRes = (float*)executor.getAllocator()->getFastPointer(result);
-    //    if (abs(pRes[0] - 5.0) > 0.1) {
-    //        std::cout << "Element 0 is wrong"
-    //                  << "\n";
-    //        return 1;
-    //    }
-    //    if (abs(pRes[1] - 7.0) > 0.1) {
-    //        std::cout << "Element 1 is wrong"
-    //                  << "\n";
-    //        return 1;
-    //    }
-    //    if (abs(pRes[2] - 9.0) > 0.1) {
-    //        std::cout << "Element 2 is wrong"
-    //                  << "\n";
-    //        return 1;
-    //    }
+    auto pRes =
+    (float*)executor.getAllocator()->getFastPointer(inner::getTensorFromNode(add));
+    if (abs(pRes[0] - 5.0) > 0.1) {
+        std::cout << "Element 0 is wrong"
+                  << "\n";
+        return 1;
+    }
+    if (abs(pRes[1] - 7.0) > 0.1) {
+        std::cout << "Element 1 is wrong"
+                  << "\n";
+        return 1;
+    }
+    if (abs(pRes[2] - 9.0) > 0.1) {
+        std::cout << "Element 2 is wrong"
+                  << "\n";
+        return 1;
+    }
     return true;
 }
 

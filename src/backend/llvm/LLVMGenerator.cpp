@@ -19,17 +19,19 @@
 namespace athena::backend::llvm {
 
 llvm::LLVMGenerator::LLVMGenerator(
-    ::llvm::LLVMContext &ctx, const std::unique_ptr<::llvm::Module> &module,
+    ::llvm::LLVMContext &ctx,
+    const std::unique_ptr<::llvm::Module> &module,
     core::Allocator &allocator)
     : mModule(module),
-      mainBlock(::llvm::BasicBlock::Create(ctx, "entry",
-                                           module->getFunction("jitmain"))),
+      mainBlock(::llvm::BasicBlock::Create(
+          ctx, "entry", module->getFunction("jitmain"))),
       mContext(ctx),
       mBuilder(::llvm::IRBuilder(mainBlock)),
       mAllocator(allocator) {
     mBuilder.SetInsertPoint(mainBlock);
 }
-void LLVMGenerator::generateAdd(core::inner::Tensor &a, core::inner::Tensor &b,
+void LLVMGenerator::generateAdd(core::inner::Tensor &a,
+                                core::inner::Tensor &b,
                                 core::inner::Tensor &c) {
     // todo handle different data types
 
@@ -82,7 +84,9 @@ void LLVMGenerator::generateAllocation(core::inner::Tensor &a) {
     mBuilder.CreateCall(calledFunction, ArgsV);
 }
 
-::llvm::IRBuilder<> &LLVMGenerator::getBuilder() { return mBuilder; }
+::llvm::IRBuilder<> &LLVMGenerator::getBuilder() {
+    return mBuilder;
+}
 
 ::llvm::Value *LLVMGenerator::generateGetFastPointer(core::inner::Tensor &t) {
     ::llvm::Function *calledFunction = mModule->getFunction("get_fast_pointer");
@@ -103,5 +107,37 @@ void LLVMGenerator::generateAllocation(core::inner::Tensor &a) {
     ArgsV.push_back(tensorConst);
     auto callInst = mBuilder.CreateCall(calledFunction, ArgsV);
     return callInst;
+}
+
+void LLVMGenerator::generateLoad(const core::AbstractLoader &loader,
+                                 core::inner::Tensor &tensor) {
+    ::llvm::Function *loadFunction =
+        mModule->getFunction(loader.getLoadCName());
+
+    if (!loadFunction) {
+        std::vector<::llvm::Type *> args(3, ::llvm::Type::getInt64Ty(mContext));
+        ::llvm::FunctionType *FT = ::llvm::FunctionType::get(
+            ::llvm::Type::getVoidTy(mContext), args, false);
+
+        loadFunction =
+            ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage,
+                                     loader.getLoadCName(), mModule.get());
+    }
+
+    if (!loadFunction) {
+        core::FatalError(1, "Unknown function referenced");
+    }
+
+    std::vector<::llvm::Value *> ArgsV;
+    ::llvm::Constant *loaderConst = ::llvm::ConstantInt::get(
+        ::llvm::Type::getInt64Ty(mContext), (size_t)(&loader));
+    ArgsV.push_back(loaderConst);
+    ::llvm::Constant *allocatorConst = ::llvm::ConstantInt::get(
+        ::llvm::Type::getInt64Ty(mContext), (size_t)(&mAllocator));
+    ArgsV.push_back(allocatorConst);
+    ::llvm::Constant *tensorConst = ::llvm::ConstantInt::get(
+        ::llvm::Type::getInt64Ty(mContext), (size_t)(&tensor));
+    ArgsV.push_back(tensorConst);
+    mBuilder.CreateCall(loadFunction, ArgsV);
 }
 }  // namespace athena::backend::llvm

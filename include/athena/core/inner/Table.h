@@ -24,7 +24,7 @@ constexpr size_t kKUndefinedIndex = 0;
 template <typename Content>
 class Table {
  private:
-    Content const mNullRecord;
+    static inline Content const mNullRecord = NullRecord<Content>::value;
     std::vector<Content> mRegisteredContents;
 
  public:
@@ -44,7 +44,7 @@ class Table {
 };
 
 template <typename Content>
-Table<Content>::Table() : mNullRecord(NullRecord<Content>::value) {
+Table<Content>::Table() {
     mRegisteredContents.emplace_back(mNullRecord);
 }
 
@@ -69,6 +69,37 @@ template <typename Content>
 void Table<Content>::clear() {
     mRegisteredContents.clear();
     mRegisteredContents.emplace_back(mNullRecord);
+}
+
+template <>
+class Table<AllocationRecord> {
+    private:
+    size_t mLastId;
+    static inline const AllocationRecord mNullRecord = NullRecord<AllocationRecord>::value;
+    std::vector<AllocationRecord> mRegisteredContents;
+
+    public:
+    Table();
+    Table(const Table &) = delete;
+    Table(Table &&rhs)   = delete;
+    ~Table()             = default;
+
+    Table &operator=(const Table &rhs) = delete;
+    Table &operator=(Table &&rhs) = delete;
+    AllocationRecord &operator[](size_t index);
+
+    template <typename... Args>
+    size_t registerRecord(Args &&... args);
+    size_t size();
+    void clear();
+};
+
+template <typename... Args>
+size_t Table<AllocationRecord>::registerRecord(Args &&... args) {
+    mRegisteredContents.emplace_back(std::forward<Args>(args)...);
+    size_t lastIdCopy = mLastId;
+    mLastId += mRegisteredContents.back().getSize();
+    return lastIdCopy;
 }
 }
 

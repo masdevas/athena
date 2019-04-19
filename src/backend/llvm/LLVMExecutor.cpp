@@ -13,8 +13,11 @@
 
 #include <athena/backend/llvm/LLVMExecutor.h>
 #include <athena/backend/llvm/LLVMGenerator.h>
-#include <athena/core/InputNode.h>
 #include <athena/core/FatalError.h>
+#include <athena/core/InputNode.h>
+#include <athena/core/Node.h>
+#include <athena/core/inner/GlobalTables.h>
+#include <athena/core/inner/InnerFunctions.h>
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/Support/TargetSelect.h"
@@ -24,54 +27,56 @@
 namespace athena::backend::llvm {
 
 void LLVMExecutor::prepare(athena::core::Graph &graph) {
-//    mMainModule = std::make_unique<::llvm::Module>("AthenaMain",
-//                                                   mJITCompiler->getContext());
-//    mMainModule->setDataLayout(mJITCompiler->getDataLayout());
-//
-//    // todo consider initializing some optimizers
-//
-//    ::llvm::FunctionType *FT = ::llvm::FunctionType::get(
-//        ::llvm::Type::getVoidTy(mJITCompiler->getContext()), false);
-//    ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, "jitmain",
-//                             *mMainModule);
-//
-//    LLVMGenerator generator(mJITCompiler->getContext(), mMainModule,
-//                            *mAllocator);
-//
-//    athena::core::Traversal traversal = graph.traverse();
-//
-//    std::stack<core::inner::Tensor *> preparedTensors;
-//
-//    while (!code.empty()) {
-//        auto currentNode = code.front();
-//
-//        if (currentNode->getType() == NodeType::DEFAULT) {
-//            auto node = static_cast<core::Node *>(currentNode);
-//            auto &op  = node->getAssignedOperation();
-//
-//            auto tensor = data.front();
-//            data.pop_front();
-//            preparedTensors.push(tensor);
-//
-//            generator.generateAllocation(*tensor);
-//
-//            op.gen(generator, preparedTensors);
-//            preparedTensors.empty();
-//        } else if (currentNode->getType() == core::NodeType::INPUT) {
-//            auto tensor = data.front();
-//            data.pop_front();
-//
-//            generator.generateAllocation(*tensor);
-//
-//            preparedTensors.push(tensor);
-//        }
-//
-//        code.pop();
-//    }
-//
-//    auto builder = generator.getBuilder();
-//
-//    builder.CreateRetVoid();
+    mMainModule = std::make_unique<::llvm::Module>("AthenaMain",
+                                                   mJITCompiler->getContext());
+    mMainModule->setDataLayout(mJITCompiler->getDataLayout());
+
+    // todo consider initializing some optimizers
+
+    ::llvm::FunctionType *FT = ::llvm::FunctionType::get(
+        ::llvm::Type::getVoidTy(mJITCompiler->getContext()), false);
+    auto jitMainFunc = ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, "jitmain",
+                             *mMainModule);
+
+    LLVMGenerator generator(mJITCompiler->getContext(), mMainModule,
+                            *mAllocator);
+
+    mGraphTraversal = graph.traverse();
+
+    for (auto &cluster : mGraphTraversal.getClusters()) {
+        auto &inputNodes = cluster.get<core::InputNode>();
+        for (auto &nodeDeps : inputNodes) {
+            // todo generate wrapper function
+            auto& inputNode = static_cast<core::InputNode&>(*core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            generator.generateAllocation(
+                core::inner::getTensorFromNode(inputNode));
+            // todo generate code for loader
+            generator.generateLoad(inputNode.getLoader(),
+                                   core::inner::getTensorFromNode(inputNode));
+        }
+
+        auto &actionNodes = cluster.get<core::Node>();
+        for (auto &nodeDeps : actionNodes) {
+            // todo generate wrapper function
+            std::stack<core::inner::Tensor *> preparedTensors;
+            for (auto &input : nodeDeps.input) {
+                auto *node = core::inner::getNodeTable()[input.nodeIndex];
+                preparedTensors.push(&core::inner::getTensorFromNode(*node));
+            }
+            auto& node =
+                static_cast<core::Node&>(*core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            generator.generateAllocation(
+                core::inner::getTensorFromNode(node));
+            preparedTensors.push(&core::inner::getTensorFromNode(node));
+            // todo lock tensors in memory
+            node.getOperation().gen(generator, preparedTensors);
+            // todo unlock tensors in memory
+        }
+    }
+
+    auto builder = generator.getBuilder();
+
+    builder.CreateRetVoid();
 }
 
 void LLVMExecutor::execute() {

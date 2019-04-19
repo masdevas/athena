@@ -44,19 +44,12 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
     return ::llvm::make_unique<AthenaJIT>(std::move(*JTMB), std::move(*DL));
 }
 ::llvm::Error AthenaJIT::addModule(std::unique_ptr<::llvm::Module> &M) {
-    //    M->dump();
     return mOptimizeLayer.add(
         mExecutionSession.getMainJITDylib(),
         ::llvm::orc::ThreadSafeModule(std::move(M), mContext));
 }
 ::llvm::Expected<::llvm::JITEvaluatedSymbol> AthenaJIT::lookup(
     ::llvm::StringRef Name) {
-    std::string o;
-    auto stream = ::llvm::raw_string_ostream(o);
-    mExecutionSession.dump(stream);
-    stream.flush();
-    std::cout << o;
-    std::cout.flush();
     return mExecutionSession.lookup({&mExecutionSession.getMainJITDylib()},
                                     mMangle(Name.str()));
 }
@@ -68,7 +61,6 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
         TSM.getModule());
 
     // Add some optimizations.
-    // FPM->add(::llvm::createInstructionCombiningPass());
     FPM->add(::llvm::createReassociatePass());
     FPM->add(::llvm::createGVNPass());
     FPM->add(::llvm::createCFGSimplificationPass());

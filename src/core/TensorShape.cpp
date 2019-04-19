@@ -15,6 +15,7 @@
 #include <athena/core/TensorShape.h>
 
 #include <stdexcept>
+#include <numeric>
 #include <string>
 
 namespace athena::core {
@@ -40,10 +41,7 @@ bool TensorShape::operator!=(const ShapeView& rhs) const {
     return !(*this == rhs);
 }
 size_t TensorShape::calculateTotalSize() {
-    size_t totalSize = 1;
-    for (auto size : mShape) {
-        totalSize *= size;
-    }
+    size_t totalSize = std::accumulate(mShape.begin(), mShape.end(), 1, std::multiplies<int>());
     return mShape.empty() ? 0 : totalSize;
 }
 const std::vector<size_t> &TensorShape::getShape() const {

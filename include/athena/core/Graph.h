@@ -53,11 +53,10 @@ class Graph {
     OwningStorage mOwningStorage;
     Topology mTopology;
     size_t mGraphIndex;
+    Traversal mTraversal;
     template <typename TemplateNodeType>
     void saveRealNode(TemplateNodeType& node, bool isRepairedNode, bool isErase);
     void saveNode(AbstractNode &node, bool isRepairedNode, bool isErase);
-    template <typename TemplateNodeType>
-    void initVisitsOf(std::unordered_map<size_t, inner::NodeState>& visits) const;
     void fullClear();
 
  public:
@@ -81,7 +80,10 @@ class Graph {
     size_t countSyncNodes() const;
     size_t getGraphIndex() const;
     void clear();
-    Traversal traverse(bool isRepairedNodes = true);
+    bool isValidTraversal() const;
+    const Traversal& traverse();
+
+    friend Traversal &inner::getTraversal(Graph &graph);
 };
 }  // namespace athena::core
 

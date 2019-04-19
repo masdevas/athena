@@ -11,18 +11,22 @@
  * the License.
  */
 
-#ifndef ATHENA_INDEXFUNCTIONS_H
-#define ATHENA_INDEXFUNCTIONS_H
-
-#include <cstddef>
+#include <athena/core/FatalError.h>
+#include <athena/core/NodeType.h>
+#include <athena/core/inner/ForwardDeclarations.h>
 
 namespace athena::core {
-class AbstractNode;
+template <typename TemplateNodeType>
+NodeType getNodeType() {
+    FatalError(1, "NodeType is not defined for given type");
+    return NodeType::UNDEFINED;
 }
-
-namespace athena::core::inner {
-void setGraphIndex(AbstractNode &node, size_t graphIndex);
-void incrementInputCount(AbstractNode &node);
+template <>
+NodeType getNodeType<Node>() {
+    return NodeType::DEFAULT;
 }
-
-#endif //ATHENA_INDEXFUNCTIONS_H
+template <>
+NodeType getNodeType<InputNode>() {
+    return NodeType::INPUT;
+}
+}

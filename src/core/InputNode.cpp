@@ -14,12 +14,24 @@
 #include <athena/core/InputNode.h>
 
 namespace athena::core {
+InputNode::InputNode(InputNode&& rhs) noexcept : AbstractNode(std::move(rhs)), mLoader(rhs.mLoader) {
+    rhs.fullClear();
+}
 InputNode::InputNode(TensorShape shape, DataType dataType,
-                     const AbstractLoader& loader, std::string name)
-    : AbstractNode(std::move(shape), dataType, std::move(name)), mLoader(&loader)  {
+                     AbstractLoader& loader, std::string name)
+    : AbstractNode(std::move(shape), dataType, std::move(name)), mLoader(&loader) {
 }
 InputNode::~InputNode() {
     saveInGraph(false);
+}
+InputNode &InputNode::operator=(InputNode&& rhs) noexcept {
+    AbstractNode::operator=(std::move(rhs));
+    mLoader = rhs.mLoader;
+    rhs.fullClear();
+    return *this;
+}
+void InputNode::fullClear() {
+    InputNode::clear();
 }
 NodeType InputNode::getType() const {
     return NodeType::INPUT;
@@ -27,8 +39,17 @@ NodeType InputNode::getType() const {
 const AbstractLoader& InputNode::getLoader() const {
     return *mLoader;
 }
+const AbstractLoader* InputNode::getLoaderPtr() const {
+    return mLoader;
+}
+AbstractLoader& InputNode::loader() {
+    return *mLoader;
+}
+void InputNode::setLoader(AbstractLoader& loader) {
+    mLoader = &loader;
+}
 void InputNode::clear() {
-    AbstractNode::clear();
     mLoader = nullptr;
+    AbstractNode::clear();
 }
 }

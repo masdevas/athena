@@ -20,20 +20,25 @@
 namespace athena::core {
 class InputNode : public AbstractNode {
  private:
-    const AbstractLoader *mLoader;
+    void fullClear();
+ protected:
+    AbstractLoader *mLoader;
  public:
     InputNode() = delete;
     InputNode(const InputNode& rhs) = default;
-    InputNode(InputNode&& rhs) noexcept = default;
+    InputNode(InputNode&& rhs) noexcept;
     InputNode(TensorShape shape, DataType dataType,
-              const AbstractLoader& loader, std::string name = "");
+              AbstractLoader& loader, std::string name = "");
     ~InputNode() override;
 
     InputNode &operator=(const InputNode& rhs) = default;
-    InputNode &operator=(InputNode&& rhs) noexcept = default;
+    InputNode &operator=(InputNode&& rhs) noexcept;
 
     NodeType getType() const override;
     const AbstractLoader& getLoader() const;
+    const AbstractLoader* getLoaderPtr() const;
+    AbstractLoader& loader();
+    void setLoader(AbstractLoader& loader);
     void clear() override;
 };
 }

@@ -19,16 +19,14 @@
 namespace athena::core::inner {
 class Tensor {
     private:
-    using RegisteredTensors = std::vector<inner::AllocationRecord>;
+    size_t mVirtualAddress;
     size_t mRecordIndex;
     size_t mShapeOffset;
-    size_t mAddressOffset;
     size_t mShapePartialProduct;
-    Tensor(size_t recordIndex, size_t shapeOffset, size_t addressOffset,
+    Tensor(size_t id, size_t recordIndex, size_t shapeOffset,
         size_t shapePartialProduct);
 
     public:
-    Tensor() = delete;
     Tensor(const Tensor& rhs);
     Tensor(Tensor&& rhs) noexcept = default;
     Tensor(DataType dataType, TensorShape shape);
@@ -36,16 +34,14 @@ class Tensor {
 
     Tensor& operator=(const Tensor& rhs);
     Tensor& operator=(Tensor&& rhs) noexcept = default;
-    /**
-     * Returns subtensor like a new object
-     * @return Reference to new Tensor on the same memory
-     */
     Tensor operator[](size_t index) const;
 
     DataType getDataType() const;
     ShapeView getShapeView() const;
     ShapeView getSubShapeView(size_t offset = 1) const;
-    size_t getAddress() const;
+    size_t getVirtualAddress() const;
+    size_t getSize() const;
+    void setShape(const TensorShape& shape);
     void clear();
 };
 }  // namespace athena::core

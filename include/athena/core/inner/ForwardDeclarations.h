@@ -11,14 +11,21 @@
  * the License.
  */
 
-#ifndef ATHENA_NODETYPE_H
-#define ATHENA_NODETYPE_H
+#ifndef ATHENA_FORWARDDECLARATIONS_H
+#define ATHENA_FORWARDDECLARATIONS_H
+
+#include <vector>
 
 namespace athena::core {
-enum class NodeType { UNDEFINED, INPUT, DEFAULT };
-
-template <typename TemplateNodeType>
-NodeType getNodeType();
+class AbstractNode;
+class Node;
+class InputNode;
+class Graph;
+class Traversal;
+namespace inner {
+struct Cluster;
+using Clusters = std::vector<Cluster>;
+}
 }
 
-#endif //ATHENA_NODETYPE_H
+#endif  // ATHENA_FORWARDDECLARATIONS_H

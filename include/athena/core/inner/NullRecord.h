@@ -15,12 +15,8 @@
 #define ATHENA_NULLRECORD_H
 
 #include <athena/core/inner/AllocationRecord.h>
+#include <athena/core/inner/ForwardDeclarations.h>
 #include <athena/core/FatalError.h>
-
-namespace athena::core {
-class Graph;
-class AbstractNode;
-}
 
 namespace athena::core::inner {
 template <typename Content>

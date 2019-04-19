@@ -40,9 +40,10 @@ class OperationDummy : public Operation {
  public:
     explicit OperationDummy(std::string name) : Operation(std::move(name)){};
 
-    [[noreturn]] inner::Tensor* getResultTensor(
+    inner::Tensor* getResultTensor(
         std::deque<inner::Tensor*> args) const override {
         FatalError(1, "NOT IMPL");
+        return nullptr;
     }
 
     void gen(AbstractGenerator& g,

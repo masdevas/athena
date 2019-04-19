@@ -28,6 +28,7 @@ class LLVMExecutor : public athena::core::Executor {
     std::unique_ptr<AthenaJIT> mJITCompiler;
     std::unique_ptr<::llvm::Module> mMainModule;
     std::unique_ptr<core::Allocator> mAllocator;
+    athena::core::Traversal mGraphTraversal;
 
     public:
     LLVMExecutor();

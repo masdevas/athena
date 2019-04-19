@@ -64,4 +64,11 @@ TEST(Node, CopyOperator) {
     ASSERT_EQ(n.getName(), nSecond.getName());
     ASSERT_EQ(n.name(), nSecond.name());
 }
+TEST(Node, NodeSavesOperation) {
+    inner::getNodeTable().clear();
+    OperationDummy op("DummyOp");
+    Node node({1}, DataType::DOUBLE, op);
+
+    EXPECT_EQ(node.getOperation().getName(), "DummyOp");
+}
 }

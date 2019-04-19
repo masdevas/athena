@@ -27,7 +27,7 @@ class Error {
     public:
     Error();
     template <typename ...Args>
-    explicit Error(int32_t errorCode, Args ...messages);
+    explicit Error(int32_t errorCode, Args&& ...messages);
     Error(const Error &error)     = default;
     Error(Error &&error) noexcept = default;
     Error &operator=(const Error &error) = default;
@@ -38,9 +38,9 @@ class Error {
     friend std::ostream &operator<<(std::ostream &stream, const Error &err);
 };
 template <typename ...Args>
-Error::Error(int32_t errorCode, Args ...messages) : mErrorCode(errorCode) {
+Error::Error(int32_t errorCode, Args&& ...messages) : mErrorCode(errorCode) {
     std::stringstream ss;
-    (ss << ... << messages);
+    (ss << ... << std::forward<Args>(messages));
     mErrorMessage = ss.str();
 }
 }  // namespace athena::core

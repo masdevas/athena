@@ -11,14 +11,9 @@
  * the License.
  */
 
-#ifndef ATHENA_NODETYPE_H
-#define ATHENA_NODETYPE_H
+#include <athena/core/Traversal.h>
 
 namespace athena::core {
-enum class NodeType { UNDEFINED, INPUT, DEFAULT };
-
-template <typename TemplateNodeType>
-NodeType getNodeType();
+namespace inner {
 }
-
-#endif //ATHENA_NODETYPE_H
+}

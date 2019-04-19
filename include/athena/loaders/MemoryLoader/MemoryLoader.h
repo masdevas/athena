@@ -32,11 +32,11 @@ class MemoryLoader : public core::AbstractLoader {
     MemoryLoader &operator=(MemoryLoader &&src);
 
     virtual void load(core::Allocator *, core::inner::Tensor *) override;
-    std::string_view getLoadCName() const override {
+    std::string getLoadCName() const override {
         static const std::string loadName = "MemoryLoaderLoad";
         return loadName;
     };
-    std::string_view getCreateCName() const override {
+    std::string getCreateCName() const override {
         static const std::string createName = "CreateMemoryLoader";
         return createName;
     };

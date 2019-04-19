@@ -12,6 +12,7 @@
  */
 
 #include <athena/core/inner/AllocationRecord.h>
+#include <numeric>
 
 namespace athena::core::inner {
 AllocationRecord::AllocationRecord(DataType dataType, TensorShape shape)
@@ -20,7 +21,13 @@ AllocationRecord::AllocationRecord(DataType dataType, TensorShape shape)
 DataType AllocationRecord::getDataType() const {
     return mDataType;
 }
+const TensorShape& AllocationRecord::getShape() const {
+    return mShape;
+}
 ShapeView AllocationRecord::getShapeView(size_t offset) const {
     return mShape.getSubShapeView(offset);
+}
+size_t AllocationRecord::getSize() const {
+    return mShape.getTotalSize();
 }
 }

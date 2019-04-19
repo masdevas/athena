@@ -40,8 +40,10 @@ AbstractNode &AbstractNode::operator=(const AbstractNode& rhs) {
     return *this;
 }
 AbstractNode &AbstractNode::operator=(AbstractNode&& rhs) noexcept {
-    saveInGraph(false);
-    fullClear();
+    //saveInGraph(false);
+    if (mGraphIndex != inner::kKUndefinedIndex) {
+        FatalError(1, "Move into node, which belongs to graph");
+    }
     mTensor = std::move(rhs.mTensor);
     mName = std::move(rhs.mName);
     mGraphIndex = rhs.mGraphIndex;
@@ -52,8 +54,10 @@ AbstractNode &AbstractNode::operator=(AbstractNode&& rhs) noexcept {
     return *this;
 }
 void AbstractNode::fullClear() {
-    clear();
+    AbstractNode::clear();
+    mGraphIndex = inner::kKUndefinedIndex;
     mNodeIndex = inner::kKUndefinedIndex;
+    mInputsCount = 0;
 }
 void AbstractNode::after(const AbstractNode& node, EdgeMark mark) const {
     if (auto* graph = inner::getGraphTable()[mGraphIndex]; graph) {
@@ -93,12 +97,12 @@ std::string_view AbstractNode::getName() const {
 std::string& AbstractNode::name() {
     return mName;
 }
+void AbstractNode::setShape(const TensorShape& shape) {
+    mTensor.setShape(shape);
+}
 void AbstractNode::clear() {
     mTensor.clear();
     mName.clear();
-    mGraphIndex = inner::kKUndefinedIndex;
-    mNodeIndex = inner::kKUndefinedIndex;
-    mInputsCount = 0;
 }
 void AbstractNode::removeFromGraph() {
     if (auto* graph = inner::getGraphTable()[mGraphIndex]; graph) {

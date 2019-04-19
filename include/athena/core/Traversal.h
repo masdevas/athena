@@ -20,27 +20,28 @@
 
 namespace athena::core {
 namespace inner {
-struct Dependence {
+struct Dependency {
     size_t nodeIndex;
     size_t mark;
-    Dependence(size_t nodeIndex, size_t mark)
+    Dependency(size_t nodeIndex, size_t mark)
         : nodeIndex(nodeIndex), mark(mark) {
     }
 };
+
 template <typename TemplateNodeType>
 struct NodeDependencies {
-    TemplateNodeType node;
-    std::vector<Dependence> input;
-    std::vector<Dependence> output;
-    NodeDependencies(TemplateNodeType node, std::vector<Dependence> input, std::vector<Dependence> output)
-        : node(std::move(node)), input(std::move(input)), output(std::move(output)) {
+    size_t nodeIndex;
+    std::vector<Dependency> input;
+    std::vector<Dependency> output;
+    NodeDependencies(size_t nodeIndex, std::vector<Dependency> input, std::vector<Dependency> output)
+        : nodeIndex(nodeIndex), input(std::move(input)), output(std::move(output)) {
     }
 };
 
 struct NodeState {
     size_t inputCount;
-    std::vector<Dependence> input;
-    std::vector<Dependence> output;
+    std::vector<Dependency> input;
+    std::vector<Dependency> output;
 };
 
 struct Cluster {
@@ -51,11 +52,26 @@ struct Cluster {
     std::vector<inner::NodeDependencies<TemplateNodeType>>& get() {
         return std::get<std::vector<inner::NodeDependencies<TemplateNodeType>>>(content);
     }
+    template <typename TemplateNodeType>
+    const std::vector<inner::NodeDependencies<TemplateNodeType>>& get() const {
+        return std::get<std::vector<inner::NodeDependencies<TemplateNodeType>>>(content);
+    }
 };
 }
 
-struct Traversal {
-    std::vector<inner::Cluster> clusters;
+class Traversal {
+    private:
+    inner::Clusters clusters;
+    bool mIsValidTraversal;
+    public:
+    const inner::Clusters &getClusters() const {
+        return clusters;
+    }
+    bool isValidTraversal() const {
+        return mIsValidTraversal;
+    }
+    friend inner::Clusters &inner::getClusters(Traversal &traversal);
+    friend void inner::setTraversalValidity(Traversal &traversal, bool flag);
 };
 }
 
