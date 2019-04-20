@@ -19,4 +19,4 @@ void clearAll() {
     inner::getNodeTable().clear();
     inner::getAllocationTable().clear();
 }
-}
+}  // namespace athena::core

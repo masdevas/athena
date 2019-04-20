@@ -15,4 +15,4 @@
 
 namespace athena::core {
 namespace inner {}
-}
+}  // namespace athena::core

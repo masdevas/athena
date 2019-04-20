@@ -55,4 +55,4 @@ void Node::clear() {
     mOperation = nullptr;
     AbstractNode::clear();
 }
-}
+}  // namespace athena::core

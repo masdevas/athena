@@ -36,4 +36,4 @@ Clusters &getClusters(Traversal &traversal) {
 void setTraversalValidity(Traversal &traversal, bool flag) {
     traversal.mIsValidTraversal = flag;
 }
-}
+}  // namespace athena::core::inner

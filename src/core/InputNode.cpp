@@ -55,4 +55,4 @@ void InputNode::clear() {
     mLoader = nullptr;
     AbstractNode::clear();
 }
-}
+}  // namespace athena::core

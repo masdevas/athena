@@ -32,4 +32,4 @@ void Table<AllocationRecord>::clear() {
     mRegisteredContents.emplace_back(mNullRecord);
     mLastId = 1;
 }
-}
+}  // namespace athena::core::inner
