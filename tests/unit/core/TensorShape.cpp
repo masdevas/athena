@@ -13,18 +13,17 @@
 
 #include <athena/core/TensorShape.h>
 
-#include <numeric>
 #include <gtest/gtest.h>
+#include <numeric>
 
 namespace athena::core {
 TEST(TensorShapeTest, CreationWithInitList) {
     TensorShape shape{3, 2, 3};
     std::vector<size_t> expected{3, 2, 3};
-    size_t product = std::accumulate<std::vector<size_t>::iterator, size_t>(expected.begin(),
-        expected.end(), 1, std::multiplies<size_t>());
+    size_t product = std::accumulate<std::vector<size_t>::iterator, size_t>(
+        expected.begin(), expected.end(), 1, std::multiplies<size_t>());
     ASSERT_EQ(shape.getShape(), expected);
     ASSERT_EQ(shape.getTotalSize(), product);
-
 }
 
 TEST(TensorShapeTest, CreationEmpty) {
@@ -36,8 +35,8 @@ TEST(TensorShapeTest, CreationEmpty) {
 
 TEST(TensorShapeTest, CreationWithVector) {
     std::vector<size_t> expected{3, 2, 3, 20};
-    size_t product = std::accumulate<std::vector<size_t>::iterator, size_t>(expected.begin(),
-        expected.end(), 1, std::multiplies<size_t>());
+    size_t product = std::accumulate<std::vector<size_t>::iterator, size_t>(
+        expected.begin(), expected.end(), 1, std::multiplies<size_t>());
     TensorShape shape(expected);
     for (size_t index_sec = 0; index_sec < expected.size(); ++index_sec) {
         ASSERT_EQ(shape[index_sec], expected[index_sec]);
@@ -49,8 +48,8 @@ TEST(TensorShapeTest, CreationWithVector) {
 TEST(TensorShapeTest, CreationWithCopyableIterator) {
     std::vector<int16_t> data{3, 2, 3, 20};
     std::vector<size_t> expected(data.begin(), data.end());
-    int16_t product = std::accumulate<std::vector<int16_t>::iterator, int16_t>(data.begin(),
-        data.end(), 1, std::multiplies<int16_t>());
+    int16_t product = std::accumulate<std::vector<int16_t>::iterator, int16_t>(
+        data.begin(), data.end(), 1, std::multiplies<int16_t>());
     TensorShape shape(data.begin(), data.end());
     for (size_t index_sec = 0; index_sec < data.size(); ++index_sec) {
         ASSERT_EQ(shape[index_sec], data[index_sec]);
@@ -75,8 +74,8 @@ TEST(TensorShapeTest, Dim) {
 TEST(TensorShapeTest, TotalSize) {
     std::vector<size_t> expected{10, 2, 3, 4, 2};
     TensorShape shape(expected);
-    size_t product = std::accumulate<std::vector<size_t>::iterator, size_t>(expected.begin(),
-        expected.end(), 1, std::multiplies<size_t>());
+    size_t product = std::accumulate<std::vector<size_t>::iterator, size_t>(
+        expected.begin(), expected.end(), 1, std::multiplies<size_t>());
     ASSERT_EQ(shape.getTotalSize(), product);
 }
 
@@ -93,7 +92,8 @@ TEST(TensorShapeTest, RangeBasedFor) {
 TEST(TensorShapeTest, SubShape) {
     TensorShape shape{3, 2, 3};
     std::vector<size_t> expected{3, 2, 3};
-    TensorShape shapeSecond(std::vector<size_t>(expected.begin() + 1, expected.end()));
+    TensorShape shapeSecond(
+        std::vector<size_t>(expected.begin() + 1, expected.end()));
     ASSERT_EQ(shape.getSubShape(), shapeSecond);
 }
 }  // namespace athena::core

@@ -27,23 +27,25 @@ namespace athena::core {
 using EdgeMark = size_t;
 
 class AbstractNode {
- private:
+    private:
     void fullClear();
- protected:
+
+    protected:
     inner::Tensor mTensor;
     std::string mName;
     size_t mGraphIndex;
     size_t mNodeIndex;
     size_t mInputsCount;
- public:
+
+    public:
     AbstractNode() = delete;
     AbstractNode(const AbstractNode& rhs);
     AbstractNode(AbstractNode&& rhs) noexcept;
     AbstractNode(TensorShape shape, DataType dataType, std::string name);
     virtual ~AbstractNode();
 
-    AbstractNode &operator=(const AbstractNode& rhs);
-    AbstractNode &operator=(AbstractNode&& rhs) noexcept;
+    AbstractNode& operator=(const AbstractNode& rhs);
+    AbstractNode& operator=(AbstractNode&& rhs) noexcept;
 
     void after(const AbstractNode& node, EdgeMark mark) const;
     void before(const AbstractNode& node, EdgeMark mark) const;
@@ -61,10 +63,10 @@ class AbstractNode {
     void removeFromGraph();
     void saveInGraph(bool isRepairedNode = true);
     virtual void clear();
-    friend void inner::setGraphIndex(AbstractNode &node, size_t graphIndex);
+    friend void inner::setGraphIndex(AbstractNode& node, size_t graphIndex);
     friend void inner::incrementInputCount(athena::core::AbstractNode& node);
-    friend inner::Tensor &inner::getTensorFromNode(AbstractNode &node);
+    friend inner::Tensor& inner::getTensorFromNode(AbstractNode& node);
 };
-}
+}  // namespace athena::core
 
-#endif //ATHENA_ABSTRACTNODE_H
+#endif  // ATHENA_ABSTRACTNODE_H

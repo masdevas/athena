@@ -13,16 +13,16 @@
 
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 
-#include <cstring>
 #include <cassert>
+#include <cstring>
 
 namespace athena::loaders {
 
 MemoryLoader::MemoryLoader(MemoryLoader &&src) {
     this->mData = src.mData;
     this->mSize = src.mSize;
-    src.mSize   = 0;
-    src.mData   = nullptr;
+    src.mSize = 0;
+    src.mData = nullptr;
 }
 
 MemoryLoader &MemoryLoader::operator=(athena::loaders::MemoryLoader &&src) {
@@ -32,13 +32,14 @@ MemoryLoader &MemoryLoader::operator=(athena::loaders::MemoryLoader &&src) {
 
     this->mData = src.mData;
     this->mSize = src.mSize;
-    src.mSize   = 0;
-    src.mData   = nullptr;
+    src.mSize = 0;
+    src.mData = nullptr;
 
     return *this;
 }
 
-void MemoryLoader::load(core::Allocator *allocator, core::inner::Tensor *tensor) {
+void MemoryLoader::load(core::Allocator *allocator,
+                        core::inner::Tensor *tensor) {
     auto pointer = reinterpret_cast<void *>(allocator->getRAMPointer(*tensor));
 #ifdef DEBUG
     assert(mSize <= tensor->getShapeView().getTotalSize() *
@@ -51,9 +52,9 @@ void MemoryLoader::load(core::Allocator *allocator, core::inner::Tensor *tensor)
 
 extern "C" {
 void MemoryLoaderLoad(void *loader, void *allocator, void *tensor) {
-    auto pLoader    = reinterpret_cast<athena::loaders::MemoryLoader *>(loader);
+    auto pLoader = reinterpret_cast<athena::loaders::MemoryLoader *>(loader);
     auto pAllocator = reinterpret_cast<athena::core::Allocator *>(allocator);
-    auto pTensor    = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
+    auto pTensor = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
 
 #ifdef DEBUG
     assert(pLoader != nullptr);

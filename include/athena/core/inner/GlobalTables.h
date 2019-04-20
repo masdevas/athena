@@ -20,6 +20,6 @@ namespace athena::core::inner {
 Table<AllocationRecord>& getAllocationTable();
 Table<AbstractNode*>& getNodeTable();
 Table<Graph*>& getGraphTable();
-}
+}  // namespace athena::core::inner
 
-#endif //ATHENA_GLOBALTABLES_H
+#endif  // ATHENA_GLOBALTABLES_H

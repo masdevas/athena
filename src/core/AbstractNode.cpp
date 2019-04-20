@@ -16,31 +16,39 @@
 #include <athena/core/inner/GlobalTables.h>
 
 namespace athena::core {
-AbstractNode::AbstractNode(const AbstractNode& rhs) : mTensor(rhs.mTensor),
-    mName(rhs.mName), mGraphIndex(inner::kKUndefinedIndex),
-    mNodeIndex(inner::getNodeTable().registerRecord(this)), mInputsCount(0) {
-}
-AbstractNode::AbstractNode(AbstractNode&& rhs) noexcept : mTensor(std::move(rhs.mTensor)),
-    mName(std::move(rhs.mName)), mGraphIndex(rhs.mGraphIndex), mNodeIndex(rhs.mNodeIndex),
-    mInputsCount(rhs.mInputsCount) {
+AbstractNode::AbstractNode(const AbstractNode& rhs)
+    : mTensor(rhs.mTensor),
+      mName(rhs.mName),
+      mGraphIndex(inner::kKUndefinedIndex),
+      mNodeIndex(inner::getNodeTable().registerRecord(this)),
+      mInputsCount(0) {}
+AbstractNode::AbstractNode(AbstractNode&& rhs) noexcept
+    : mTensor(std::move(rhs.mTensor)),
+      mName(std::move(rhs.mName)),
+      mGraphIndex(rhs.mGraphIndex),
+      mNodeIndex(rhs.mNodeIndex),
+      mInputsCount(rhs.mInputsCount) {
     inner::getNodeTable()[mNodeIndex] = this;
     rhs.fullClear();
 }
-AbstractNode::AbstractNode(TensorShape shape, DataType dataType, std::string name)
-    : mTensor(dataType, std::move(shape)), mName(std::move(name)),
-    mGraphIndex(inner::kKUndefinedIndex),
-    mNodeIndex(inner::getNodeTable().registerRecord(this)), mInputsCount(0) {
-}
+AbstractNode::AbstractNode(TensorShape shape,
+                           DataType dataType,
+                           std::string name)
+    : mTensor(dataType, std::move(shape)),
+      mName(std::move(name)),
+      mGraphIndex(inner::kKUndefinedIndex),
+      mNodeIndex(inner::getNodeTable().registerRecord(this)),
+      mInputsCount(0) {}
 AbstractNode::~AbstractNode() {
     inner::getNodeTable()[mNodeIndex] = nullptr;
 }
-AbstractNode &AbstractNode::operator=(const AbstractNode& rhs) {
+AbstractNode& AbstractNode::operator=(const AbstractNode& rhs) {
     mTensor = rhs.mTensor;
     mName = rhs.mName;
     return *this;
 }
-AbstractNode &AbstractNode::operator=(AbstractNode&& rhs) noexcept {
-    //saveInGraph(false);
+AbstractNode& AbstractNode::operator=(AbstractNode&& rhs) noexcept {
+    // saveInGraph(false);
     if (mGraphIndex != inner::kKUndefinedIndex) {
         FatalError(1, "Move into node, which belongs to graph");
     }
@@ -114,4 +122,4 @@ void AbstractNode::saveInGraph(bool isRepairedNode) {
         graph->saveNode(*this, isRepairedNode);
     }
 }
-}
+}  // namespace athena::core

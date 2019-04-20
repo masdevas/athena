@@ -35,8 +35,8 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
 
     ::llvm::FunctionType *FT = ::llvm::FunctionType::get(
         ::llvm::Type::getVoidTy(mJITCompiler->getContext()), false);
-    auto jitMainFunc = ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, "jitmain",
-                             *mMainModule);
+    auto jitMainFunc = ::llvm::Function::Create(
+        FT, ::llvm::Function::ExternalLinkage, "jitmain", *mMainModule);
 
     LLVMGenerator generator(mJITCompiler->getContext(), mMainModule,
                             *mAllocator);
@@ -47,7 +47,8 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
         auto &inputNodes = cluster.get<core::InputNode>();
         for (auto &nodeDeps : inputNodes) {
             // todo generate wrapper function
-            auto& inputNode = static_cast<core::InputNode&>(*core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            auto &inputNode = static_cast<core::InputNode &>(
+                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
             generator.generateAllocation(
                 core::inner::getTensorFromNode(inputNode));
             // todo generate code for loader
@@ -63,10 +64,9 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
                 auto *node = core::inner::getNodeTable()[input.nodeIndex];
                 preparedTensors.push(&core::inner::getTensorFromNode(*node));
             }
-            auto& node =
-                static_cast<core::Node&>(*core::inner::getNodeTable()[nodeDeps.nodeIndex]);
-            generator.generateAllocation(
-                core::inner::getTensorFromNode(node));
+            auto &node = static_cast<core::Node &>(
+                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            generator.generateAllocation(core::inner::getTensorFromNode(node));
             preparedTensors.push(&core::inner::getTensorFromNode(node));
             // todo lock tensors in memory
             node.getOperation().gen(generator, preparedTensors);

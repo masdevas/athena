@@ -14,6 +14,5 @@
 #include <athena/core/Traversal.h>
 
 namespace athena::core {
-namespace inner {
-}
+namespace inner {}
 }

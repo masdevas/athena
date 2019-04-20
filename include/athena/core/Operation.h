@@ -15,8 +15,8 @@
 #define ATHENA_OPERATION_H
 
 #include <athena/core/AbstractGenerator.h>
-#include <athena/core/inner/Tensor.h>
 #include <athena/core/FatalError.h>
+#include <athena/core/inner/Tensor.h>
 
 #include <stack>
 #include <string>
@@ -30,14 +30,14 @@ class Operation {
     public:
     explicit Operation(std::string&& name) : mName(std::move(name)){};
     virtual inner::Tensor* getResultTensor(
-        std::deque<inner::Tensor*> args) const   = 0;
+        std::deque<inner::Tensor*> args) const = 0;
     virtual void gen(AbstractGenerator& g,
                      std::stack<inner::Tensor*>& operationArguments) const = 0;
     std::string getName() const;
 };
 
 class OperationDummy : public Operation {
- public:
+    public:
     explicit OperationDummy(std::string name) : Operation(std::move(name)){};
 
     inner::Tensor* getResultTensor(

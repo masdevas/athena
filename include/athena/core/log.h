@@ -35,8 +35,8 @@ class LogHolder {
     LogHolder()
         : mLog(std::make_unique<core::Logger>(std::cout)),
           mErr(std::make_unique<core::Logger>(std::cerr)) {}
-    ~LogHolder()                        = default;
-    LogHolder(const LogHolder& rhs)     = delete;
+    ~LogHolder() = default;
+    LogHolder(const LogHolder& rhs) = delete;
     LogHolder(LogHolder&& rhs) noexcept = delete;
 
     LogHolder& operator=(const LogHolder& rhs) = delete;

@@ -23,10 +23,10 @@
 namespace athena::core {
 class FatalError : public Error {
     public:
-    template <typename ...Args>
+    template <typename... Args>
     explicit FatalError(int32_t errorCode, Args... messages);
 };
-template <typename ...Args>
+template <typename... Args>
 FatalError::FatalError(int32_t errorCode, Args... messages)
     : Error(errorCode, messages...) {
     err() << mErrorMessage;

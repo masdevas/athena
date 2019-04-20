@@ -14,17 +14,20 @@
 #include <athena/core/InputNode.h>
 
 namespace athena::core {
-InputNode::InputNode(InputNode&& rhs) noexcept : AbstractNode(std::move(rhs)), mLoader(rhs.mLoader) {
+InputNode::InputNode(InputNode&& rhs) noexcept
+    : AbstractNode(std::move(rhs)), mLoader(rhs.mLoader) {
     rhs.fullClear();
 }
-InputNode::InputNode(TensorShape shape, DataType dataType,
-                     AbstractLoader& loader, std::string name)
-    : AbstractNode(std::move(shape), dataType, std::move(name)), mLoader(&loader) {
-}
+InputNode::InputNode(TensorShape shape,
+                     DataType dataType,
+                     AbstractLoader& loader,
+                     std::string name)
+    : AbstractNode(std::move(shape), dataType, std::move(name)),
+      mLoader(&loader) {}
 InputNode::~InputNode() {
     saveInGraph(false);
 }
-InputNode &InputNode::operator=(InputNode&& rhs) noexcept {
+InputNode& InputNode::operator=(InputNode&& rhs) noexcept {
     AbstractNode::operator=(std::move(rhs));
     mLoader = rhs.mLoader;
     rhs.fullClear();

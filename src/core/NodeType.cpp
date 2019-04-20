@@ -29,4 +29,4 @@ template <>
 NodeType getNodeType<InputNode>() {
     return NodeType::INPUT;
 }
-}
+}  // namespace athena::core

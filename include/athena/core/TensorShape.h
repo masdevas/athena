@@ -14,12 +14,13 @@
 #ifndef ATHENA_TENSORSHAPE_H
 #define ATHENA_TENSORSHAPE_H
 
+#include "FatalError.h"
+
 #include <athena/core/ShapeView.h>
 
-#include <utility>
 #include <initializer_list>
+#include <utility>
 #include <vector>
-#include "FatalError.h"
 
 namespace athena::core {
 class TensorShape {
@@ -34,8 +35,8 @@ class TensorShape {
     TensorShape(std::vector<size_t> rhs);
     template <typename CopyableIterator>
     TensorShape(CopyableIterator begin, CopyableIterator end);
-    TensorShape(const TensorShape &rhs) = default;
-    TensorShape(TensorShape &&rhs) noexcept = default;
+    TensorShape(const TensorShape& rhs) = default;
+    TensorShape(TensorShape&& rhs) noexcept = default;
     ~TensorShape() = default;
 
     TensorShape& operator=(const TensorShape& rhs) = default;
@@ -50,7 +51,7 @@ class TensorShape {
      * Returns shape as std::vector
      * @return vector containing sizes for every dimension
      */
-    const std::vector<size_t> &getShape() const;
+    const std::vector<size_t>& getShape() const;
     ShapeView getShapeView() const;
     TensorShape getSubShape(size_t offset = 1) const;
     ShapeView getSubShapeView(size_t offset = 1) const;
@@ -78,14 +79,13 @@ class TensorShape {
      * Returns clone of mShape without first element
      * @return Clone of mShape without first element
      */
-     Iterator begin() const;
-     Iterator end() const;
+    Iterator begin() const;
+    Iterator end() const;
 };
 
-template<typename CopyableIterator>
+template <typename CopyableIterator>
 TensorShape::TensorShape(CopyableIterator begin, CopyableIterator end)
-    : mShape(begin, end), mTotalSize(calculateTotalSize()) {
-}
+    : mShape(begin, end), mTotalSize(calculateTotalSize()) {}
 
 }  // namespace athena::core
 

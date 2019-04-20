@@ -21,20 +21,21 @@ namespace athena::core {
 class TensorShape;
 
 class ShapeView {
- private:
+    private:
     using Iterator = std::vector<size_t>::const_iterator;
     Iterator mBegin;
     Iterator mEnd;
- public:
+
+    public:
     ShapeView() = delete;
-    ShapeView(const ShapeView &shapeView) = default;
-    ShapeView(ShapeView &&shapeView) = default;
+    ShapeView(const ShapeView& shapeView) = default;
+    ShapeView(ShapeView&& shapeView) = default;
     ShapeView(Iterator begin, Iterator end);
     ShapeView(const TensorShape& shape);
     ~ShapeView() = default;
 
-    ShapeView &operator=(const ShapeView& shapeView) = default;
-    ShapeView &operator=(ShapeView&& shapeView) = default;
+    ShapeView& operator=(const ShapeView& shapeView) = default;
+    ShapeView& operator=(ShapeView&& shapeView) = default;
     size_t operator[](size_t index) const;
     bool operator==(const TensorShape& rhs) const;
     bool operator==(const ShapeView& rhs) const;
@@ -49,6 +50,6 @@ class ShapeView {
     size_t getTotalSize() const;
     ShapeView getSubShapeView(size_t offset = 1) const;
 };
-}
+}  // namespace athena::core
 
-#endif //ATHENA_SHAPEVIEW_H
+#endif  // ATHENA_SHAPEVIEW_H

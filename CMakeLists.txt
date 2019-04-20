@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.9)
 project(athena)
 
 set(ATHENA_MAJOR_VERSION "0")
@@ -11,6 +11,10 @@ set(USE_SANITIZERS "OFF" CACHE STRING "Specify Google Sanitizers")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
+# todo remove hacks http://lists.llvm.org/pipermail/llvm-dev/2016-May/099874.html
+if (UNIX AND NOT APPLE)
+set(CMAKE_CXX_FLAGS  "-Wl,--export-dynamic")
+endif()
 
 include(AthenaTarget)
 include(AthenaEnableSanitizers)

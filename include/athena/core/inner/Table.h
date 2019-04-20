@@ -23,11 +23,11 @@ constexpr size_t kKUndefinedIndex = 0;
 
 template <typename Content>
 class Table {
- private:
+    private:
     static inline Content const mNullRecord = NullRecord<Content>::value;
     std::vector<Content> mRegisteredContents;
 
- public:
+    public:
     Table();
     Table(const Table &) = delete;
     Table(Table &&rhs) = delete;
@@ -35,10 +35,10 @@ class Table {
 
     Table &operator=(const Table &rhs) = delete;
     Table &operator=(Table &&rhs) = delete;
-    Content& operator[](size_t index);
+    Content &operator[](size_t index);
 
-    template <typename ...Args>
-    size_t registerRecord(Args&&... args);
+    template <typename... Args>
+    size_t registerRecord(Args &&... args);
     size_t size();
     void clear();
 };
@@ -49,13 +49,13 @@ Table<Content>::Table() {
 }
 
 template <typename Content>
-Content& Table<Content>::operator[](size_t index) {
+Content &Table<Content>::operator[](size_t index) {
     return mRegisteredContents[index];
 }
 
 template <typename Content>
-template <typename ...Args>
-size_t Table<Content>::registerRecord(Args&&... args) {
+template <typename... Args>
+size_t Table<Content>::registerRecord(Args &&... args) {
     mRegisteredContents.emplace_back(std::forward<Args>(args)...);
     return mRegisteredContents.size() - 1;
 }
@@ -75,14 +75,15 @@ template <>
 class Table<AllocationRecord> {
     private:
     size_t mLastId;
-    static inline const AllocationRecord mNullRecord = NullRecord<AllocationRecord>::value;
+    static inline const AllocationRecord mNullRecord =
+        NullRecord<AllocationRecord>::value;
     std::vector<AllocationRecord> mRegisteredContents;
 
     public:
     Table();
     Table(const Table &) = delete;
-    Table(Table &&rhs)   = delete;
-    ~Table()             = default;
+    Table(Table &&rhs) = delete;
+    ~Table() = default;
 
     Table &operator=(const Table &rhs) = delete;
     Table &operator=(Table &&rhs) = delete;
@@ -101,6 +102,6 @@ size_t Table<AllocationRecord>::registerRecord(Args &&... args) {
     mLastId += mRegisteredContents.back().getSize();
     return lastIdCopy;
 }
-}
+}  // namespace athena::core::inner
 
-#endif //ATHENA_TABLE_H
+#endif  // ATHENA_TABLE_H

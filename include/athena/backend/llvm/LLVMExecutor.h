@@ -13,7 +13,6 @@
 #ifndef ATHENA_LLVMEXECUTOR_H
 #define ATHENA_LLVMEXECUTOR_H
 
-
 #include <athena/backend/llvm/AthenaJIT.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/Executor.h>

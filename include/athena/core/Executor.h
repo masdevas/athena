@@ -21,7 +21,7 @@ namespace athena::core {
 class Executor {
     public:
     virtual void prepare(Graph &graph) = 0;
-    virtual void execute()             = 0;
+    virtual void execute() = 0;
 };
 
 }  // namespace athena::core

@@ -14,8 +14,8 @@
 #ifndef ATHENA_INNERFUNCTIONS_H
 #define ATHENA_INNERFUNCTIONS_H
 
-#include <athena/core/inner/Tensor.h>
 #include <athena/core/inner/ForwardDeclarations.h>
+#include <athena/core/inner/Tensor.h>
 
 #include <cstddef>
 
@@ -31,6 +31,6 @@ Traversal &getTraversal(Graph &graph);
 Clusters &getClusters(Graph &graph);
 Clusters &getClusters(Traversal &traversal);
 void setTraversalValidity(Traversal &traversal, bool flag);
-}
+}  // namespace athena::core::inner
 
 #endif  // ATHENA_INNERFUNCTIONS_H

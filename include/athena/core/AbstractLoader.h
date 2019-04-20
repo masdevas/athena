@@ -15,6 +15,7 @@
 #define ATHENA_ABSTRACTLOADER_H
 
 #include <athena/core/Allocator.h>
+
 #include <string>
 #include <string_view>
 
@@ -27,10 +28,8 @@ class AbstractLoader {
 };
 
 class DummyLoader : public AbstractLoader {
- public:
-    void load(Allocator *, inner::Tensor *tensor) override {
-
-    }
+    public:
+    void load(Allocator *, inner::Tensor *tensor) override {}
     std::string getLoadCName() const override {
         static const std::string loadName = "DummyLoad";
         return loadName;

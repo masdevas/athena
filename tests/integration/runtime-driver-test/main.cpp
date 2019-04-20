@@ -51,7 +51,9 @@ void test_using_functions() {
 }
 }  // namespace athena::backend
 
-void init() { kPathToRuntimeCPU = ::getenv(kPathToRuntimeCPUName.data()); }
+void init() {
+    kPathToRuntimeCPU = ::getenv(kPathToRuntimeCPUName.data());
+}
 
 int main() {
     init();

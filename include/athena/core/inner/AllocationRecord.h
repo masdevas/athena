@@ -19,16 +19,17 @@
 
 namespace athena::core::inner {
 struct AllocationRecord {
- private:
+    private:
     DataType mDataType;
     TensorShape mShape;
- public:
+
+    public:
     AllocationRecord(DataType dataType, TensorShape shape);
     DataType getDataType() const;
     const TensorShape& getShape() const;
     ShapeView getShapeView(size_t offset = 0) const;
     size_t getSize() const;
 };
-}
+}  // namespace athena::core::inner
 
-#endif //ATHENA_ALLOCATIONTABLERECORD_H
+#endif  // ATHENA_ALLOCATIONTABLERECORD_H

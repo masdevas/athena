@@ -10,8 +10,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <athena/core/inner/GlobalTables.h>
 #include <athena/core/Clear.h>
+#include <athena/core/inner/GlobalTables.h>
 
 namespace athena::core {
 void clearAll() {

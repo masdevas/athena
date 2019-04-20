@@ -18,4 +18,4 @@ namespace athena::core {
 void clearAll();
 }
 
-#endif //ATHENA_CLEAR_H
+#endif  // ATHENA_CLEAR_H

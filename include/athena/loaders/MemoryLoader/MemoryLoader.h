@@ -25,7 +25,7 @@ class MemoryLoader : public core::AbstractLoader {
 
     public:
     MemoryLoader(void *data, size_t size) : mData(data), mSize(size){};
-    MemoryLoader(const MemoryLoader&) = default;
+    MemoryLoader(const MemoryLoader &) = default;
     MemoryLoader(MemoryLoader &&src);
     ~MemoryLoader() = default;
     MemoryLoader &operator=(const MemoryLoader &) = default;

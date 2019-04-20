@@ -15,10 +15,9 @@
 #include <athena/core/TensorShape.h>
 
 namespace athena::core {
-ShapeView::ShapeView(Iterator begin, Iterator end) : mBegin(begin), mEnd(end) {
-}
-ShapeView::ShapeView(const TensorShape& shape) : mBegin(shape.begin()), mEnd(shape.end()) {
-}
+ShapeView::ShapeView(Iterator begin, Iterator end) : mBegin(begin), mEnd(end) {}
+ShapeView::ShapeView(const TensorShape& shape)
+    : mBegin(shape.begin()), mEnd(shape.end()) {}
 size_t ShapeView::operator[](size_t index) const {
     return dim(index);
 }
@@ -67,4 +66,4 @@ size_t ShapeView::getTotalSize() const {
 ShapeView ShapeView::getSubShapeView(size_t offset) const {
     return ShapeView(mBegin + offset, mEnd);
 }
-}
+}  // namespace athena::core

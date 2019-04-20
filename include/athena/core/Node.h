@@ -17,23 +17,26 @@
 #include <athena/core/AbstractNode.h>
 #include <athena/core/Operation.h>
 
-
-
 namespace athena::core {
 class Node : public AbstractNode {
- private:
+    private:
     void fullClear();
- protected:
-    Operation *mOperation;
- public:
+
+    protected:
+    Operation* mOperation;
+
+    public:
     Node() = delete;
     Node(const Node& rhs) = default;
     Node(Node&& rhs) noexcept;
-    Node(TensorShape shape, DataType dataType, Operation &operation, std::string name = "");
+    Node(TensorShape shape,
+         DataType dataType,
+         Operation& operation,
+         std::string name = "");
     ~Node() override;
 
-    Node &operator=(const Node& rhs) = default;
-    Node &operator=(Node&& rhs) noexcept;
+    Node& operator=(const Node& rhs) = default;
+    Node& operator=(Node&& rhs) noexcept;
 
     NodeType getType() const override;
     const Operation& getOperation() const;
@@ -42,6 +45,6 @@ class Node : public AbstractNode {
     void setOperation(Operation& operation);
     void clear() override;
 };
-}
+}  // namespace athena::core
 
-#endif //ATHENA_NODE
+#endif  // ATHENA_NODE

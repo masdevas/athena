@@ -71,4 +71,4 @@ TEST(Node, NodeSavesOperation) {
 
     EXPECT_EQ(node.getOperation().getName(), "DummyOp");
 }
-}
+}  // namespace athena::core

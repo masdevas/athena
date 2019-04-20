@@ -11,12 +11,12 @@
  * the License.
  */
 
+#include <athena/core/FatalError.h>
 #include <athena/core/ShapeView.h>
 #include <athena/core/TensorShape.h>
-#include <athena/core/FatalError.h>
 
-#include <numeric>
 #include <gtest/gtest.h>
+#include <numeric>
 
 namespace athena::core {
 TEST(TensorViewTest, CreationEmpty) {
@@ -27,8 +27,8 @@ TEST(TensorViewTest, CreationEmpty) {
 }
 TEST(TensorViewTest, CreationFromShape) {
     std::vector<size_t> expected{3, 2, 3, 20};
-    size_t product = std::accumulate<std::vector<size_t>::iterator, size_t>(expected.begin(),
-        expected.end(), 1, std::multiplies<size_t>());
+    size_t product = std::accumulate<std::vector<size_t>::iterator, size_t>(
+        expected.begin(), expected.end(), 1, std::multiplies<size_t>());
     TensorShape shape(expected);
     ShapeView view = shape.getShapeView();
     ASSERT_EQ(view.dimensions(), expected.size());
@@ -36,8 +36,8 @@ TEST(TensorViewTest, CreationFromShape) {
 }
 TEST(TensorViewTest, CheckFieldsAndFunctions) {
     std::vector<size_t> expected{12, 12, 3, 2, 3, 20};
-    size_t product = std::accumulate<std::vector<size_t>::iterator, size_t>(expected.begin(),
-        expected.end(), 1, std::multiplies<size_t>());
+    size_t product = std::accumulate<std::vector<size_t>::iterator, size_t>(
+        expected.begin(), expected.end(), 1, std::multiplies<size_t>());
     TensorShape shape(expected);
     ShapeView view = shape.getShapeView();
     ASSERT_EQ(view.dimensions(), expected.size());
@@ -59,4 +59,4 @@ TEST(TensorViewTest, CheckFieldsAndFunctions) {
         ++index;
     }
 }
-}
+}  // namespace athena::core

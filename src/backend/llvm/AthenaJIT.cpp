@@ -24,12 +24,14 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
     : mObjectLayer(
           mExecutionSession,
           []() { return ::llvm::make_unique<::llvm::SectionMemoryManager>(); }),
-      mCompileLayer(mExecutionSession, mObjectLayer,
+      mCompileLayer(mExecutionSession,
+                    mObjectLayer,
                     ::llvm::orc::ConcurrentIRCompiler(std::move(JTMB))),
       mOptimizeLayer(mExecutionSession, mCompileLayer, optimizeModule),
       mDataLayout(std::move(DL)),
       mMangle(mExecutionSession, mDataLayout),
       mContext(::llvm::make_unique<::llvm::LLVMContext>()) {
+    ::llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
     mExecutionSession.getMainJITDylib().setGenerator(cantFail(
         ::llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(DL)));
 }
@@ -68,7 +70,8 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
 
     // Run the optimizations over all functions in the module being added to
     // the JIT.
-    for (auto &F : *TSM.getModule()) FPM->run(F);
+    for (auto &F : *TSM.getModule())
+        FPM->run(F);
 
     return TSM;
 }

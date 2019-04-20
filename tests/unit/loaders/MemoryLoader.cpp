@@ -12,8 +12,8 @@
  */
 
 #include <athena/backend/llvm/LLVMTrivialAllocator.h>
-#include <athena/core/inner/Tensor.h>
 #include <athena/core/TensorShape.h>
+#include <athena/core/inner/Tensor.h>
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 
 #include <gtest/gtest.h>

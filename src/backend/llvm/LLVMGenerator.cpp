@@ -15,6 +15,7 @@
 
 #include <athena/backend/llvm/LLVMGenerator.h>
 #include <athena/core/FatalError.h>
+#include <athena/loaders/MemoryLoader/MemoryLoader.h>
 
 namespace athena::backend::llvm {
 

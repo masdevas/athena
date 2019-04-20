@@ -58,8 +58,8 @@ bool testVectorSum() {
 
     // Assert
 
-    auto pRes =
-    (float*)executor.getAllocator()->getFastPointer(inner::getTensorFromNode(add));
+    auto pRes = (float*)executor.getAllocator()->getFastPointer(
+        inner::getTensorFromNode(add));
     if (abs(pRes[0] - 5.0) > 0.1) {
         std::cout << "Element 0 is wrong"
                   << "\n";

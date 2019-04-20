@@ -1,7 +1,7 @@
 function(getboost)
     find_package(Boost)
 
-    if(NOT ${BOOST_FOUND})
+    if (NOT ${BOOST_FOUND})
         include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
         externalproject_add(boost
                 URL https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
@@ -9,9 +9,9 @@ function(getboost)
                 CONFIGURE_COMMAND ""
                 BUILD_COMMAND ""
                 INSTALL_COMMAND ""
-        )
+                )
         add_dependencies(runtime-llvm-cpu boost)
-    endif()
+    endif ()
 
     target_include_directories(runtime-llvm-cpu PUBLIC ${BOOST_INCLUDE_DIRS})
 endfunction(getboost)
@@ -62,8 +62,8 @@ else ()
         set(BLA_VENDOR Apple)
         target_compile_definitions(runtime-llvm-cpu PUBLIC -DAPPLE_ACCELERATE)
         message(STATUS "Apple Accelerate Framework will be used")
-    else()
+    else ()
         message(STATUS "No BLAS installation found. Boost will be downloaded and compiled")
         getboost()
-    endif()
+    endif ()
 endif ()

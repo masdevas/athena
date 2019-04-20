@@ -23,8 +23,10 @@ class Tensor {
     size_t mRecordIndex;
     size_t mShapeOffset;
     size_t mShapePartialProduct;
-    Tensor(size_t id, size_t recordIndex, size_t shapeOffset,
-        size_t shapePartialProduct);
+    Tensor(size_t id,
+           size_t recordIndex,
+           size_t shapeOffset,
+           size_t shapePartialProduct);
 
     public:
     Tensor(const Tensor& rhs);
@@ -44,6 +46,6 @@ class Tensor {
     void setShape(const TensorShape& shape);
     void clear();
 };
-}  // namespace athena::core
+}  // namespace athena::core::inner
 
 #endif  // ATHENA_TENSOR_H

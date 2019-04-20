@@ -19,8 +19,8 @@
 #include <athena/core/Traversal.h>
 #include <athena/core/inner/Table.h>
 
-#include <unordered_map>
 #include <set>
+#include <unordered_map>
 #include <unordered_set>
 
 namespace athena::core {
@@ -41,41 +41,46 @@ struct Edge {
         return startNodeIndex < rhs.startNodeIndex;
     }
 };
-}
+}  // namespace inner
 
 using SyncStorage = std::unordered_set<size_t>;
-using OwningStorage = inner::TupleContainers<std::vector, Node, InputNode>::Holder;
+using OwningStorage =
+    inner::TupleContainers<std::vector, Node, InputNode>::Holder;
 using Topology = std::vector<inner::Edge>;
 
 class Graph {
- private:
+    private:
     SyncStorage mSyncStorage;
     OwningStorage mOwningStorage;
     Topology mTopology;
     size_t mGraphIndex;
     Traversal mTraversal;
     template <typename TemplateNodeType>
-    void saveRealNode(TemplateNodeType& node, bool isRepairedNode, bool isErase);
-    void saveNode(AbstractNode &node, bool isRepairedNode, bool isErase);
+    void saveRealNode(TemplateNodeType& node,
+                      bool isRepairedNode,
+                      bool isErase);
+    void saveNode(AbstractNode& node, bool isRepairedNode, bool isErase);
     void fullClear();
 
- public:
+    public:
     Graph();
     Graph(const Graph& rhs) = delete;
     Graph(Graph&& rhs) noexcept;
     ~Graph();
 
-    Graph &operator=(const Graph& rhs) = delete;
-    Graph &operator=(Graph&& rhs) noexcept;
+    Graph& operator=(const Graph& rhs) = delete;
+    Graph& operator=(Graph&& rhs) noexcept;
 
     const SyncStorage& getSyncStorage() const;
     const OwningStorage& getOwningStorage() const;
     const Topology& getTopology() const;
-    void addNode(AbstractNode &node);
-    void saveNode(AbstractNode &node, bool isRepairedNode = true);
+    void addNode(AbstractNode& node);
+    void saveNode(AbstractNode& node, bool isRepairedNode = true);
     void saveAllSyncNodes(bool isRepairedNode = true);
-    void removeNode(AbstractNode &node);
-    void link(const AbstractNode &startNode, const AbstractNode &endNode, EdgeMark mark);
+    void removeNode(AbstractNode& node);
+    void link(const AbstractNode& startNode,
+              const AbstractNode& endNode,
+              EdgeMark mark);
     size_t countOwningNodes() const;
     size_t countSyncNodes() const;
     size_t getGraphIndex() const;
@@ -83,7 +88,7 @@ class Graph {
     bool isValidTraversal() const;
     const Traversal& traverse();
 
-    friend Traversal &inner::getTraversal(Graph &graph);
+    friend Traversal& inner::getTraversal(Graph& graph);
 };
 }  // namespace athena::core
 

@@ -5,7 +5,7 @@ AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortLoopsOnASingleLine: false
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: true
+AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlwaysBreakTemplateDeclarations: Yes
 BreakBeforeBraces: Attach

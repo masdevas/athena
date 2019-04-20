@@ -25,7 +25,7 @@ class Traversal;
 namespace inner {
 struct Cluster;
 using Clusters = std::vector<Cluster>;
-}
-}
+}  // namespace inner
+}  // namespace athena::core
 
 #endif  // ATHENA_FORWARDDECLARATIONS_H

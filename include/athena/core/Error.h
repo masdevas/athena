@@ -26,19 +26,19 @@ class Error {
 
     public:
     Error();
-    template <typename ...Args>
-    explicit Error(int32_t errorCode, Args&& ...messages);
-    Error(const Error &error)     = default;
+    template <typename... Args>
+    explicit Error(int32_t errorCode, Args &&... messages);
+    Error(const Error &error) = default;
     Error(Error &&error) noexcept = default;
     Error &operator=(const Error &error) = default;
     Error &operator=(Error &&error) noexcept = default;
-    ~Error()                                 = default;
+    ~Error() = default;
 
     operator bool() const;
     friend std::ostream &operator<<(std::ostream &stream, const Error &err);
 };
-template <typename ...Args>
-Error::Error(int32_t errorCode, Args&& ...messages) : mErrorCode(errorCode) {
+template <typename... Args>
+Error::Error(int32_t errorCode, Args &&... messages) : mErrorCode(errorCode) {
     std::stringstream ss;
     (ss << ... << std::forward<Args>(messages));
     mErrorMessage = ss.str();

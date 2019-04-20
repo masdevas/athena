@@ -66,4 +66,4 @@ TEST(InputNode, CopyOperator) {
     ASSERT_EQ(n.name(), nSecond.name());
     ASSERT_EQ(&n.getLoader(), &loader);
 }
-}
+}  // namespace athena::core

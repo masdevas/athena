@@ -1,2 +1,2 @@
-# TODO make JIT link against executable
-add_athena_library(MemoryLoader SHARED MemoryLoader.cpp)
+add_athena_library(MemoryLoader STATIC MemoryLoader.cpp)
+target_link_libraries(MemoryLoader athena-core)

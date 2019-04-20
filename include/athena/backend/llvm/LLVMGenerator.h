@@ -39,7 +39,8 @@ class LLVMGenerator : public core::AbstractGenerator {
                            const std::unique_ptr<::llvm::Module> &module,
                            core::Allocator &allocator);
     void generateAllocation(core::inner::Tensor &a) override;
-    void generateAdd(core::inner::Tensor &a, core::inner::Tensor &b,
+    void generateAdd(core::inner::Tensor &a,
+                     core::inner::Tensor &b,
                      core::inner::Tensor &c) override;
     void generateLoad(const core::AbstractLoader &loader,
                       core::inner::Tensor &tensor);

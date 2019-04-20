@@ -24,12 +24,12 @@ class Error;
 
 class AbstractLogger {
     public:
-    AbstractLogger()                           = default;
-    AbstractLogger(const AbstractLogger &)     = default;
+    AbstractLogger() = default;
+    AbstractLogger(const AbstractLogger &) = default;
     AbstractLogger(AbstractLogger &&) noexcept = default;
     AbstractLogger &operator=(const AbstractLogger &) = default;
     AbstractLogger &operator=(AbstractLogger &&) noexcept = default;
-    virtual ~AbstractLogger()                             = default;
+    virtual ~AbstractLogger() = default;
 
     template <typename T>
     AbstractLogger &operator<<(const T &data) {
@@ -37,10 +37,10 @@ class AbstractLogger {
     }
 
     protected:
-    virtual AbstractLogger &streamImpl(const std::string &data)      = 0;
+    virtual AbstractLogger &streamImpl(const std::string &data) = 0;
     virtual AbstractLogger &streamImpl(const std::string_view &data) = 0;
-    virtual AbstractLogger &streamImpl(const Error &data)            = 0;
-    virtual AbstractLogger &streamImpl(const char *data)             = 0;
+    virtual AbstractLogger &streamImpl(const Error &data) = 0;
+    virtual AbstractLogger &streamImpl(const char *data) = 0;
 };
 
 }  // namespace athena::core

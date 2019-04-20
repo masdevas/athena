@@ -14,16 +14,17 @@
 #ifndef ATHENA_NULLRECORD_H
 #define ATHENA_NULLRECORD_H
 
+#include <athena/core/FatalError.h>
 #include <athena/core/inner/AllocationRecord.h>
 #include <athena/core/inner/ForwardDeclarations.h>
-#include <athena/core/FatalError.h>
 
 namespace athena::core::inner {
 template <typename Content>
 struct NullRecord;
 template <>
 struct NullRecord<AllocationRecord> {
-    static inline const AllocationRecord value = AllocationRecord(DataType::UNDEFINED, TensorShape{});
+    static inline const AllocationRecord value =
+        AllocationRecord(DataType::UNDEFINED, TensorShape{});
 };
 template <>
 struct NullRecord<Graph*> {
@@ -33,6 +34,6 @@ template <>
 struct NullRecord<AbstractNode*> {
     static inline AbstractNode* const value = nullptr;
 };
-}
+}  // namespace athena::core::inner
 
-#endif //ATHENA_NULLRECORD_H
+#endif  // ATHENA_NULLRECORD_H

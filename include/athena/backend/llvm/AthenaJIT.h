@@ -49,8 +49,12 @@ class AthenaJIT {
     AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB, ::llvm::DataLayout DL);
 
     static ::llvm::Expected<std::unique_ptr<AthenaJIT>> create();
-    const ::llvm::DataLayout &getDataLayout() const { return mDataLayout; }
-    ::llvm::LLVMContext &getContext() { return *mContext.getContext(); }
+    const ::llvm::DataLayout &getDataLayout() const {
+        return mDataLayout;
+    }
+    ::llvm::LLVMContext &getContext() {
+        return *mContext.getContext();
+    }
 
     ::llvm::Error addModule(std::unique_ptr<::llvm::Module> &M);
     ::llvm::Expected<::llvm::JITEvaluatedSymbol> lookup(::llvm::StringRef Name);

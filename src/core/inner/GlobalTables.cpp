@@ -27,4 +27,4 @@ Table<Graph*>& getGraphTable() {
     static Table<Graph*> table;
     return table;
 }
-}
+}  // namespace athena::core::inner

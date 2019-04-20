@@ -30,7 +30,7 @@ class RuntimeDriver {
     public:
     RuntimeDriver();
     RuntimeDriver(std::string_view nameLibrary);
-    RuntimeDriver(const RuntimeDriver& rhs)     = delete;
+    RuntimeDriver(const RuntimeDriver& rhs) = delete;
     RuntimeDriver(RuntimeDriver&& rhs) noexcept = default;
     ~RuntimeDriver();
 

@@ -14,8 +14,7 @@
 #include <athena/core/Error.h>
 
 namespace athena::core {
-Error::Error() : mErrorCode(0) {
-}
+Error::Error() : mErrorCode(0) {}
 Error::operator bool() const {
     return mErrorCode != 0;
 }

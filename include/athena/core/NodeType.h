@@ -19,6 +19,6 @@ enum class NodeType { UNDEFINED, INPUT, DEFAULT };
 
 template <typename TemplateNodeType>
 NodeType getNodeType();
-}
+}  // namespace athena::core
 
-#endif //ATHENA_NODETYPE_H
+#endif  // ATHENA_NODETYPE_H

@@ -15,26 +15,27 @@
 
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include "llvm/IRReader/IRReader.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/TargetSelect.h"
-#include "llvm/IRReader/IRReader.h"
 
 #include <gtest/gtest.h>
 #include <memory>
 
 using namespace athena::backend::llvm;
 
-std::string jit_test_add_ir = "define i32 @jit_test_add(i32, i32) {\n"
-                              "  %3 = alloca i32, align 4\n"
-                              "  %4 = alloca i32, align 4\n"
-                              "  store i32 %0, i32* %3, align 4\n"
-                              "  store i32 %1, i32* %4, align 4\n"
-                              "  %5 = load i32, i32* %3, align 4\n"
-                              "  %6 = load i32, i32* %4, align 4\n"
-                              "  %7 = add nsw i32 %5, %6\n"
-                              "  ret i32 %7\n"
-                              "}";
+std::string jit_test_add_ir =
+    "define i32 @jit_test_add(i32, i32) {\n"
+    "  %3 = alloca i32, align 4\n"
+    "  %4 = alloca i32, align 4\n"
+    "  store i32 %0, i32* %3, align 4\n"
+    "  store i32 %1, i32* %4, align 4\n"
+    "  %5 = load i32, i32* %3, align 4\n"
+    "  %6 = load i32, i32* %4, align 4\n"
+    "  %7 = add nsw i32 %5, %6\n"
+    "  ret i32 %7\n"
+    "}";
 
 class LLVMJITTestType : public ::testing::Test {
     protected:
@@ -55,7 +56,7 @@ class LLVMJITTestType : public ::testing::Test {
 TEST_F(LLVMJITTestType, JITIsAbleToExecuteCode) {
     // Arrange
     std::string irStr = "target datalayout = \"";
-    irStr+= jitCompiler->getDataLayout().getStringRepresentation();
+    irStr += jitCompiler->getDataLayout().getStringRepresentation();
     irStr += "\"\n";
     irStr += jit_test_add_ir;
 
@@ -80,5 +81,4 @@ TEST_F(LLVMJITTestType, JITIsAbleToExecuteCode) {
 
     // Assert
     ASSERT_EQ(res, 9);
-
 }

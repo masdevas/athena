@@ -11,8 +11,8 @@
  * the License.
  */
 
-#include <athena/core/inner/Tensor.h>
 #include <athena/core/Clear.h>
+#include <athena/core/inner/Tensor.h>
 
 #include <gtest/gtest.h>
 #include <numeric>
@@ -20,7 +20,7 @@
 namespace athena::core::inner {
 
 void testTensorCreation(const std::vector<size_t> &data, DataType dataType) {
-    auto shape  = TensorShape(data);
+    auto shape = TensorShape(data);
     auto tensor = Tensor(dataType, shape);
     ASSERT_EQ(dataType, tensor.getDataType());
     ASSERT_EQ(shape, tensor.getShapeView());
@@ -36,7 +36,7 @@ void testTensorCreation(const std::vector<size_t> &data, DataType dataType) {
                                                      data.end());
         ASSERT_EQ(expectedSubShapeViewData, expectedSubShapeViewData);
     }
-    //std::cout << tensor.getVirtualAddress() << '\n';
+    // std::cout << tensor.getVirtualAddress() << '\n';
 }
 
 TEST(TensorTest, Creation) {
@@ -80,7 +80,7 @@ TEST(TensorTest, CreationSeveralTensors) {
 TEST(TensorTest, GetSubTensor) {
     auto dataType = DataType::DOUBLE;
     std::vector<size_t> data{50, 65, 8, 12};
-    auto shape  = TensorShape(data);
+    auto shape = TensorShape(data);
     auto tensor = Tensor(dataType, shape);
     for (size_t indexSubTensor = 0; indexSubTensor < data[0];
          ++indexSubTensor) {
@@ -97,7 +97,7 @@ TEST(TensorTest, GetSubTensor) {
 TEST(TensorTest, GetSubSubTensor) {
     auto dataType = DataType::DOUBLE;
     std::vector<size_t> data{10, 10, 10};
-    auto shape  = TensorShape(data);
+    auto shape = TensorShape(data);
     auto tensor = Tensor(dataType, shape);
     size_t subSize =
         std::accumulate<std::vector<size_t>::const_iterator, size_t>(
@@ -120,7 +120,7 @@ TEST(TensorTest, GetSubSubTensor) {
 TEST(TensorTest, CopyConstructor) {
     auto dataType = DataType::HALF;
     std::vector<size_t> data{10, 12, 10};
-    auto shape  = TensorShape(data);
+    auto shape = TensorShape(data);
     auto tensor = Tensor(dataType, shape);
     size_t subSize =
         std::accumulate<std::vector<size_t>::const_iterator, size_t>(
@@ -142,20 +142,20 @@ TEST(TensorTest, CopyConstructor) {
 TEST(TensorTest, CopyOperator) {
     auto dataType = DataType::HALF;
     std::vector<size_t> data{10, 12, 10};
-    auto shape  = TensorShape(data);
+    auto shape = TensorShape(data);
     auto tensor = Tensor(dataType, shape);
     {
         auto dataTypeSecond = DataType::HALF;
         std::vector<size_t> dataSecond{10, 12, 10};
-        auto shapeSecond  = TensorShape(data);
+        auto shapeSecond = TensorShape(data);
         auto tensorSecond = Tensor(dataTypeSecond, shapeSecond);
-        tensor            = tensorSecond;
+        tensor = tensorSecond;
         ASSERT_EQ(tensor.getDataType(), dataTypeSecond);
         ASSERT_EQ(tensor.getShapeView(), shapeSecond);
     }
     {
         for (size_t index = 0; index < shape[0]; ++index) {
-            auto subTensor    = tensor[index];
+            auto subTensor = tensor[index];
             auto tensorSecond = subTensor;
             Tensor tensorThird(dataType, shape);
             tensorThird = subTensor;

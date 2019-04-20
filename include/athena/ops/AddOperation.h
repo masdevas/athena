@@ -25,8 +25,9 @@ class AddOperation : public core::Operation {
 
     core::inner::Tensor *getResultTensor(
         std::deque<core::inner::Tensor *> args) const override;
-    void gen(core::AbstractGenerator &g,
-             std::stack<core::inner::Tensor *> &operationArguments) const override;
+    void gen(
+        core::AbstractGenerator &g,
+        std::stack<core::inner::Tensor *> &operationArguments) const override;
 };
 }  // namespace athena::ops
 #endif  // ATHENA_ADDOPERATION_H

@@ -14,9 +14,9 @@
 #ifndef ATHENA_TRAVERSAL_H
 #define ATHENA_TRAVERSAL_H
 
-#include <athena/core/inner/TupleContainers.h>
-#include <athena/core/Node.h>
 #include <athena/core/InputNode.h>
+#include <athena/core/Node.h>
+#include <athena/core/inner/TupleContainers.h>
 
 namespace athena::core {
 namespace inner {
@@ -24,8 +24,7 @@ struct Dependency {
     size_t nodeIndex;
     size_t mark;
     Dependency(size_t nodeIndex, size_t mark)
-        : nodeIndex(nodeIndex), mark(mark) {
-    }
+        : nodeIndex(nodeIndex), mark(mark) {}
 };
 
 template <typename TemplateNodeType>
@@ -33,9 +32,12 @@ struct NodeDependencies {
     size_t nodeIndex;
     std::vector<Dependency> input;
     std::vector<Dependency> output;
-    NodeDependencies(size_t nodeIndex, std::vector<Dependency> input, std::vector<Dependency> output)
-        : nodeIndex(nodeIndex), input(std::move(input)), output(std::move(output)) {
-    }
+    NodeDependencies(size_t nodeIndex,
+                     std::vector<Dependency> input,
+                     std::vector<Dependency> output)
+        : nodeIndex(nodeIndex),
+          input(std::move(input)),
+          output(std::move(output)) {}
 };
 
 struct NodeState {
@@ -45,24 +47,30 @@ struct NodeState {
 };
 
 struct Cluster {
-    using Content = inner::TupleContainersWithWrappers<std::vector, inner::NodeDependencies, Node, InputNode>::Holder;
+    using Content = inner::TupleContainersWithWrappers<std::vector,
+                                                       inner::NodeDependencies,
+                                                       Node,
+                                                       InputNode>::Holder;
     size_t nodeCount;
     Content content;
     template <typename TemplateNodeType>
-    std::vector<inner::NodeDependencies<TemplateNodeType>>& get() {
-        return std::get<std::vector<inner::NodeDependencies<TemplateNodeType>>>(content);
+    std::vector<inner::NodeDependencies<TemplateNodeType>> &get() {
+        return std::get<std::vector<inner::NodeDependencies<TemplateNodeType>>>(
+            content);
     }
     template <typename TemplateNodeType>
-    const std::vector<inner::NodeDependencies<TemplateNodeType>>& get() const {
-        return std::get<std::vector<inner::NodeDependencies<TemplateNodeType>>>(content);
+    const std::vector<inner::NodeDependencies<TemplateNodeType>> &get() const {
+        return std::get<std::vector<inner::NodeDependencies<TemplateNodeType>>>(
+            content);
     }
 };
-}
+}  // namespace inner
 
 class Traversal {
     private:
     inner::Clusters clusters;
     bool mIsValidTraversal;
+
     public:
     const inner::Clusters &getClusters() const {
         return clusters;
@@ -73,6 +81,6 @@ class Traversal {
     friend inner::Clusters &inner::getClusters(Traversal &traversal);
     friend void inner::setTraversalValidity(Traversal &traversal, bool flag);
 };
-}
+}  // namespace athena::core
 
 #endif  // ATHENA_TRAVERSAL_H

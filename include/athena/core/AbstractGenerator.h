@@ -19,8 +19,10 @@ namespace athena::core {
 
 class AbstractGenerator {
     public:
-    virtual void generateAllocation(inner::Tensor &a)                = 0;
-    virtual void generateAdd(inner::Tensor &a, inner::Tensor &b, inner::Tensor &c) = 0;
+    virtual void generateAllocation(inner::Tensor &a) = 0;
+    virtual void generateAdd(inner::Tensor &a,
+                             inner::Tensor &b,
+                             inner::Tensor &c) = 0;
 };
 
 }  // namespace athena::core

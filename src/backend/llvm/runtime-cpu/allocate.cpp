@@ -18,14 +18,14 @@
 extern "C" {
 void allocate(void *allocator, void *tensor) {
     auto pAllocator = reinterpret_cast<athena::core::Allocator *>(allocator);
-    auto pTensor    = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
+    auto pTensor = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
 
     pAllocator->allocate(*pTensor);
 }
 
 size_t get_fast_pointer(void *allocator, void *tensor) {
     auto pAllocator = reinterpret_cast<athena::core::Allocator *>(allocator);
-    auto pTensor    = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
+    auto pTensor = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
 
     return pAllocator->getFastPointer(*pTensor);
 }

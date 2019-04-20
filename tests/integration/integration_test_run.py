@@ -11,10 +11,10 @@
 # the License.
 #
 
-import sys
-import re
 import os
+import re
 import subprocess
+import sys
 import xml.etree.ElementTree as et
 
 main_env_var_name = "ATHENA_TEST_ENVIRONMENT"
@@ -28,9 +28,11 @@ value_tag = "value"
 alias_attrib_name = "name"
 alias_attrib_env = "env"
 
+
 def fatal_error(*args, error_code=1):
     print("(!) Integration test system error:", *args, file=sys.stderr)
     sys.exit(error_code)
+
 
 def get_env_code() -> str:
     environment = os.environ.get(main_env_var_name)
@@ -41,19 +43,22 @@ def get_env_code() -> str:
     else:
         fatal_error("Undefined value of ATHENA_TEST_ENVIRONMENT:", environment)
 
+
 def substitute_env_vars(value) -> str:
     found = re.findall(r'\$[a-zA-Z][\w]*', value)
     for found_item in found:
         env_var_name = found_item[1:]
         env_var = os.environ.get(env_var_name)
         if env_var is None:
-            fatal_error("Environment variable", "\""+env_var_name+"\"", "exists")
+            fatal_error("Environment variable", "\"" + env_var_name + "\"", "exists")
         value = value.replace(found_item, env_var)
     return value
+
 
 def set_env_var_with_value(var_name, value):
     value = substitute_env_vars(value)
     os.environ[var_name] = value
+
 
 def set_env_var(set_command, env_code):
     var_name = set_command.attrib.get(alias_attrib_name)
@@ -70,15 +75,17 @@ def set_env_var(set_command, env_code):
             else:
                 fatal_error("Unknown tag", value.tag)
         else:
-            fatal_error("Value for variable", "\""+var_name+"\"",
-                        "for env","\""+env_code+"\"", "is not defined")
+            fatal_error("Value for variable", "\"" + var_name + "\"",
+                        "for env", "\"" + env_code + "\"", "is not defined")
 
-def get_commands_tree_from_xml(file_name : str):
+
+def get_commands_tree_from_xml(file_name: str):
     if not os.path.isfile(file_name):
         return None
     return et.ElementTree(file=file_name)
 
-def exec_commands(tree_commands, env_code : str):
+
+def exec_commands(tree_commands, env_code: str):
     if tree_commands is None:
         return
     commands = tree_commands.getroot()
@@ -90,6 +97,7 @@ def exec_commands(tree_commands, env_code : str):
         else:
             fatal_error("Unknown command:", command.tag)
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         fatal_error("Wrong count arguments for script. Args: ", *sys.argv)
@@ -98,9 +106,9 @@ if __name__ == "__main__":
     commands_tree = get_commands_tree_from_xml(name_config)
     req_env_code = get_env_code()
     exec_commands(commands_tree, req_env_code)
-    print("-- Integration test output for target", "\""+target+"\"", ":")
+    print("-- Integration test output for target", "\"" + target + "\"", ":")
     try:
         subprocess.check_call(["./" + target], stdout=sys.stdout, shell=True)
     except subprocess.CalledProcessError as exc:
-        fatal_error("Error code from subprocess", "\""+target+"\"", ":", exc.returncode,
+        fatal_error("Error code from subprocess", "\"" + target + "\"", ":", exc.returncode,
                     "\nOutput: ", exc.output, error_code=exc.returncode)

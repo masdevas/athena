@@ -14,17 +14,15 @@
 #include <athena/core/FatalError.h>
 #include <athena/core/TensorShape.h>
 
-#include <stdexcept>
 #include <numeric>
+#include <stdexcept>
 #include <string>
 
 namespace athena::core {
-TensorShape::TensorShape(std::initializer_list<size_t> rhs) : mShape(std::move(rhs)),
-    mTotalSize(calculateTotalSize()) {
-}
-TensorShape::TensorShape(std::vector<size_t> rhs) : mShape(std::move(rhs)),
-    mTotalSize(calculateTotalSize()) {
-}
+TensorShape::TensorShape(std::initializer_list<size_t> rhs)
+    : mShape(std::move(rhs)), mTotalSize(calculateTotalSize()) {}
+TensorShape::TensorShape(std::vector<size_t> rhs)
+    : mShape(std::move(rhs)), mTotalSize(calculateTotalSize()) {}
 size_t TensorShape::operator[](size_t index) {
     return dim(index);
 }
@@ -41,10 +39,11 @@ bool TensorShape::operator!=(const ShapeView& rhs) const {
     return !(*this == rhs);
 }
 size_t TensorShape::calculateTotalSize() {
-    size_t totalSize = std::accumulate(mShape.begin(), mShape.end(), 1, std::multiplies<int>());
+    size_t totalSize = std::accumulate(mShape.begin(), mShape.end(), 1,
+                                       std::multiplies<int>());
     return mShape.empty() ? 0 : totalSize;
 }
-const std::vector<size_t> &TensorShape::getShape() const {
+const std::vector<size_t>& TensorShape::getShape() const {
     return mShape;
 }
 ShapeView TensorShape::getShapeView() const {

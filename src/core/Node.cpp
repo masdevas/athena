@@ -14,16 +14,20 @@
 #include <athena/core/Node.h>
 
 namespace athena::core {
-Node::Node(Node&& rhs) noexcept : AbstractNode(std::move(rhs)), mOperation(rhs.mOperation) {
+Node::Node(Node&& rhs) noexcept
+    : AbstractNode(std::move(rhs)), mOperation(rhs.mOperation) {
     rhs.fullClear();
 }
-Node::Node(TensorShape shape, DataType dataType, Operation &operation, std::string name)
-    : AbstractNode(std::move(shape), dataType, std::move(name)), mOperation(&operation) {
-}
+Node::Node(TensorShape shape,
+           DataType dataType,
+           Operation& operation,
+           std::string name)
+    : AbstractNode(std::move(shape), dataType, std::move(name)),
+      mOperation(&operation) {}
 Node::~Node() {
     saveInGraph(false);
 }
-Node &Node::operator=(Node&& rhs) noexcept {
+Node& Node::operator=(Node&& rhs) noexcept {
     AbstractNode::operator=(std::move(rhs));
     mOperation = std::move(rhs.mOperation);
     rhs.fullClear();
