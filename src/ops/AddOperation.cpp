@@ -25,7 +25,7 @@ void AddOperation::gen(
     core::inner::Tensor *a = operationArguments.top();
     operationArguments.pop();
 
-    g.generateAdd(*a, *b, *c);
+    g.generate("add", *a, *b, *c);
 }
 core::inner::Tensor *AddOperation::getResultTensor(
     std::deque<core::inner::Tensor *> args) const {

@@ -13,7 +13,6 @@
 
 #include <athena/backend/llvm/AthenaJIT.h>
 
-#include <iostream>
 #include <llvm/Transforms/InstCombine/InstCombine.h>
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Transforms/Scalar/GVN.h>
@@ -70,8 +69,9 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
 
     // Run the optimizations over all functions in the module being added to
     // the JIT.
-    for (auto &F : *TSM.getModule())
+    for (auto &F : *TSM.getModule()) {
         FPM->run(F);
+    }
 
     return TSM;
 }

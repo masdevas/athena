@@ -11,4 +11,4 @@
  * the License.
  */
 
-#include <athena/core/AbstractGenerator.h>
+#include <athena/backend/llvm/LLVMGeneratorFunctor.h>

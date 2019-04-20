@@ -42,6 +42,7 @@ void MemoryLoader::load(core::Allocator *allocator,
                         core::inner::Tensor *tensor) {
     auto pointer = reinterpret_cast<void *>(allocator->getRAMPointer(*tensor));
 #ifdef DEBUG
+    assert(pointer && "MemoryLoader pointer is NULL");
     assert(mSize <= tensor->getShapeView().getTotalSize() *
                         core::sizeOfDataType(tensor->getDataType()));
 #endif

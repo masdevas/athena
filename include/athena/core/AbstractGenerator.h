@@ -18,11 +18,23 @@
 namespace athena::core {
 
 class AbstractGenerator {
+    protected:
+    virtual void generateImpl(std::string &, inner::Tensor &a) = 0;
+    virtual void generateImpl(std::string &,
+                              inner::Tensor &a,
+                              inner::Tensor &b) = 0;
+    virtual void generateImpl(std::string &,
+                              inner::Tensor &a,
+                              inner::Tensor &b,
+                              inner::Tensor &c) = 0;
+
     public:
-    virtual void generateAllocation(inner::Tensor &a) = 0;
-    virtual void generateAdd(inner::Tensor &a,
-                             inner::Tensor &b,
-                             inner::Tensor &c) = 0;
+    virtual void openNode(std::string_view name) = 0;
+    virtual void closeNode() = 0;
+    template <typename... Args>
+    void generate(std::string name, Args &&... a) {
+        generateImpl(name, std::forward<Args>(a)...);
+    };
 };
 
 }  // namespace athena::core

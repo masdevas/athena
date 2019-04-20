@@ -11,4 +11,13 @@
  * the License.
  */
 
-#include <athena/core/AbstractGenerator.h>
+#ifndef ATHENA_REGISTER_DEFAULT_FUNCTORS_H
+#define ATHENA_REGISTER_DEFAULT_FUNCTORS_H
+
+#include <athena/backend/llvm/LLVMGenerator.h>
+
+namespace athena::backend::llvm::codegen {
+void registerDefaultFunctors(LLVMGenerator *generator);
+}
+
+#endif  // ATHENA_REGISTER_DEFAULT_FUNCTORS_H

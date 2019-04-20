@@ -11,6 +11,7 @@
  * the License.
  */
 
+#include "codegen/register_default_functors.h"
 #include "utils.h"
 
 #include <athena/backend/llvm/LLVMGenerator.h>
@@ -24,65 +25,14 @@ llvm::LLVMGenerator::LLVMGenerator(
     const std::unique_ptr<::llvm::Module> &module,
     core::Allocator &allocator)
     : mModule(module),
-      mainBlock(::llvm::BasicBlock::Create(
+      mMainBlock(::llvm::BasicBlock::Create(
           ctx, "entry", module->getFunction("jitmain"))),
+      mCurrentBlock(mMainBlock),
       mContext(ctx),
-      mBuilder(::llvm::IRBuilder(mainBlock)),
+      mBuilder(::llvm::IRBuilder(mMainBlock)),
       mAllocator(allocator) {
-    mBuilder.SetInsertPoint(mainBlock);
-}
-void LLVMGenerator::generateAdd(core::inner::Tensor &a,
-                                core::inner::Tensor &b,
-                                core::inner::Tensor &c) {
-    // todo handle different data types
-
-    ::llvm::Function *calledFunction = mModule->getFunction("fadd");
-
-    if (!calledFunction)
-        calledFunction = impl::create_fadd_decl(mContext, *mModule);
-
-    if (!calledFunction) {
-        core::FatalError(1, "Unknown function referenced");
-    }
-
-    // todo check arg count
-
-    std::vector<::llvm::Value *> ArgsV;
-
-    ArgsV.push_back(generateGetFastPointer(a));
-    ::llvm::Constant *aSizeConst = ::llvm::ConstantInt::get(
-        ::llvm::Type::getInt64Ty(mContext), a.getShapeView().getTotalSize());
-    ArgsV.push_back(aSizeConst);
-    ArgsV.push_back(generateGetFastPointer(b));
-    ::llvm::Constant *bSizeConst = ::llvm::ConstantInt::get(
-        ::llvm::Type::getInt64Ty(mContext), b.getShapeView().getTotalSize());
-    ArgsV.push_back(bSizeConst);
-    ArgsV.push_back(generateGetFastPointer(c));
-    mBuilder.CreateCall(calledFunction, ArgsV);
-}
-
-void LLVMGenerator::generateAllocation(core::inner::Tensor &a) {
-    // todo handle different data types
-
-    ::llvm::Function *calledFunction = mModule->getFunction("allocate");
-
-    if (!calledFunction)
-        calledFunction = impl::create_allocate_decl(mContext, *mModule);
-
-    if (!calledFunction) {
-        core::FatalError(1, "Unknown function referenced");
-    }
-
-    // todo check arg count
-
-    std::vector<::llvm::Value *> ArgsV;
-    ::llvm::Constant *allocatorConst = ::llvm::ConstantInt::get(
-        ::llvm::Type::getInt64Ty(mContext), (size_t)(&mAllocator));
-    ArgsV.push_back(allocatorConst);
-    ::llvm::Constant *tensorConst = ::llvm::ConstantInt::get(
-        ::llvm::Type::getInt64Ty(mContext), (size_t)(&a));
-    ArgsV.push_back(tensorConst);
-    mBuilder.CreateCall(calledFunction, ArgsV);
+    mBuilder.SetInsertPoint(mMainBlock);
+    codegen::registerDefaultFunctors(this);
 }
 
 ::llvm::IRBuilder<> &LLVMGenerator::getBuilder() {
@@ -140,5 +90,40 @@ void LLVMGenerator::generateLoad(const core::AbstractLoader &loader,
         ::llvm::Type::getInt64Ty(mContext), (size_t)(&tensor));
     ArgsV.push_back(tensorConst);
     mBuilder.CreateCall(loadFunction, ArgsV);
+}
+void LLVMGenerator::generateImpl(std::string &name, core::inner::Tensor &a) {
+    mFunctorsMap[name](mContext, *mModule, mBuilder, a);
+}
+void LLVMGenerator::generateImpl(std::string &name,
+                                 core::inner::Tensor &a,
+                                 core::inner::Tensor &b) {
+    mFunctorsMap[name](mContext, *mModule, mBuilder, a, b);
+}
+void LLVMGenerator::generateImpl(std::string &name,
+                                 core::inner::Tensor &a,
+                                 core::inner::Tensor &b,
+                                 core::inner::Tensor &c) {
+    mFunctorsMap[name](mContext, *mModule, mBuilder, a, b, c);
+}
+void LLVMGenerator::openNode(std::string_view name) {
+#ifdef DEBUG
+    assert(mCurrentBlock == mMainBlock && "There is an opened node");
+#endif
+    ::llvm::FunctionType *FT =
+        ::llvm::FunctionType::get(::llvm::Type::getVoidTy(mContext), false);
+    auto nodeFunction =
+        ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage,
+                                 "node_" + std::string(name), *mModule);
+
+    mBuilder.CreateCall(nodeFunction);
+
+    mCurrentBlock = ::llvm::BasicBlock::Create(mContext, "entry", nodeFunction);
+
+    mBuilder.SetInsertPoint(mCurrentBlock);
+}
+void LLVMGenerator::closeNode() {
+    mBuilder.CreateRetVoid();
+    mCurrentBlock = mMainBlock;
+    mBuilder.SetInsertPoint(mCurrentBlock);
 }
 }  // namespace athena::backend::llvm

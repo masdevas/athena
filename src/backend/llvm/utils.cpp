@@ -15,30 +15,6 @@
 
 namespace athena::backend::llvm::impl {
 
-::llvm::Function *create_fadd_decl(::llvm::LLVMContext &ctx,
-                                   ::llvm::Module &module) {
-    std::vector<::llvm::Type *> args(5, ::llvm::Type::getInt64Ty(ctx));
-    ::llvm::FunctionType *FT =
-        ::llvm::FunctionType::get(::llvm::Type::getVoidTy(ctx), args, false);
-
-    ::llvm::Function *F = ::llvm::Function::Create(
-        FT, ::llvm::Function::ExternalLinkage, "fadd", &module);
-
-    return F;
-}
-
-::llvm::Function *create_allocate_decl(::llvm::LLVMContext &ctx,
-                                       ::llvm::Module &module) {
-    std::vector<::llvm::Type *> args(2, ::llvm::Type::getInt64Ty(ctx));
-    ::llvm::FunctionType *FT =
-        ::llvm::FunctionType::get(::llvm::Type::getVoidTy(ctx), args, false);
-
-    ::llvm::Function *F = ::llvm::Function::Create(
-        FT, ::llvm::Function::ExternalLinkage, "allocate", &module);
-
-    return F;
-}
-
 ::llvm::Function *create_get_fast_pointer_decl(::llvm::LLVMContext &ctx,
                                                ::llvm::Module &module) {
     std::vector<::llvm::Type *> args(2, ::llvm::Type::getInt64Ty(ctx));

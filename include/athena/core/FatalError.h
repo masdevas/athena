@@ -17,6 +17,7 @@
 #include <athena/core/Error.h>
 #include <athena/core/log.h>
 
+#include <csignal>
 #include <iostream>
 #include <string_view>
 
@@ -30,7 +31,11 @@ template <typename... Args>
 FatalError::FatalError(int32_t errorCode, Args... messages)
     : Error(errorCode, messages...) {
     err() << mErrorMessage;
+#ifdef DEBUG
+    std::raise(SIGABRT);
+#else
     exit(errorCode);
+#endif
 }
 }  // namespace athena::core
 

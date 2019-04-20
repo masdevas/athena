@@ -35,8 +35,8 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
 
     ::llvm::FunctionType *FT = ::llvm::FunctionType::get(
         ::llvm::Type::getVoidTy(mJITCompiler->getContext()), false);
-    auto jitMainFunc = ::llvm::Function::Create(
-        FT, ::llvm::Function::ExternalLinkage, "jitmain", *mMainModule);
+    ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, "jitmain",
+                             *mMainModule);
 
     LLVMGenerator generator(mJITCompiler->getContext(), mMainModule,
                             *mAllocator);
@@ -49,11 +49,13 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
             // todo generate wrapper function
             auto &inputNode = static_cast<core::InputNode &>(
                 *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
-            generator.generateAllocation(
-                core::inner::getTensorFromNode(inputNode));
+            generator.openNode(inputNode.getName());
+            generator.generate("allocate",
+                               core::inner::getTensorFromNode(inputNode));
             // todo generate code for loader
             generator.generateLoad(inputNode.getLoader(),
                                    core::inner::getTensorFromNode(inputNode));
+            generator.closeNode();
         }
 
         auto &actionNodes = cluster.get<core::Node>();
@@ -66,11 +68,14 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
             }
             auto &node = static_cast<core::Node &>(
                 *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
-            generator.generateAllocation(core::inner::getTensorFromNode(node));
+            generator.openNode(node.getName());
+            generator.generate("allocate",
+                               core::inner::getTensorFromNode(node));
             preparedTensors.push(&core::inner::getTensorFromNode(node));
             // todo lock tensors in memory
             node.getOperation().gen(generator, preparedTensors);
             // todo unlock tensors in memory
+            generator.closeNode();
         }
     }
 
