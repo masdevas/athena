@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [[ $1 ]]
 then
     git clang-format-8 $1 --diff --extensions h,cpp > format-fixes.diff
@@ -11,5 +13,5 @@ else
 fi
 
 git reset --hard HEAD
-[ -s format-fixes.diff ]
-exit $?
+
+touch format-fixes.diff
