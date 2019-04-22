@@ -32,6 +32,7 @@ Clusters &getClusters(Graph &graph);
 Clusters &getClusters(Traversal &traversal);
 void setTraversalValidity(Traversal &traversal, bool flag);
 void addDerivativeTensor(Node &node, inner::Tensor &tensor);
+void setResultTensor(Node &node, inner::Tensor &&tensor);
 }  // namespace athena::core::inner
 
 #endif  // ATHENA_INNERFUNCTIONS_H

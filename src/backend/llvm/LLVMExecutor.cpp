@@ -61,17 +61,18 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
         auto &actionNodes = cluster.get<core::Node>();
         for (auto &nodeDeps : actionNodes) {
             // todo generate wrapper function
-            std::stack<core::inner::Tensor *> preparedTensors;
+            std::vector<core::inner::Tensor *> preparedTensors;
             for (auto &input : nodeDeps.input) {
                 auto *node = core::inner::getNodeTable()[input.nodeIndex];
-                preparedTensors.push(&core::inner::getTensorFromNode(*node));
+                preparedTensors.push_back(
+                    &core::inner::getTensorFromNode(*node));
             }
             auto &node = static_cast<core::Node &>(
                 *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
             generator.openNode(node.getName());
             generator.generate("allocate",
                                core::inner::getTensorFromNode(node));
-            preparedTensors.push(&core::inner::getTensorFromNode(node));
+            preparedTensors.push_back(&core::inner::getTensorFromNode(node));
             // todo lock tensors in memory
             node.getOperation().gen(generator, preparedTensors);
             // todo unlock tensors in memory
