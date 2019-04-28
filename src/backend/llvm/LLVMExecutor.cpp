@@ -46,7 +46,6 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
     for (auto &cluster : mGraphTraversal.getClusters()) {
         auto &inputNodes = cluster.get<core::InputNode>();
         for (auto &nodeDeps : inputNodes) {
-            // todo generate wrapper function
             auto &inputNode = static_cast<core::InputNode &>(
                 *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
             generator.openNode(inputNode.getName());
@@ -60,7 +59,6 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
 
         auto &actionNodes = cluster.get<core::Node>();
         for (auto &nodeDeps : actionNodes) {
-            // todo generate wrapper function
             std::vector<core::inner::Tensor *> preparedTensors;
             for (auto &input : nodeDeps.input) {
                 auto *node = core::inner::getNodeTable()[input.nodeIndex];
@@ -76,6 +74,18 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
             // todo lock tensors in memory
             node.getOperation().gen(generator, preparedTensors);
             // todo unlock tensors in memory
+
+            for (size_t argNo = 0; argNo < nodeDeps.input.size(); argNo++) {
+                // todo check for frozen nodes
+                auto derivativeTensor = node.getOperation().getDerivativeTensor(
+                    preparedTensors, argNo);
+                core::inner::addDerivativeTensor(node, *derivativeTensor);
+                preparedTensors.pop_back();
+                preparedTensors.push_back(derivativeTensor);
+                node.getOperation().genDerivative(generator, preparedTensors,
+                                                  argNo);
+            }
+
             generator.closeNode();
         }
     }
