@@ -38,15 +38,25 @@ core::inner::Tensor *AddOperation::getDerivativeTensor(
     assert(argNo < 2 && "AddOperation takes 2 arguments!");
 #endif
     core::ShapeView shapeView(args[argNo]->getShapeView());
-    core::inner::Tensor *res =
-        new core::inner::Tensor(args[argNo]->getDataType(), shapeView.toShape());
+    core::inner::Tensor *res = new core::inner::Tensor(
+        args[argNo]->getDataType(), shapeView.toShape());
     return res;
 }
 void AddOperation::genDerivative(
     core::AbstractGenerator &g,
     std::vector<core::inner::Tensor *> &operationArguments,
     int argNo) const {
-    // todo implementation
+    float f_unit = 1;
+    void *unit = reinterpret_cast<void *>(&f_unit);
+    // We need to make sure the 4th (3rd in terms of vector)
+    // tensor persist and is a derivative tensor
+#ifdef DEBUG
+    assert(operationArguments.size() >= 4 &&
+           "operationArguments[3] must be derivative tensor");
+    assert(operationArguments[3]->getDataType() != core::DataType::UNDEFINED &&
+           "operationArguments[3] is broken");
+#endif
+    g.generate("fill", operationArguments[3], unit);
 }
 
 }  // namespace athena::ops

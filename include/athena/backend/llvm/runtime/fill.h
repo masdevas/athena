@@ -11,14 +11,10 @@
  * the License.
  */
 
-#include "register_default_functors.h"
 
-#include "common.h"
-
-namespace athena::backend::llvm::codegen {
-void registerDefaultFunctors(LLVMGenerator *generator) {
-    registerAdd(generator);
-    registerAllocate(generator);
-    registerFill(generator);
-}
-}  // namespace athena::backend::llvm::codegen
+#ifndef ATHENA_FILL_H
+#define ATHENA_FILL_H
+extern "C" {
+    void ffill(void *allocator, void *tensor, float f);
+};
+#endif //ATHENA_FILL_H
