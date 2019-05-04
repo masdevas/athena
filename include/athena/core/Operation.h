@@ -18,9 +18,9 @@
 #include <athena/core/FatalError.h>
 #include <athena/core/inner/Tensor.h>
 
-#include <vector>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace athena::core {
 class Operation {

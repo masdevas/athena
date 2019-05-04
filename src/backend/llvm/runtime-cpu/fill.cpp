@@ -16,15 +16,14 @@
 #include <athena/core/inner/Tensor.h>
 
 extern "C" {
-    void ffill(void *allocator, void *tensor, float f) {
-        auto *pAllocator =
-            reinterpret_cast<athena::core::Allocator *>(allocator);
-        auto *pTensor = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
+void ffill(void *allocator, void *tensor, float f) {
+    auto *pAllocator = reinterpret_cast<athena::core::Allocator *>(allocator);
+    auto *pTensor = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
 
-        auto *mem = reinterpret_cast<float *>(pAllocator->getRAMPointer(*pTensor));
+    auto *mem = reinterpret_cast<float *>(pAllocator->getRAMPointer(*pTensor));
 
-        for (size_t i = 0; i < pTensor->getShapeView().getTotalSize(); i++) {
-            mem[i] = f;
-        }
+    for (size_t i = 0; i < pTensor->getShapeView().getTotalSize(); i++) {
+        mem[i] = f;
     }
+}
 }

@@ -12,6 +12,7 @@
  */
 
 #include <athena/ops/AddOperation.h>
+
 #include <cassert>
 
 namespace athena::ops {
@@ -52,7 +53,7 @@ void AddOperation::genDerivative(
     // We need to make sure the 4th (3rd in terms of vector)
     // tensor persist and is a derivative tensor
 #ifdef DEBUG
-    assert(operationArguments.size() >=3 &&
+    assert(operationArguments.size() >= 3 &&
            "operationArguments[2] must be derivative tensor");
     assert(operationArguments[2]->getDataType() != core::DataType::UNDEFINED &&
            "operationArguments[2] is broken");
