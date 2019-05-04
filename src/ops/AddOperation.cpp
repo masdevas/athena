@@ -52,12 +52,12 @@ void AddOperation::genDerivative(
     // We need to make sure the 4th (3rd in terms of vector)
     // tensor persist and is a derivative tensor
 #ifdef DEBUG
-    assert(operationArguments.size() >= 4 &&
-           "operationArguments[3] must be derivative tensor");
-    assert(operationArguments[3]->getDataType() != core::DataType::UNDEFINED &&
-           "operationArguments[3] is broken");
+    assert(operationArguments.size() >=3 &&
+           "operationArguments[2] must be derivative tensor");
+    assert(operationArguments[2]->getDataType() != core::DataType::UNDEFINED &&
+           "operationArguments[2] is broken");
 #endif
-    g.generate("fill", operationArguments[3], unit);
+    g.generate("fill", *operationArguments[2], unit);
 }
 
 }  // namespace athena::ops

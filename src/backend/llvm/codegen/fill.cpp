@@ -30,10 +30,10 @@ namespace athena::backend::llvm::codegen {
 
 void registerFill(LLVMGenerator *generator) {
     std::function<void(::llvm::LLVMContext &, ::llvm::Module &,
-                       ::llvm::IRBuilder<> &, core::inner::Tensor &, void *)>
+                       ::llvm::IRBuilder<> &, core::inner::Tensor &, void *&)>
         f = [generator](::llvm::LLVMContext &ctx, ::llvm::Module &module,
                         ::llvm::IRBuilder<> &builder, core::inner::Tensor &a,
-                        void *filler) {
+                        void *&filler) {
             // todo handle different data types
 
             ::llvm::Function *calledFunction = module.getFunction("ffill");

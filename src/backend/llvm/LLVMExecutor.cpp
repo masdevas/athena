@@ -82,6 +82,7 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
                 core::inner::addDerivativeTensor(node, *derivativeTensor);
                 preparedTensors.pop_back();
                 preparedTensors.push_back(derivativeTensor);
+                generator.generate("allocate", *derivativeTensor);
                 node.getOperation().genDerivative(generator, preparedTensors,
                                                   argNo);
             }

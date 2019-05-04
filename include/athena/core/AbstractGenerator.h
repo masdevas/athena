@@ -20,6 +20,7 @@ namespace athena::core {
 class AbstractGenerator {
     protected:
     virtual void generateImpl(std::string &, inner::Tensor &a) = 0;
+    virtual void generateImpl(std::string &, inner::Tensor &a, void *&b) = 0;
     virtual void generateImpl(std::string &,
                               inner::Tensor &a,
                               inner::Tensor &b) = 0;
