@@ -12,6 +12,7 @@
  */
 
 #include <athena/ops/AddOperation.h>
+#include <cassert>
 
 namespace athena::ops {
 
