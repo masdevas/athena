@@ -24,6 +24,8 @@ namespace athena::backend {
 class RuntimeDriver {
     void* mLibraryHandle;
     void (*mFaddPointer)(void* a, size_t ca, void* b, size_t cb, void* c);
+    void (*mAllocatePointer)(void* a, void* t);
+    void* (*mGetFPPointer)(void* a, void* t);
 
     void* getFunction(std::string_view nameFunction);
 
@@ -42,18 +44,23 @@ class RuntimeDriver {
     void reload(std::string_view nameLibrary);
     bool isLoaded() const;
 
-    void fadd(void* a, size_t ca, void* b, size_t cb, void* c) {
+    void athena_fadd(void* a, size_t ca, void* b, size_t cb, void* c) {
         mFaddPointer(a, ca, b, cb, c);
     }
+    void athena_allocate(void* a, void* t) {
+        mAllocatePointer(a, t);
+    }
+    void* athena_get_fast_pointer(void* a, void* t) {
+        return mGetFPPointer(a, t);
+    }
 };
-
 extern RuntimeDriver kRuntimeDriver;
+}  // namespace athena::backend
 
 extern "C" {
-void inline fadd(void* a, size_t ca, void* b, size_t cb, void* c) {
-    kRuntimeDriver.fadd(a, ca, b, cb, c);
+void athena_fadd(void* a, size_t ca, void* b, size_t cb, void* c);
+void athena_allocate(void* a, void* t);
+void* athena_get_fast_pointer(void* a, void* t);
 }
-}
-}  // namespace athena::backend
 
 #endif  // ATHENA_RUNTIME_DRIVER_H

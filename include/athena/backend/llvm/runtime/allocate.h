@@ -21,8 +21,8 @@ extern "C" {
 #include <stddef.h>
 #endif
 
-void allocate(void *allocator, void *tensor);
-size_t get_fast_pointer(void *allocator, void *tensor);
+void athena_allocate(void *allocator, void *tensor);
+size_t athena_get_fast_pointer(void *allocator, void *tensor);
 
 #if __cplusplus
 }

@@ -15,7 +15,7 @@
 
 #include <iostream>
 
-void fadd(void *a, size_t ca, void *b, size_t cb, void *c) {
+void athena_fadd(void *a, size_t ca, void *b, size_t cb, void *c) {
     auto af = reinterpret_cast<float *>(a);
     auto bf = reinterpret_cast<float *>(b);
     auto cf = reinterpret_cast<float *>(c);

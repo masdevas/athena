@@ -16,6 +16,7 @@ import re
 import subprocess
 import sys
 import xml.etree.ElementTree as et
+import platform
 
 main_env_var_name = "ATHENA_TEST_ENVIRONMENT"
 ci_environment_code = "ci"
@@ -27,6 +28,7 @@ value_tag = "value"
 
 alias_attrib_name = "name"
 alias_attrib_env = "env"
+alias_attrib_os = "os"
 
 
 def fatal_error(*args, error_code=1):
@@ -61,6 +63,10 @@ def set_env_var_with_value(var_name, value):
 
 
 def set_env_var(set_command, env_code):
+    target_os = set_command.attrib.get(alias_attrib_os)
+    if target_os is not None and target_os != platform.system():
+        return
+
     var_name = set_command.attrib.get(alias_attrib_name)
     if len(set_command) == 0:
         if set_command.attrib.get(alias_attrib_env) is not None:

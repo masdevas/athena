@@ -13,7 +13,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 # todo remove hacks http://lists.llvm.org/pipermail/llvm-dev/2016-May/099874.html
 if (UNIX AND NOT APPLE)
-set(CMAKE_CXX_FLAGS  "-Wl,--export-dynamic")
+    set(CMAKE_CXX_FLAGS  "-Wl,--export-dynamic")
+    #set(CMAKE_CXX_FLAGS  "-fvisibility=default -Wl,--export-dynamic")
 endif()
 
 include(AthenaTarget)

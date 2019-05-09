@@ -49,7 +49,7 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
             auto &inputNode = static_cast<core::InputNode &>(
                 *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
             generator.openNode(inputNode.getName());
-            generator.generate("allocate",
+            generator.generate("athena_allocate",
                                core::inner::getTensorFromNode(inputNode));
             // todo generate code for loader
             generator.generateLoad(inputNode.getLoader(),
@@ -68,7 +68,7 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
             auto &node = static_cast<core::Node &>(
                 *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
             generator.openNode(node.getName());
-            generator.generate("allocate",
+            generator.generate("athena_allocate",
                                core::inner::getTensorFromNode(node));
             preparedTensors.push_back(&core::inner::getTensorFromNode(node));
             // todo lock tensors in memory

@@ -50,7 +50,13 @@ void RuntimeDriver::load(std::string_view nameLibrary) {
     }
     mFaddPointer =
         reinterpret_cast<void (*)(void*, size_t, void*, size_t, void*)>(
-            getFunction("fadd"));
+            getFunction("athena_fadd"));
+
+    mAllocatePointer = reinterpret_cast<void (*)(void*, void*)>(
+        getFunction("athena_allocate"));
+
+    mGetFPPointer = reinterpret_cast<void* (*)(void*, void*)>(
+        getFunction("athena_get_fast_pointer"));
 }
 void RuntimeDriver::unload() {
     if (mLibraryHandle && dlclose(mLibraryHandle)) {
@@ -67,3 +73,15 @@ bool RuntimeDriver::isLoaded() const {
     return mLibraryHandle != nullptr;
 }
 }  // namespace athena::backend
+
+extern "C" {
+void athena_fadd(void* a, size_t ca, void* b, size_t cb, void* c) {
+    athena::backend::kRuntimeDriver.athena_fadd(a, ca, b, cb, c);
+}
+void athena_allocate(void* a, void* t) {
+    athena::backend::kRuntimeDriver.athena_allocate(a, t);
+}
+void* athena_get_fast_pointer(void* a, void* t) {
+    return athena::backend::kRuntimeDriver.athena_get_fast_pointer(a, t);
+}
+}

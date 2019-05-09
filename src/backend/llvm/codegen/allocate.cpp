@@ -22,7 +22,7 @@ namespace athena::backend::llvm::codegen {
         ::llvm::FunctionType::get(::llvm::Type::getVoidTy(ctx), args, false);
 
     ::llvm::Function *F = ::llvm::Function::Create(
-        FT, ::llvm::Function::ExternalLinkage, "allocate", &module);
+        FT, ::llvm::Function::ExternalLinkage, "athena_allocate", &module);
 
     return F;
 }
@@ -34,7 +34,8 @@ void registerAllocate(LLVMGenerator *generator) {
                         ::llvm::IRBuilder<> &builder, core::inner::Tensor &a) {
             // todo handle different data types
 
-            ::llvm::Function *calledFunction = module.getFunction("allocate");
+            ::llvm::Function *calledFunction =
+                module.getFunction("athena_allocate");
 
             if (!calledFunction)
                 calledFunction = create_allocate_decl(ctx, module);
@@ -56,6 +57,6 @@ void registerAllocate(LLVMGenerator *generator) {
             builder.CreateCall(calledFunction, ArgsV);
         };
 
-    generator->registerFunctor("allocate", f);
+    generator->registerFunctor("athena_allocate", f);
 }
 }  // namespace athena::backend::llvm::codegen

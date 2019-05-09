@@ -21,8 +21,9 @@ namespace athena::backend::llvm::impl {
     ::llvm::FunctionType *FT =
         ::llvm::FunctionType::get(::llvm::Type::getInt64Ty(ctx), args, false);
 
-    ::llvm::Function *F = ::llvm::Function::Create(
-        FT, ::llvm::Function::ExternalLinkage, "get_fast_pointer", &module);
+    ::llvm::Function *F =
+        ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage,
+                                 "athena_get_fast_pointer", &module);
 
     return F;
 }

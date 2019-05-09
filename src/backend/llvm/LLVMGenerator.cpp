@@ -40,7 +40,8 @@ llvm::LLVMGenerator::LLVMGenerator(
 }
 
 ::llvm::Value *LLVMGenerator::generateGetFastPointer(core::inner::Tensor &t) {
-    ::llvm::Function *calledFunction = mModule->getFunction("get_fast_pointer");
+    ::llvm::Function *calledFunction =
+        mModule->getFunction("athena_get_fast_pointer");
 
     if (!calledFunction)
         calledFunction = impl::create_get_fast_pointer_decl(mContext, *mModule);

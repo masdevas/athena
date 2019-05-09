@@ -12,6 +12,7 @@
  */
 
 #include <athena/backend/llvm/AthenaJIT.h>
+#include <athena/backend/llvm/runtime-driver/runtime-driver.h>
 
 #include <llvm/Transforms/InstCombine/InstCombine.h>
 #include <llvm/Transforms/Scalar.h>
@@ -30,6 +31,10 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
       mDataLayout(std::move(DL)),
       mMangle(mExecutionSession, mDataLayout),
       mContext(::llvm::make_unique<::llvm::LLVMContext>()) {
+    kRuntimeDriver.load(getenv("ATHENA_RT_LIBRARY"));
+#ifdef DEBUG
+    assert(kRuntimeDriver.isLoaded());
+#endif
     ::llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
     mExecutionSession.getMainJITDylib().setGenerator(cantFail(
         ::llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(DL)));

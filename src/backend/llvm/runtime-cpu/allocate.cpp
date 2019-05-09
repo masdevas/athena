@@ -16,16 +16,16 @@
 #include <athena/core/inner/Tensor.h>
 
 extern "C" {
-void allocate(void *allocator, void *tensor) {
-    auto pAllocator = reinterpret_cast<athena::core::Allocator *>(allocator);
-    auto pTensor = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
+void athena_allocate(void *a, void *t) {
+    auto pAllocator = reinterpret_cast<athena::core::Allocator *>(a);
+    auto pTensor = reinterpret_cast<athena::core::inner::Tensor *>(t);
 
     pAllocator->allocate(*pTensor);
 }
 
-size_t get_fast_pointer(void *allocator, void *tensor) {
-    auto pAllocator = reinterpret_cast<athena::core::Allocator *>(allocator);
-    auto pTensor = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
+size_t athena_get_fast_pointer(void *a, void *t) {
+    auto pAllocator = reinterpret_cast<athena::core::Allocator *>(a);
+    auto pTensor = reinterpret_cast<athena::core::inner::Tensor *>(t);
 
     return pAllocator->getFastPointer(*pTensor);
 }

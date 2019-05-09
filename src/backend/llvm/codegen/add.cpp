@@ -24,7 +24,7 @@ namespace athena::backend::llvm::codegen {
         ::llvm::FunctionType::get(::llvm::Type::getVoidTy(ctx), args, false);
 
     ::llvm::Function *F = ::llvm::Function::Create(
-        FT, ::llvm::Function::ExternalLinkage, "fadd", &module);
+        FT, ::llvm::Function::ExternalLinkage, "athena_fadd", &module);
 
     return F;
 }
@@ -38,7 +38,8 @@ void registerAdd(LLVMGenerator *generator) {
                         core::inner::Tensor &b, core::inner::Tensor &c) {
             // todo handle different data types
 
-            ::llvm::Function *calledFunction = module.getFunction("fadd");
+            ::llvm::Function *calledFunction =
+                module.getFunction("athena_fadd");
 
             if (!calledFunction) calledFunction = create_fadd_decl(ctx, module);
 
