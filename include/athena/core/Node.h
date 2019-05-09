@@ -24,6 +24,9 @@ class Node : public AbstractNode {
 
     protected:
     Operation* mOperation;
+    std::vector<inner::Tensor> mDerivativeTensors;
+
+    friend void inner::addDerivativeTensor(Node& node, inner::Tensor& tensor);
 
     public:
     Node() = delete;

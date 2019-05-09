@@ -38,6 +38,7 @@ class LLVMGenerator : public core::AbstractGenerator {
 
     protected:
     void generateImpl(std::string &, core::inner::Tensor &a) override;
+    void generateImpl(std::string &, core::inner::Tensor &a, void *&b) override;
     void generateImpl(std::string &,
                       core::inner::Tensor &a,
                       core::inner::Tensor &b) override;

@@ -21,6 +21,7 @@
 namespace athena::backend::llvm::codegen {
 void registerAdd(LLVMGenerator *generator);
 void registerAllocate(LLVMGenerator *generator);
+void registerFill(LLVMGenerator *generator);
 }  // namespace athena::backend::llvm::codegen
 
 #endif  // ATHENA_COMMON_H

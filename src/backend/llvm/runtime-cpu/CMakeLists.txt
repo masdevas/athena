@@ -48,7 +48,14 @@ endfunction(getblis)
 option(FORCE_BLIS "Require library to use BLIS" OFF)
 option(FORCE_ULAS "Require library to use uBLAS" OFF)
 
-add_athena_library(runtime-llvm-cpu SHARED add.cpp allocate.cpp)
+add_athena_library(runtime-llvm-cpu SHARED add.cpp allocate.cpp fill.cpp)
+target_link_libraries(runtime-llvm-cpu athena-core)
+
+if (APPLE)
+    athena_add_linker_options(runtime-llvm-cpu PRIVATE "-undefined dynamic_lookup")
+elseif (UNIX)
+    athena_add_linker_options(runtime-llvm-cpu PRIVATE "--allow-shlib-undefined")
+endif ()
 
 if (FORCE_BLIS)
     message(STATUS "BLIS will be downloaded and compiled")

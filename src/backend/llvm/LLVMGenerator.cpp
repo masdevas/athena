@@ -96,6 +96,11 @@ void LLVMGenerator::generateImpl(std::string &name, core::inner::Tensor &a) {
 }
 void LLVMGenerator::generateImpl(std::string &name,
                                  core::inner::Tensor &a,
+                                 void *&b) {
+    mFunctorsMap[name](mContext, *mModule, mBuilder, a, b);
+}
+void LLVMGenerator::generateImpl(std::string &name,
+                                 core::inner::Tensor &a,
                                  core::inner::Tensor &b) {
     mFunctorsMap[name](mContext, *mModule, mBuilder, a, b);
 }

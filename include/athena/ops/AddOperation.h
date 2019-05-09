@@ -24,10 +24,15 @@ class AddOperation : public core::Operation {
     AddOperation() : Operation("add") {}
 
     core::inner::Tensor *getResultTensor(
-        std::deque<core::inner::Tensor *> args) const override;
+        std::vector<core::inner::Tensor *> args) const override;
+    core::inner::Tensor *getDerivativeTensor(
+        std::vector<core::inner::Tensor *> args, int argNo) const override;
     void gen(
         core::AbstractGenerator &g,
-        std::stack<core::inner::Tensor *> &operationArguments) const override;
+        std::vector<core::inner::Tensor *> &operationArguments) const override;
+    void genDerivative(core::AbstractGenerator &g,
+                       std::vector<core::inner::Tensor *> &operationArguments,
+                       int argNo) const override;
 };
 }  // namespace athena::ops
 #endif  // ATHENA_ADDOPERATION_H

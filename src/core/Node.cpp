@@ -55,4 +55,7 @@ void Node::clear() {
     mOperation = nullptr;
     AbstractNode::clear();
 }
+void inner::addDerivativeTensor(Node& node, inner::Tensor& tensor) {
+    node.mDerivativeTensors.push_back(tensor);
+}
 }  // namespace athena::core
