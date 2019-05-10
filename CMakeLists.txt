@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.13)
 project(athena)
 
 set(ATHENA_MAJOR_VERSION "0")
@@ -13,8 +13,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 # todo remove hacks http://lists.llvm.org/pipermail/llvm-dev/2016-May/099874.html
 if (UNIX AND NOT APPLE)
-    set(CMAKE_CXX_FLAGS  "-Wl,--export-dynamic")
-    #set(CMAKE_CXX_FLAGS  "-fvisibility=default -Wl,--export-dynamic")
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        add_link_options("-rdynamic")
+    else()
+        add_link_options("-export-dynamic")
+    endif()
 endif()
 
 include(AthenaTarget)

@@ -23,7 +23,7 @@ namespace athena::backend::llvm::codegen {
         ::llvm::FunctionType::get(::llvm::Type::getVoidTy(ctx), args, false);
 
     ::llvm::Function *F = ::llvm::Function::Create(
-        FT, ::llvm::Function::ExternalLinkage, "ffill", &module);
+        FT, ::llvm::Function::ExternalLinkage, "athena_ffill", &module);
 
     return F;
 }
@@ -36,7 +36,8 @@ void registerFill(LLVMGenerator *generator) {
                         void *&filler) {
             // todo handle different data types
 
-            ::llvm::Function *calledFunction = module.getFunction("ffill");
+            ::llvm::Function *calledFunction =
+                module.getFunction("athena_ffill");
 
             if (!calledFunction)
                 calledFunction = create_ffill_decl(ctx, module);

@@ -1,0 +1,13 @@
+commands:
+  macos:
+    - set:
+        name: PATH_TO_RUNTIME_CPU
+        value:
+          ci: "@ATHENA_BINARY_DIR@/src/backend/llvm/runtime-cpu/libruntime-llvm-cpu.dylib"
+          dev: "@CMAKE_BINARY_DIR@/src/backend/llvm/runtime-cpu/libruntime-llvm-cpu.dylib"
+  linux:
+    - set:
+        name: PATH_TO_RUNTIME_CPU
+        value:
+          ci: "@ATHENA_BINARY_DIR@/src/backend/llvm/runtime-cpu/libruntime-llvm-cpu.so"
+          dev: "@CMAKE_BINARY_DIR@/src/backend/llvm/runtime-cpu/libruntime-llvm-cpu.so"

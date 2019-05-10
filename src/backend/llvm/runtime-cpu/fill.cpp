@@ -16,7 +16,7 @@
 #include <athena/core/inner/Tensor.h>
 
 extern "C" {
-void ffill(void *allocator, void *tensor, float f) {
+void athena_ffill(void *allocator, void *tensor, float f) {
     auto *pAllocator = reinterpret_cast<athena::core::Allocator *>(allocator);
     auto *pTensor = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
 

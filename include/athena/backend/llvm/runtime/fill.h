@@ -14,6 +14,6 @@
 #ifndef ATHENA_FILL_H
 #define ATHENA_FILL_H
 extern "C" {
-void ffill(void *allocator, void *tensor, float f);
+void athena_ffill(void *allocator, void *tensor, float f);
 };
 #endif  // ATHENA_FILL_H

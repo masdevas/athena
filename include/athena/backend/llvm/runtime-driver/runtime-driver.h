@@ -26,6 +26,7 @@ class RuntimeDriver {
     void (*mFaddPointer)(void* a, size_t ca, void* b, size_t cb, void* c);
     void (*mAllocatePointer)(void* a, void* t);
     void* (*mGetFPPointer)(void* a, void* t);
+    void (*mFfillPointer)(void* allocator, void* tensor, float f);
 
     void* getFunction(std::string_view nameFunction);
 
@@ -53,6 +54,7 @@ class RuntimeDriver {
     void* athena_get_fast_pointer(void* a, void* t) {
         return mGetFPPointer(a, t);
     }
+    void athena_ffill(void* allocator, void* tensor, float f) {}
 };
 extern RuntimeDriver kRuntimeDriver;
 }  // namespace athena::backend
@@ -61,6 +63,7 @@ extern "C" {
 void athena_fadd(void* a, size_t ca, void* b, size_t cb, void* c);
 void athena_allocate(void* a, void* t);
 void* athena_get_fast_pointer(void* a, void* t);
+void athena_ffill(void* allocator, void* tensor, float f);
 }
 
 #endif  // ATHENA_RUNTIME_DRIVER_H

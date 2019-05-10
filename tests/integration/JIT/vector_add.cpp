@@ -20,12 +20,14 @@
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 #include <athena/ops/AddOperation.h>
 
+#include <gtest/gtest.h>
+
 using namespace athena::core;
 using namespace athena::ops;
 using namespace athena::backend::llvm;
 using namespace athena::loaders;
 
-bool testVectorSum() {
+TEST(JIT, SimpleVectorAdd) {
     // Arrange
     TensorShape shape({3});
 
@@ -60,25 +62,8 @@ bool testVectorSum() {
 
     auto pRes = (float*)executor.getAllocator()->getFastPointer(
         inner::getTensorFromNode(add));
-    if (abs(pRes[0] - 5.0) > 0.1) {
-        std::cout << "Element 0 is wrong"
-                  << "\n";
-        return 1;
-    }
-    if (abs(pRes[1] - 7.0) > 0.1) {
-        std::cout << "Element 1 is wrong"
-                  << "\n";
-        return 1;
-    }
-    if (abs(pRes[2] - 9.0) > 0.1) {
-        std::cout << "Element 2 is wrong"
-                  << "\n";
-        return 1;
-    }
-    return true;
-}
 
-int main() {
-    testVectorSum();
-    return 0;
+    EXPECT_FLOAT_EQ(pRes[0], 5.0);
+    EXPECT_FLOAT_EQ(pRes[1], 7.0);
+    EXPECT_FLOAT_EQ(pRes[2], 9.0);
 }

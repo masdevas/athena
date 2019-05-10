@@ -14,6 +14,7 @@
 #include "athena/backend/llvm/runtime-driver/runtime-driver.h"
 
 #include <cassert>
+#include <gtest/gtest.h>
 #include <iostream>
 #include <string>
 
@@ -21,13 +22,21 @@ std::string kPathToRuntimeCPU;
 const std::string kPathToRuntimeCPUName = "PATH_TO_RUNTIME_CPU";
 
 namespace athena::backend {
-void test_creation() {
+
+class RuntimeDriverTest : public ::testing::Test {
+    protected:
+    void SetUp() override {
+        kPathToRuntimeCPU = ::getenv(kPathToRuntimeCPUName.data());
+    }
+};
+
+TEST_F(RuntimeDriverTest, TestCreation) {
     std::string nameLibrary(kPathToRuntimeCPU);
     kRuntimeDriver.reload(nameLibrary);
     assert(kRuntimeDriver.isLoaded());
 }
 
-void test_loads() {
+TEST_F(RuntimeDriverTest, TestLoads) {
     std::string nameLibrary(kPathToRuntimeCPU);
     kRuntimeDriver = RuntimeDriver(nameLibrary);
     assert(kRuntimeDriver.isLoaded());
@@ -39,7 +48,7 @@ void test_loads() {
     assert(kRuntimeDriver.isLoaded());
 }
 
-void test_using_functions() {
+TEST_F(RuntimeDriverTest, TestFunctionCall) {
     std::string nameLibrary(kPathToRuntimeCPU);
     constexpr size_t size = 3;
     float vector_first[] = {1.0, 2.0, 3.0}, vector_second[] = {4.0, 5.0, 6.0},
@@ -50,16 +59,3 @@ void test_using_functions() {
     assert(vector_res[2] == 9.0);
 }
 }  // namespace athena::backend
-
-void init() {
-    kPathToRuntimeCPU = ::getenv(kPathToRuntimeCPUName.data());
-}
-
-int main() {
-    init();
-    ::athena::backend::test_creation();
-    ::athena::backend::test_loads();
-    ::athena::backend::test_using_functions();
-    std::cout << "OK" << '\n';
-    return 0;
-}

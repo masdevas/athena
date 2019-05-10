@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.13)
+
+project(yaml-download NONE)
+
+include(ExternalProject)
+ExternalProject_add(yaml
+            GIT_REPOSITORY    "git://github.com/jbeder/yaml-cpp.git"
+            SOURCE_DIR        "${CMAKE_BINARY_DIR}/third_party/yaml-src"
+            BINARY_DIR        "${CMAKE_BINARY_DIR}/third_party/yaml-build"
+            INSTALL_COMMAND   ""
+            CONFIGURE_COMMAND ""
+            TEST_COMMAND      ""
+            BUILD_COMMAND     ""
+            )

@@ -57,6 +57,6 @@ void registerAllocate(LLVMGenerator *generator) {
             builder.CreateCall(calledFunction, ArgsV);
         };
 
-    generator->registerFunctor("athena_allocate", f);
+    generator->registerFunctor("allocate", f);
 }
 }  // namespace athena::backend::llvm::codegen

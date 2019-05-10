@@ -57,6 +57,9 @@ void RuntimeDriver::load(std::string_view nameLibrary) {
 
     mGetFPPointer = reinterpret_cast<void* (*)(void*, void*)>(
         getFunction("athena_get_fast_pointer"));
+
+    mFfillPointer = reinterpret_cast<void (*)(void*, void*, float)>(
+        getFunction("athena_ffill"));
 }
 void RuntimeDriver::unload() {
     if (mLibraryHandle && dlclose(mLibraryHandle)) {
@@ -83,5 +86,8 @@ void athena_allocate(void* a, void* t) {
 }
 void* athena_get_fast_pointer(void* a, void* t) {
     return athena::backend::kRuntimeDriver.athena_get_fast_pointer(a, t);
+}
+void athena_ffill(void* allocator, void* tensor, float f) {
+    athena::backend::kRuntimeDriver.athena_ffill(allocator, tensor, f);
 }
 }

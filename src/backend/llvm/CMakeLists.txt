@@ -21,7 +21,7 @@ target_compile_definitions(backend-llvm PUBLIC ${LLVM_DEFINITIONS})
 
 llvm_map_components_to_libnames(llvm_libs core irreader support transformutils passes codegen orcjit x86asmparser x86codegen)
 
-target_link_libraries(backend-llvm PUBLIC athena-core runtime-driver ${llvm_libs})
+target_link_libraries(backend-llvm PUBLIC runtime-driver ${llvm_libs})
 add_dependencies(backend-llvm runtime-llvm-cpu)
 # TODO make JIT link against executable
 target_link_libraries(backend-llvm PUBLIC MemoryLoader)
