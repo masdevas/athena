@@ -1,0 +1,41 @@
+DOXYFILE_ENCODING      = UTF-8
+PROJECT_NAME           = Athena
+CREATE_SUBDIRS         = YES
+ALLOW_UNICODE_NAMES    = YES
+OUTPUT_LANGUAGE        = English
+
+SOURCE_BROWSER         = YES
+VERBATIM_HEADERS       = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_LINK_SOURCE = YES
+
+ABBREVIATE_BRIEF       = "The $name class" \
+                         "The $name widget" \
+                         "The $name file" \
+                         is \
+                         provides \
+                         specifies \
+                         contains \
+                         represents \
+                         a \
+                         an \
+                         the
+
+ALWAYS_DETAILED_SEC    = YES
+
+STRIP_FROM_PATH        = @CMAKE_SOURCE_DIR@/src/ @CMAKE_SOURCE_DIR@/tests/
+
+MARKDOWN_SUPPORT       = YES
+AUTOLINK_SUPPORT       = YES
+
+INPUT = @CMAKE_SOURCE_DIR@/src/ @CMAKE_SOURCE_DIR@/include/
+
+FILE_PATTERNS          = *.cpp *.h
+
+RECURSIVE              = YES
+
+HTML_OUTPUT = @CMAKE_BINARY_DIR@/docs/
+USE_MATHJAX = YES
+
+TYPEDEF_HIDES_STRUCT = YES
+ENUM_VALUES_PER_LINE = 1

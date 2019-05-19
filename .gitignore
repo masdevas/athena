@@ -70,5 +70,6 @@ fabric.properties
 
 libs
 third_party
-docs
 .DS_Store
+
+node_modules

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
-project(athena)
+project(athena NONE)
+
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 
 set(ATHENA_MAJOR_VERSION "0")
 set(ATHENA_MINOR_VERSION "1")
@@ -7,49 +9,59 @@ set(ATHENA_PATCH_VERSION "0")
 
 option(DISABLE_TESTS "OFF")
 option(ENABLE_CODE_COVERAGE "OFF")
+option(DOCS_ONLY "OFF")
 set(USE_SANITIZERS "OFF" CACHE STRING "Specify Google Sanitizers")
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
-# todo remove hacks http://lists.llvm.org/pipermail/llvm-dev/2016-May/099874.html
-if (UNIX AND NOT APPLE)
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        add_link_options("-rdynamic")
-    else()
-        add_link_options("-export-dynamic")
-    endif()
-endif()
+include(AthenaDocs)
+enable_docs()
 
-include(AthenaTarget)
-include(AthenaEnableSanitizers)
+if (NOT DOCS_ONLY)
 
-enable_testing()
-enable_sanitizers()
+    enable_language(C)
+    enable_language(CXX)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+    set(CMAKE_CXX_STANDARD 17)
 
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/null.cpp "")
-add_athena_library(athena SHARED ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
-add_definitions(-DATHENA_MAJOR_VERSION="${ATHENA_MAJOR_VERSION}")
-add_definitions(-DATHENA_MINOR_VERSION="${ATHENA_MINOR_VERSION}")
-add_definitions(-DATHENA_PATCH_VERSION="${ATHENA_PATCH_VERSION}")
-if (DEFINED $ENV{ATHENA_CI_BUILD_NUMBER})
-    add_definitions(-DATHENA_PATCH_VERSION="$ENV{ATHENA_CI_BUILD_NUMBER}")
-endif()
+    # todo remove hacks http://lists.llvm.org/pipermail/llvm-dev/2016-May/099874.html
+    if (UNIX AND NOT APPLE)
+        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+            add_link_options("-rdynamic")
+        else ()
+            add_link_options("-export-dynamic")
+        endif ()
+    endif ()
 
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    message(STATUS "Debug build contains assertions")
-    add_definitions(-DDEBUG)
-endif()
+    include(AthenaTarget)
+    include(AthenaEnableSanitizers)
 
-add_subdirectory(src)
+    enable_testing()
+    enable_sanitizers()
 
-target_link_libraries(athena PUBLIC athena-core athena-ops backend-llvm)
+    include_directories(${CMAKE_SOURCE_DIR}/include)
+
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/null.cpp "")
+    add_athena_library(athena SHARED ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
+    add_definitions(-DATHENA_MAJOR_VERSION="${ATHENA_MAJOR_VERSION}")
+    add_definitions(-DATHENA_MINOR_VERSION="${ATHENA_MINOR_VERSION}")
+    add_definitions(-DATHENA_PATCH_VERSION="${ATHENA_PATCH_VERSION}")
+    if (DEFINED $ENV{ATHENA_CI_BUILD_NUMBER})
+        add_definitions(-DATHENA_PATCH_VERSION="$ENV{ATHENA_CI_BUILD_NUMBER}")
+    endif ()
+
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+        message(STATUS "Debug build contains assertions")
+        add_definitions(-DDEBUG)
+    endif ()
+
+    add_subdirectory(src)
+
+    target_link_libraries(athena PUBLIC athena-core athena-ops backend-llvm)
 
 
-if (NOT DISABLE_TESTS)
-    include(AthenaCoverageOptions)
-    enable_coverage()
-    add_subdirectory(tests)
-endif()
+    if (NOT DISABLE_TESTS)
+        include(AthenaCoverageOptions)
+        enable_coverage()
+        add_subdirectory(tests)
+    endif ()
 
+endif ()
