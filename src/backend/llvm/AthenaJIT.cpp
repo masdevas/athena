@@ -32,11 +32,6 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
       mDataLayout(std::move(DL)),
       mMangle(mExecutionSession, mDataLayout),
       mContext(::llvm::make_unique<::llvm::LLVMContext>()) {
-    auto libName = std::getenv("ATHENA_RT_LIBRARY");
-    kRuntimeDriver.load(libName);
-#ifdef DEBUG
-    assert(kRuntimeDriver.isLoaded());
-#endif
     ::llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
     mExecutionSession.getMainJITDylib().setGenerator(cantFail(
         ::llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(DL)));

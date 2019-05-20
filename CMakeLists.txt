@@ -13,12 +13,14 @@ option(DOCS_ONLY "OFF")
 set(USE_SANITIZERS "OFF" CACHE STRING "Specify Google Sanitizers")
 
 include(AthenaDocs)
+include(AthenaCoverageOptions)
 enable_docs()
 
 if (NOT DOCS_ONLY)
 
     enable_language(C)
     enable_language(CXX)
+    enable_coverage()
 
     set(CMAKE_CXX_STANDARD 17)
 
@@ -59,8 +61,6 @@ if (NOT DOCS_ONLY)
 
 
     if (NOT DISABLE_TESTS)
-        include(AthenaCoverageOptions)
-        enable_coverage()
         add_subdirectory(tests)
     endif ()
 

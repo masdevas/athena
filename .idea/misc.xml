@@ -8,6 +8,7 @@
       <file path="$PROJECT_DIR$/tests" />
     </sourceRoots>
     <excludeRoots>
+      <file path="$PROJECT_DIR$/build" />
       <file path="$PROJECT_DIR$/cmake-build-debug" />
       <file path="$PROJECT_DIR$/cmake-build-release" />
       <file path="$PROJECT_DIR$/third_party" />

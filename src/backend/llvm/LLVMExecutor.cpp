@@ -13,6 +13,7 @@
 
 #include <athena/backend/llvm/LLVMExecutor.h>
 #include <athena/backend/llvm/LLVMGenerator.h>
+#include <athena/backend/llvm/runtime-driver/runtime-driver.h>
 #include <athena/core/FatalError.h>
 #include <athena/core/InputNode.h>
 #include <athena/core/Node.h>
@@ -114,6 +115,12 @@ LLVMExecutor::LLVMExecutor() {
     ::llvm::InitializeNativeTarget();
     LLVMInitializeNativeAsmPrinter();
     LLVMInitializeNativeAsmParser();
+
+    auto libName = std::getenv("ATHENA_RT_LIBRARY");
+    kRuntimeDriver.load(libName);
+#ifdef DEBUG
+    assert(kRuntimeDriver.isLoaded());
+#endif
 
     auto compiler = AthenaJIT::create();
 
