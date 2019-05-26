@@ -66,6 +66,7 @@ TEST_F(LLVMJITTestType, JITIsAbleToExecuteCode) {
 
     auto jitErr = jitCompiler->addModule(ir);
     if (jitErr) {
+        llvm::errs() << jitErr;
         FAIL();
     }
 

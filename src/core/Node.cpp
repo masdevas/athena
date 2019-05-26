@@ -29,7 +29,7 @@ Node::~Node() {
 }
 Node& Node::operator=(Node&& rhs) noexcept {
     AbstractNode::operator=(std::move(rhs));
-    mOperation = std::move(rhs.mOperation);
+    mOperation = rhs.mOperation;
     rhs.fullClear();
     return *this;
 }

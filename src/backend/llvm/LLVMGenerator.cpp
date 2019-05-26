@@ -55,7 +55,7 @@ llvm::LLVMGenerator::LLVMGenerator(
         ::llvm::Type::getInt64Ty(mContext), (size_t)(&mAllocator));
     ArgsV.push_back(allocatorConst);
     ::llvm::Constant *tensorConst = ::llvm::ConstantInt::get(
-        ::llvm::Type::getInt64Ty(mContext), (size_t)(&t));
+        ::llvm::Type::getInt64Ty(mContext), reinterpret_cast<size_t>(&t));
     ArgsV.push_back(tensorConst);
     auto callInst = mBuilder.CreateCall(calledFunction, ArgsV);
     return callInst;
@@ -82,13 +82,14 @@ void LLVMGenerator::generateLoad(const core::AbstractLoader &loader,
 
     std::vector<::llvm::Value *> ArgsV;
     ::llvm::Constant *loaderConst = ::llvm::ConstantInt::get(
-        ::llvm::Type::getInt64Ty(mContext), (size_t)(&loader));
+        ::llvm::Type::getInt64Ty(mContext), reinterpret_cast<size_t>(&loader));
     ArgsV.push_back(loaderConst);
-    ::llvm::Constant *allocatorConst = ::llvm::ConstantInt::get(
-        ::llvm::Type::getInt64Ty(mContext), (size_t)(&mAllocator));
+    ::llvm::Constant *allocatorConst =
+        ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext),
+                                 reinterpret_cast<size_t>(&mAllocator));
     ArgsV.push_back(allocatorConst);
     ::llvm::Constant *tensorConst = ::llvm::ConstantInt::get(
-        ::llvm::Type::getInt64Ty(mContext), (size_t)(&tensor));
+        ::llvm::Type::getInt64Ty(mContext), reinterpret_cast<size_t>(&tensor));
     ArgsV.push_back(tensorConst);
     mBuilder.CreateCall(loadFunction, ArgsV);
 }

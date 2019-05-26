@@ -26,10 +26,10 @@ class MemoryLoader : public core::AbstractLoader {
     public:
     MemoryLoader(void *data, size_t size) : mData(data), mSize(size){};
     MemoryLoader(const MemoryLoader &) = default;
-    MemoryLoader(MemoryLoader &&src);
+    MemoryLoader(MemoryLoader &&src) noexcept;
     ~MemoryLoader() = default;
     MemoryLoader &operator=(const MemoryLoader &) = default;
-    MemoryLoader &operator=(MemoryLoader &&src);
+    MemoryLoader &operator=(MemoryLoader &&src) noexcept;
 
     virtual void load(core::Allocator *, core::inner::Tensor *) override;
     std::string getLoadCName() const override {

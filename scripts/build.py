@@ -16,7 +16,7 @@ def build(args):
         options.append("-DDOCS_ONLY=ON")
 
     if args.disable_tests:
-        options.append("-DDISATBLE_TESTS=ON")
+        options.append("-DDISABLE_TESTS=ON")
 
     if args.enable_coverage:
         options.append("-DENABLE_CODE_COVERAGE=ON")
@@ -39,7 +39,8 @@ def build(args):
     options.append("-B" + args.destination)
 
     subprocess.call(options, env=my_env)
-    subprocess.call(["cmake", "--build", args.destination], env=my_env)
+    if not args.no_build:
+        subprocess.call(["cmake", "--build", args.destination], env=my_env)
 
 
 def main():
@@ -53,6 +54,7 @@ def main():
     parser.add_argument("--build-type", type=str, default='Release', help="Build type")
     parser.add_argument("--compile-commands", action='store_true', help="Export compile commands")
     parser.add_argument("--use-ldd", action='store_true', help="Use LLVM ldd linker")
+    parser.add_argument("--no-build", action='store_true', help="Do not perform actual build")
 
     args = parser.parse_args()
 

@@ -46,7 +46,8 @@ class AthenaJIT {
         const ::llvm::orc::MaterializationResponsibility &R);
 
     public:
-    AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB, ::llvm::DataLayout DL);
+    AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
+              ::llvm::DataLayout &&DL);
 
     static ::llvm::Expected<std::unique_ptr<AthenaJIT>> create();
     const ::llvm::DataLayout &getDataLayout() const {

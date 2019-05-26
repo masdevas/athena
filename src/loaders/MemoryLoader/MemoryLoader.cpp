@@ -18,14 +18,15 @@
 
 namespace athena::loaders {
 
-MemoryLoader::MemoryLoader(MemoryLoader &&src) {
+MemoryLoader::MemoryLoader(MemoryLoader &&src) noexcept {
     this->mData = src.mData;
     this->mSize = src.mSize;
     src.mSize = 0;
     src.mData = nullptr;
 }
 
-MemoryLoader &MemoryLoader::operator=(athena::loaders::MemoryLoader &&src) {
+MemoryLoader &MemoryLoader::operator=(
+    athena::loaders::MemoryLoader &&src) noexcept {
     if (&src == this) {
         return *this;
     }

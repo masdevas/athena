@@ -20,7 +20,7 @@
 
 namespace athena::core {
 TensorShape::TensorShape(std::initializer_list<size_t> rhs)
-    : mShape(std::move(rhs)), mTotalSize(calculateTotalSize()) {}
+    : mShape(rhs), mTotalSize(calculateTotalSize()) {}
 TensorShape::TensorShape(std::vector<size_t> rhs)
     : mShape(std::move(rhs)), mTotalSize(calculateTotalSize()) {}
 size_t TensorShape::operator[](size_t index) {
@@ -40,7 +40,12 @@ bool TensorShape::operator!=(const ShapeView& rhs) const {
 }
 size_t TensorShape::calculateTotalSize() {
     size_t totalSize = std::accumulate(mShape.begin(), mShape.end(), 1,
+// todo remove hacks when gcc is updated
+#ifdef __clang__
+                                       std::multiplies());
+#else
                                        std::multiplies<int>());
+#endif
     return mShape.empty() ? 0 : totalSize;
 }
 const std::vector<size_t>& TensorShape::getShape() const {

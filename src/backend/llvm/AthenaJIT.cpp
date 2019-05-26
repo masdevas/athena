@@ -21,7 +21,7 @@
 
 namespace athena::backend::llvm {
 AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
-                     ::llvm::DataLayout DL)
+                     ::llvm::DataLayout &&DL)
     : mObjectLayer(
           mExecutionSession,
           []() { return ::llvm::make_unique<::llvm::SectionMemoryManager>(); }),
@@ -29,7 +29,7 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
                     mObjectLayer,
                     ::llvm::orc::ConcurrentIRCompiler(std::move(JTMB))),
       mOptimizeLayer(mExecutionSession, mCompileLayer, optimizeModule),
-      mDataLayout(std::move(DL)),
+      mDataLayout(DL),
       mMangle(mExecutionSession, mDataLayout),
       mContext(::llvm::make_unique<::llvm::LLVMContext>()) {
     ::llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
