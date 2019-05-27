@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -19,6 +19,9 @@
 #include <athena/core/inner/Tensor.h>
 
 namespace athena::ops {
+/**
+ * Add two Tensors
+ */
 class AddOperation : public core::Operation {
     public:
     AddOperation() : Operation("add") {}

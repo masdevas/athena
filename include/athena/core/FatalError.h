@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -22,6 +22,10 @@
 #include <string_view>
 
 namespace athena::core {
+
+/**
+ * A fatal error. Creating instances of this class forces program to stop.
+ */
 class FatalError : public Error {
     public:
     template <typename... Args>

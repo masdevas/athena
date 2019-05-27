@@ -15,7 +15,7 @@
     </excludeRoots>
   </component>
   <component name="JavaScriptSettings">
-    <option name="languageLevel" value="ES6" />
+    <option name="languageLevel" value="JSX" />
   </component>
   <component name="TaskProjectConfiguration">
     <server type="YouTrack" url="https://youtrack.athenaframework.ml/youtrack" />

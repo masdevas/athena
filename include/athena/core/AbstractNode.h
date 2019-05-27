@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -26,6 +26,9 @@
 namespace athena::core {
 using EdgeMark = size_t;
 
+/**
+ * A Node represents a piece of computation in Graph
+ */
 class AbstractNode {
     private:
     void fullClear();

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -23,6 +23,9 @@
 #include <vector>
 
 namespace athena::core {
+/**
+ * Operation is an abstract computation, like addition or multiplication
+ */
 class Operation {
     protected:
     std::string mName;
@@ -33,11 +36,28 @@ class Operation {
         std::vector<inner::Tensor*> args) const = 0;
     virtual inner::Tensor* getDerivativeTensor(std::vector<inner::Tensor*> args,
                                                int argNo) const = 0;
+    /**
+     * Generate code for Operation
+     * @param g Generator to be used
+     * @param operationArguments Necessary arguments specific
+     * to Generator implementation
+     */
     virtual void gen(AbstractGenerator& g,
                      std::vector<inner::Tensor*>& operationArguments) const = 0;
+    /**
+     * Generate code for Operation derivative
+     * @param g Generator to be used
+     * @param operationArguments Necessary arguments specific
+     * to Generator implementation
+     * @param argNo Index of argument that derivative will be computed to
+     */
     virtual void genDerivative(AbstractGenerator& g,
                                std::vector<inner::Tensor*>& operationArguments,
                                int argNo) const = 0;
+    /**
+     *
+     * @return Name of Operation
+     */
     std::string getName() const;
 };
 

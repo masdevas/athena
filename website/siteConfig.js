@@ -30,8 +30,8 @@ const siteConfig = {
   //   baseUrl: '/test-site/',
 
   // Used for publishing and more
-  projectName: 'athena-website',
-  organizationName: 'athena',
+    projectName: 'athenaml.github.io',
+    organizationName: 'athenaml',
   // For top-level user or org sites, the organization is still the same.
   // e.g., for the https://JoelMarcey.github.io site, it would be set like...
   //   organizationName: 'JoelMarcey'
@@ -39,7 +39,8 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'intro', label: 'Docs'},
-    {blog: false, label: 'Blog'},
+    { href: "https://getathena.ml/api/master/", label: "API" },
+    //{blog: false, label: 'Blog'},
   ],
 
   // If you have users set above, you add it here:

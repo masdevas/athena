@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -22,6 +22,12 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+
+#if __has_cpp_attribute(clang::reinitializes)
+#define REINITIALIZE [[clang::reinitializes]]
+#else
+#define REINITIALIZE
+#endif
 
 namespace athena::core {
 namespace inner {
@@ -48,6 +54,10 @@ using OwningStorage =
     inner::TupleContainers<std::vector, Node, InputNode>::Holder;
 using Topology = std::vector<inner::Edge>;
 
+/**
+ * A computation graph is an abstraction to represent an arbitrary function
+ * in a way that is suitable for computation.
+ */
 class Graph {
     private:
     SyncStorage mSyncStorage;
@@ -60,7 +70,7 @@ class Graph {
                       bool isRepairedNode,
                       bool isErase);
     void saveNode(AbstractNode& node, bool isRepairedNode, bool isErase);
-    void fullClear();
+    REINITIALIZE void fullClear();
 
     public:
     Graph();
@@ -74,20 +84,50 @@ class Graph {
     const SyncStorage& getSyncStorage() const;
     const OwningStorage& getOwningStorage() const;
     const Topology& getTopology() const;
+    /**
+     * Add node to Graph
+     * @param node A node to be added
+     */
     void addNode(AbstractNode& node);
     void saveNode(AbstractNode& node, bool isRepairedNode = true);
     void saveAllSyncNodes(bool isRepairedNode = true);
+    /**
+     * Remove node from Graph
+     * @param node Node to be removed
+     */
     void removeNode(AbstractNode& node);
+    /**
+     * Add oriented edge between two nodes
+     * @param startNode Start Node
+     * @param endNode End Node
+     * @param mark
+     */
     void link(const AbstractNode& startNode,
               const AbstractNode& endNode,
               EdgeMark mark);
     size_t countOwningNodes() const;
     size_t countSyncNodes() const;
     size_t getGraphIndex() const;
+    /**
+     * Resets object to initial state
+     */
     void clear();
+    /**
+     *
+     * @return if traversal is still valid
+     */
     bool isValidTraversal() const;
+    /**
+     * Traverse current Graph and save the results inside object
+     * @return A reference to result traversal
+     */
     const Traversal& traverse();
 
+    /**
+     * Get last traversal for given Graph
+     * @param graph An instance of Graph
+     * @return A reference to last traversal
+     */
     friend Traversal& inner::getTraversal(Graph& graph);
 };
 }  // namespace athena::core

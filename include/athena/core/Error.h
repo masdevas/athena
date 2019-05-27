@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -19,6 +19,9 @@
 
 namespace athena::core {
 
+/**
+ * A non-fatal error
+ */
 class Error {
     protected:
     int32_t mErrorCode;

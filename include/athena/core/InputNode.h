@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -18,6 +18,9 @@
 #include <athena/core/AbstractNode.h>
 
 namespace athena::core {
+/**
+ * Special type of Node that can not have predecessors
+ */
 class InputNode : public AbstractNode {
     private:
     void fullClear();

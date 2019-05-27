@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -20,13 +20,33 @@
 #include <string_view>
 
 namespace athena::core {
+
+/**
+ * Loaders is a concept that helps Athena put user data into Graph
+ */
 class AbstractLoader {
     public:
+    /**
+     * Do actual data load
+     */
     virtual void load(Allocator *, inner::Tensor *) = 0;
+    /**
+     * Get C-style function name that does actual load
+     * For backend usage only
+     * @return C-style function name string
+     */
     virtual std::string getLoadCName() const = 0;
+    /**
+     * Get C-style function name that creates loader object
+     * For backend usage only
+     * @return C-style function name string
+     */
     virtual std::string getCreateCName() const = 0;
 };
 
+/**
+ * Dummy loader for testing purposes only
+ */
 class DummyLoader : public AbstractLoader {
     public:
     void load(Allocator *, inner::Tensor *tensor) override {}

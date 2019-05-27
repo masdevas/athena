@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -18,6 +18,9 @@
 #include <athena/core/Operation.h>
 
 namespace athena::core {
+/**
+ * Node holds Operation and Tensors to perform computation
+ */
 class Node : public AbstractNode {
     private:
     void fullClear();

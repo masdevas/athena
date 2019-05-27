@@ -1,5 +1,26 @@
-# Athena
-[![Build Status](https://travis-ci.org/athenaml/athena.svg?branch=master)](https://travis-ci.org/athenaml/athena)
-[![codecov](https://codecov.io/gh/athenaml/athena/branch/master/graph/badge.svg)](https://codecov.io/gh/athenaml/athena)
+# [WIP] Athena
 
-for legacy code see https://github.com/athenaml/athena_legacy
+**Warning** The project is still heavy work in progress. Not suitable for production use.
+
+## What is Athena?
+
+Athena is a high performance scalable deep learning framework. It represents computation
+through computation graph and operates tensors.
+
+## Installation
+### Building from source
+
+Prerequisites:
+- Git
+- CMake 3.13+
+- A C++17 capable compiler
+- LLVM 8
+- Python 3 (optional)
+
+Building from source
+0. Checkout repository
+0. `path/to/source/scripts/build.py --build-type Release --disable-tests path/to/build/dest path/to/source`
+
+To see other build options use `scripts/build.py --help`
+
+Alternatively, you can use pure CMake flow to build the library.

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -22,6 +22,9 @@ namespace athena::core {
 
 class Error;
 
+/**
+ * Abstract Athena logger interface
+ */
 class AbstractLogger {
     public:
     AbstractLogger() = default;

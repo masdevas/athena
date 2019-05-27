@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -24,6 +24,9 @@
 #include <map>
 
 namespace athena::backend::llvm {
+/**
+ * LLVM-based code generator
+ */
 class LLVMGenerator : public core::AbstractGenerator {
     private:
     std::map<std::string, LLVMGeneratorFunctor<void>> mFunctorsMap;
@@ -51,14 +54,41 @@ class LLVMGenerator : public core::AbstractGenerator {
     explicit LLVMGenerator(::llvm::LLVMContext &ctx,
                            const std::unique_ptr<::llvm::Module> &module,
                            core::Allocator &allocator);
+    /**
+     * Generate code to execute loaders subroutines
+     * @param loader Loader to be used
+     * @param tensor Destination Tensor
+     */
     void generateLoad(const core::AbstractLoader &loader,
                       core::inner::Tensor &tensor);
+    /**
+     * Generates glue code to get fast memory pointer from Allocator
+     * @param t Destination Tensor
+     * @return Fast memory pointer of Tensor t
+     */
     ::llvm::Value *generateGetFastPointer(core::inner::Tensor &t);
+    /**
+     *
+     * @return LLVM IR Builder
+     */
     ::llvm::IRBuilder<> &getBuilder();
 
+    /**
+     * Notifies generator that Node code generation begins
+     * @param name Node name
+     */
     void openNode(std::string_view name) override;
+    /**
+     * Notifies generator that Node code generation ends
+     */
     void closeNode() override;
 
+    /**
+     * Register new functor
+     * @tparam Args Functor arguments
+     * @param name Functor name
+     * @param f Functor function
+     */
     template <typename... Args>
     void registerFunctor(const std::string &name,
                          std::function<void(Args...)> &f) {
@@ -68,12 +98,20 @@ class LLVMGenerator : public core::AbstractGenerator {
         mFunctorsMap[name] = LLVMGeneratorFunctor(f);
     }
 
+    /**
+     * Remove Functor from registry
+     * @param name Functor name
+     */
     void unregisterFunctor(std::string &name) {
         if (mFunctorsMap.count(name)) {
             mFunctorsMap.erase(mFunctorsMap.find(name));
         }
     }
 
+    /**
+     *
+     * @return Associated Allocator
+     */
     core::Allocator &getAllocator() {
         return mAllocator;
     }

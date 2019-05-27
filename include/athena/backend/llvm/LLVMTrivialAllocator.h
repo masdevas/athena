@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -20,6 +20,9 @@
 #include <unordered_map>
 
 namespace athena::backend::llvm {
+/**
+ * The simplest Allocator that uses OS malloc/free
+ */
 class LLVMTrivialAllocator : public athena::core::Allocator {
     private:
     std::unordered_map<size_t, void*> mAllocatedMap;

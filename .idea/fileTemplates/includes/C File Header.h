@@ -1,6 +1,6 @@
 /*
  * Copyright (c) ${YEAR} Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -10,5 +10,3 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
-

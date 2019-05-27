@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -18,6 +18,9 @@
 #include <athena/core/Allocator.h>
 
 namespace athena::loaders {
+/**
+ * Load data from RAM to Tensor
+ */
 class MemoryLoader : public core::AbstractLoader {
     private:
     void *mData;

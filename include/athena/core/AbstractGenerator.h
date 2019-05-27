@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -17,6 +17,10 @@
 
 namespace athena::core {
 
+/**
+ * A helper interface to connect operations with actual runtime implementations
+ * through backend
+ */
 class AbstractGenerator {
     protected:
     virtual void generateImpl(std::string &, inner::Tensor &a) = 0;
@@ -32,6 +36,13 @@ class AbstractGenerator {
     public:
     virtual void openNode(std::string_view name) = 0;
     virtual void closeNode() = 0;
+    /**
+     * Generate code that corresponds to given parameters
+     * @tparam Args Arbitrary parameter pack defined by actual generator
+     * implementation
+     * @param name Name of operation/function/etc to be generated
+     * @param a Parameters that are needed for code generation
+     */
     template <typename... Args>
     void generate(std::string name, Args &&... a) {
         generateImpl(name, std::forward<Args>(a)...);

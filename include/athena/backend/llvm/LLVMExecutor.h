@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -22,6 +22,9 @@
 
 namespace athena::backend::llvm {
 
+/**
+ * Execute Graph with LLVM-based backend
+ */
 class LLVMExecutor : public athena::core::Executor {
     private:
     std::unique_ptr<AthenaJIT> mJITCompiler;
@@ -31,9 +34,25 @@ class LLVMExecutor : public athena::core::Executor {
 
     public:
     LLVMExecutor();
+    /**
+     * Prepare Graph for execution. This method must always be called before
+     * execution
+     * @param graph Graph to be executed
+     */
     void prepare(athena::core::Graph& graph) override;
+    /**
+     * Do actual computation
+     */
     void execute() override;
+    /**
+     *
+     * @return Associated Allocator
+     */
     std::unique_ptr<core::Allocator>& getAllocator();
+    /**
+     * Set Allocator to be used
+     * @param allocator User Allocator
+     */
     void setAllocator(std::unique_ptr<core::Allocator>& allocator);
 };
 

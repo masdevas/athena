@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Athena. All rights reserved.
- * https://athenaframework.ml
+ * https://getathena.ml
  *
  * Licensed under MIT license.
  *
@@ -30,6 +30,9 @@
 #include <memory>
 
 namespace athena::backend::llvm {
+/**
+ * Execute LLVM IR
+ */
 class AthenaJIT {
     private:
     ::llvm::orc::ExecutionSession mExecutionSession;
