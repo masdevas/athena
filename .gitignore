@@ -73,3 +73,5 @@ third_party
 .DS_Store
 
 node_modules
+website/static/api
+website/build
