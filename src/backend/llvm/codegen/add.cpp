@@ -17,18 +17,6 @@
 
 namespace athena::backend::llvm::codegen {
 
-::llvm::Function *create_fadd_decl(::llvm::LLVMContext &ctx,
-                                   ::llvm::Module &module) {
-    std::vector<::llvm::Type *> args(5, ::llvm::Type::getInt64Ty(ctx));
-    ::llvm::FunctionType *FT =
-        ::llvm::FunctionType::get(::llvm::Type::getVoidTy(ctx), args, false);
-
-    ::llvm::Function *F = ::llvm::Function::Create(
-        FT, ::llvm::Function::ExternalLinkage, "athena_fadd", &module);
-
-    return F;
-}
-
 void registerAdd(LLVMGenerator *generator) {
     std::function<void(::llvm::LLVMContext &, ::llvm::Module &,
                        ::llvm::IRBuilder<> &, core::inner::Tensor &,
@@ -38,10 +26,7 @@ void registerAdd(LLVMGenerator *generator) {
                         core::inner::Tensor &b, core::inner::Tensor &c) {
             // todo handle different data types
 
-            ::llvm::Function *calledFunction =
-                module.getFunction("athena_fadd");
-
-            if (!calledFunction) calledFunction = create_fadd_decl(ctx, module);
+            ::llvm::Function *calledFunction = generator->findLLVMFunction("athn_add_f");
 
             if (!calledFunction) {
                 core::FatalError(1, "Unknown function referenced");
@@ -51,15 +36,23 @@ void registerAdd(LLVMGenerator *generator) {
 
             std::vector<::llvm::Value *> ArgsV;
 
-            ArgsV.push_back(generator->generateGetFastPointer(a));
-            ::llvm::Constant *aSizeConst = ::llvm::ConstantInt::get(
-                ::llvm::Type::getInt64Ty(ctx), a.getShapeView().getTotalSize());
-            ArgsV.push_back(aSizeConst);
-            ArgsV.push_back(generator->generateGetFastPointer(b));
-            ::llvm::Constant *bSizeConst = ::llvm::ConstantInt::get(
-                ::llvm::Type::getInt64Ty(ctx), b.getShapeView().getTotalSize());
-            ArgsV.push_back(bSizeConst);
-            ArgsV.push_back(generator->generateGetFastPointer(c));
+            ::llvm::Constant *device = ::llvm::ConstantInt::get(
+                ::llvm::Type::getInt64Ty(ctx),
+                reinterpret_cast<size_t>(generator->getPreferredDevice("add")));
+            ArgsV.push_back(device);
+            ::llvm::Constant *allocator = ::llvm::ConstantInt::get(
+                ::llvm::Type::getInt64Ty(ctx),
+                reinterpret_cast<size_t>(&generator->getAllocator()));
+            ArgsV.push_back(allocator);
+            ::llvm::Constant *aTensor = ::llvm::ConstantInt::get(
+                ::llvm::Type::getInt64Ty(ctx), reinterpret_cast<size_t>(&a));
+            ArgsV.push_back(aTensor);
+            ::llvm::Constant *bTensor = ::llvm::ConstantInt::get(
+                ::llvm::Type::getInt64Ty(ctx), reinterpret_cast<size_t>(&b));
+            ArgsV.push_back(bTensor);
+            ::llvm::Constant *cTensor = ::llvm::ConstantInt::get(
+                ::llvm::Type::getInt64Ty(ctx), reinterpret_cast<size_t>(&c));
+            ArgsV.push_back(cTensor);
             builder.CreateCall(calledFunction, ArgsV);
         };
 
