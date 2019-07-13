@@ -13,29 +13,28 @@
 
 #include <athena/backend/llvm/runtime-driver/runtime-driver.h>
 
-namespace athena::backend {
+#include "llvm/IR/Verifier.h"
 
-RuntimeDriver kRuntimeDriver;
+#include <llvm/Support/Debug.h>
+#include <llvm/Target/TargetMachine.h>
 
-RuntimeDriver::RuntimeDriver() : mLibraryHandle(nullptr) {}
-RuntimeDriver::RuntimeDriver(std::string_view nameLibrary) {
-    load(nameLibrary);
-}
+namespace athena::backend::llvm {
+
+RuntimeDriver::RuntimeDriver(::llvm::LLVMContext &ctx) : mLibraryHandle(nullptr), mContext(ctx) {}
+
 RuntimeDriver::~RuntimeDriver() {
     unload();
 }
 RuntimeDriver& RuntimeDriver::operator=(RuntimeDriver&& rhs) noexcept {
     unload();
     mLibraryHandle = rhs.mLibraryHandle;
-    mFaddPointer = rhs.mFaddPointer;
     rhs.mLibraryHandle = nullptr;
-    rhs.mFaddPointer = nullptr;
     return *this;
 }
-void* RuntimeDriver::getFunction(std::string_view nameFunction) {
-    if (void* function = dlsym(mLibraryHandle, nameFunction.data());
+void* RuntimeDriver::getFunctionPtr(std::string_view funcName) {
+    if (void* function = dlsym(mLibraryHandle, funcName.data());
         !function) {
-        ::athena::core::FatalError(1,
+        new ::athena::core::FatalError(1,
                                    "RuntimeDriver: " + std::string(dlerror()));
         return nullptr;
     } else {
@@ -45,25 +44,14 @@ void* RuntimeDriver::getFunction(std::string_view nameFunction) {
 void RuntimeDriver::load(std::string_view nameLibrary) {
     if (mLibraryHandle = dlopen(nameLibrary.data(), RTLD_LAZY);
         !mLibraryHandle) {
-        ::athena::core::FatalError(1,
+        new ::athena::core::FatalError(1,
                                    "RuntimeDriver: " + std::string(dlerror()));
     }
-    mFaddPointer =
-        reinterpret_cast<void (*)(void*, size_t, void*, size_t, void*)>(
-            getFunction("athena_fadd"));
-
-    mAllocatePointer = reinterpret_cast<void (*)(void*, void*)>(
-        getFunction("athena_allocate"));
-
-    mGetFPPointer = reinterpret_cast<void* (*)(void*, void*)>(
-        getFunction("athena_get_fast_pointer"));
-
-    mFfillPointer = reinterpret_cast<void (*)(void*, void*, float)>(
-        getFunction("athena_ffill"));
+    prepareModules();
 }
 void RuntimeDriver::unload() {
     if (mLibraryHandle && dlclose(mLibraryHandle)) {
-        ::athena::core::FatalError(1,
+        ::athena::core::FatalError err(1,
                                    "RuntimeDriver: " + std::string(dlerror()));
     }
     mLibraryHandle = nullptr;
@@ -75,19 +63,30 @@ void RuntimeDriver::reload(std::string_view nameLibrary) {
 bool RuntimeDriver::isLoaded() const {
     return mLibraryHandle != nullptr;
 }
-}  // namespace athena::backend
+::llvm::ArrayRef<::llvm::Value *> RuntimeDriver::getArgs(::llvm::Function *function) {
+    std::vector<::llvm::Value *> argValues;
 
-extern "C" {
-void athena_fadd(void* a, size_t ca, void* b, size_t cb, void* c) {
-    athena::backend::kRuntimeDriver.athena_fadd(a, ca, b, cb, c);
+    for (auto &arg : function->args()) {
+        argValues.push_back(&arg);
+    }
+
+    return argValues;
 }
-void athena_allocate(void* a, void* t) {
-    athena::backend::kRuntimeDriver.athena_allocate(a, t);
+void RuntimeDriver::prepareModules() {
+    auto newModule = std::make_unique<::llvm::Module>("runtime", mContext);
+    ::llvm::IRBuilder<> builder(mContext);
+    generateLLVMIrBindings(mContext, *newModule, builder);
+#ifdef DEBUG
+    bool brokenDebugInfo = false;
+    std::string str;
+    ::llvm::raw_string_ostream stream(str);
+    bool isBroken = ::llvm::verifyModule(*newModule, &stream, &brokenDebugInfo);
+    stream.flush();
+    if (isBroken || brokenDebugInfo) {
+        err() << str;
+        new core::FatalError(10, "incorrect ir");
+    }
+#endif
+    mModules.push_back(std::move(newModule));
 }
-void* athena_get_fast_pointer(void* a, void* t) {
-    return athena::backend::kRuntimeDriver.athena_get_fast_pointer(a, t);
-}
-void athena_ffill(void* allocator, void* tensor, float f) {
-    athena::backend::kRuntimeDriver.athena_ffill(allocator, tensor, f);
-}
-}
+}  // namespace athena::backend
