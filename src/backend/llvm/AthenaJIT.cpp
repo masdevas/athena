@@ -81,9 +81,9 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
 
     // Run the optimizations over all functions in the module being added to
     // the JIT.
-//    for (auto &F : *TSM.getModule()) {
-//        FPM->run(F);
-//    }
+    //    for (auto &F : *TSM.getModule()) {
+    //        FPM->run(F);
+    //    }
 
     return TSM;
 }

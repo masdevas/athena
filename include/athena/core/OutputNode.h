@@ -18,15 +18,14 @@
 
 namespace athena::core {
 /**
-* Special type of Node that use for output of data
-*/
+ * Special type of Node that use for output of data
+ */
 class OutputNode : public AbstractNode {
-public:
+    public:
     OutputNode() = delete;
     OutputNode(const OutputNode& rhs) = default;
     OutputNode(OutputNode&& rhs) = default;
-    explicit OutputNode(DataType dataType,
-               std::string name = "");
+    explicit OutputNode(DataType dataType, std::string name = "");
     ~OutputNode() override;
 
     OutputNode& operator=(const OutputNode& rhs) = default;
@@ -36,4 +35,4 @@ public:
 };
 }  // namespace athena::core
 
-#endif //ATHENA_OUTPUTNODE_H
+#endif  // ATHENA_OUTPUTNODE_H

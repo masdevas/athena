@@ -16,17 +16,16 @@
 
 #include <athena/core/FatalError.h>
 
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Module.h"
+
 #include <dlfcn.h>
 #include <string>
 #include <string_view>
 
-#include "llvm/IR/Module.h"
-#include "llvm/IR/IRBuilder.h"
-
-
 namespace athena::backend::llvm {
 class RuntimeDriver {
-private:
+    private:
     void *mLibraryHandle;
 
     void *getFunctionPtr(std::string_view funcName);
@@ -43,7 +42,7 @@ private:
 
     ::llvm::LLVMContext &mContext;
 
-public:
+    public:
     explicit RuntimeDriver(::llvm::LLVMContext &ctx);
     RuntimeDriver(const RuntimeDriver &rhs) = delete;
     RuntimeDriver(RuntimeDriver &&rhs) noexcept = default;
@@ -62,7 +61,6 @@ public:
         return mModules;
     };
 };
-}  // namespace athena::backend
-
+}  // namespace athena::backend::llvm
 
 #endif  // ATHENA_RUNTIME_DRIVER_H

@@ -30,7 +30,8 @@ void registerAllocate(LLVMGenerator *generator) {
             std::vector<::llvm::Value *> ArgsV;
             ::llvm::Constant *device = ::llvm::ConstantInt::get(
                 ::llvm::Type::getInt64Ty(ctx),
-                reinterpret_cast<size_t>(generator->getPreferredDevice("allocate")));
+                reinterpret_cast<size_t>(
+                    generator->getPreferredDevice("allocate")));
             ArgsV.push_back(device);
             ::llvm::Constant *allocatorConst =
                 ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(ctx),

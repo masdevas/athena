@@ -15,8 +15,8 @@
 #define ATHENA_GRAPH_H
 
 #include <athena/core/Traversal.h>
-#include <athena/core/inner/Table.h>
 #include <athena/core/inner/Settings.h>
+#include <athena/core/inner/Table.h>
 
 #include <set>
 #include <unordered_map>
@@ -43,8 +43,8 @@ struct Edge {
 }  // namespace inner
 
 using SyncStorage = std::unordered_set<size_t>;
-using OwningStorage =
-    inner::TupleContainers<std::vector, Node, InputNode, OutputNode, LossNode>::Holder;
+using OwningStorage = inner::
+    TupleContainers<std::vector, Node, InputNode, OutputNode, LossNode>::Holder;
 using Topology = std::vector<inner::Edge>;
 
 /**

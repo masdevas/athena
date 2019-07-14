@@ -15,7 +15,13 @@
 #define ATHENA_NODETYPE_H
 
 namespace athena::core {
-enum class NodeType { UNDEFINED = 0, INPUT = 1, DEFAULT = 2, OUTPUT = 3, LOSS = 4 };
+enum class NodeType {
+    UNDEFINED = 0,
+    INPUT = 1,
+    DEFAULT = 2,
+    OUTPUT = 3,
+    LOSS = 4
+};
 
 template <typename TemplateNodeType>
 NodeType getNodeType();

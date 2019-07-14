@@ -115,7 +115,9 @@ const std::string& AbstractNode::name() const {
 }
 void AbstractNode::setShape(const TensorShape& shape) {
     if (mGraphIndex != inner::kKUndefinedIndex) {
-        FatalError(1, "It is forbidden to change shapes of nodes which belongs to graph");
+        FatalError(
+            1,
+            "It is forbidden to change shapes of nodes which belongs to graph");
     }
     mTensor.setShape(shape);
 }

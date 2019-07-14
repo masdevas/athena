@@ -14,6 +14,6 @@
 
 namespace athena::backend::llvm {
 class Device {};
-}
+}  // namespace athena::backend::llvm
 
-#endif //ATHENA_DEVICE_H
+#endif  // ATHENA_DEVICE_H

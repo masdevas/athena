@@ -14,11 +14,15 @@
 #include <athena/core/LossNode.h>
 
 namespace athena::core {
-LossNode::LossNode(TensorShape shape, DataType dataType, Operation& operation,
-                   Criterion criterion, std::string name)
-    : Node(std::move(shape), dataType, operation, std::move(name)), mCriterion(criterion) {
-}
-LossNode::LossNode(LossNode&& rhs) noexcept : Node(std::move(rhs)), mCriterion(rhs.mCriterion){
+LossNode::LossNode(TensorShape shape,
+                   DataType dataType,
+                   Operation& operation,
+                   Criterion criterion,
+                   std::string name)
+    : Node(std::move(shape), dataType, operation, std::move(name)),
+      mCriterion(criterion) {}
+LossNode::LossNode(LossNode&& rhs) noexcept
+    : Node(std::move(rhs)), mCriterion(rhs.mCriterion) {
     rhs.mCriterion = Criterion::UNDEFINED;
 }
 LossNode::~LossNode() {
@@ -46,4 +50,4 @@ Criterion& LossNode::criterion() {
 const Criterion& LossNode::criterion() const {
     return mCriterion;
 }
-}
+}  // namespace athena::core
