@@ -15,12 +15,11 @@
 
 namespace athena::core {
 OutputNode::OutputNode(DataType dataType, std::string name)
-    : AbstractNode({}, dataType, std::move(name)) {
-}
+    : AbstractNode({}, dataType, std::move(name)) {}
 OutputNode::~OutputNode() {
     saveInGraph(false);
 }
 NodeType OutputNode::getType() const {
     return NodeType::OUTPUT;
 }
-}
+}  // namespace athena::core

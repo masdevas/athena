@@ -25,5 +25,5 @@ void allocate(Device *, Allocator *allocator, Tensor *a) {
 }
 
 template void allocate<void>(athena::backend::llvm::Device *,
-                         athena::core::Allocator *,
-                         athena::core::inner::Tensor *a);
+                             athena::core::Allocator *,
+                             athena::core::inner::Tensor *a);

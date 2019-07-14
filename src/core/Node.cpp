@@ -15,7 +15,9 @@
 
 namespace athena::core {
 Node::Node(Node&& rhs) noexcept
-    : AbstractNode(std::move(rhs)), mOperation(rhs.mOperation), mDerivativeTensors(std::move(rhs.mDerivativeTensors)) {
+    : AbstractNode(std::move(rhs)),
+      mOperation(rhs.mOperation),
+      mDerivativeTensors(std::move(rhs.mDerivativeTensors)) {
     rhs.mOperation = nullptr;
 }
 Node::Node(TensorShape shape,

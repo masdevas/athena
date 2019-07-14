@@ -14,13 +14,13 @@
 #ifndef ATHENA_LOSSNODE_H
 #define ATHENA_LOSSNODE_H
 
-#include <athena/core/Node.h>
 #include <athena/core/Criterion.h>
+#include <athena/core/Node.h>
 
 namespace athena::core {
 /**
-* Special type of node that use for backward propagation on graph
-*/
+ * Special type of node that use for backward propagation on graph
+ */
 class LossNode : public Node {
     private:
     Criterion mCriterion;
@@ -47,5 +47,4 @@ class LossNode : public Node {
 };
 }  // namespace athena::core
 
-
-#endif //ATHENA_LOSSNODE_H
+#endif  // ATHENA_LOSSNODE_H

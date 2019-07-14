@@ -26,7 +26,8 @@ void registerAdd(LLVMGenerator *generator) {
                         core::inner::Tensor &b, core::inner::Tensor &c) {
             // todo handle different data types
 
-            ::llvm::Function *calledFunction = generator->findLLVMFunction("athn_add_f");
+            ::llvm::Function *calledFunction =
+                generator->findLLVMFunction("athn_add_f");
 
             if (!calledFunction) {
                 core::FatalError(1, "Unknown function referenced");

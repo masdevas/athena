@@ -12,11 +12,11 @@
  */
 
 #include <athena/core/Graph.h>
-#include <athena/core/Traversal.h>
 #include <athena/core/InputNode.h>
+#include <athena/core/LossNode.h>
 #include <athena/core/Node.h>
 #include <athena/core/OutputNode.h>
-#include <athena/core/LossNode.h>
+#include <athena/core/Traversal.h>
 #include <athena/core/inner/GlobalTables.h>
 #include <athena/core/inner/InnerFunctions.h>
 
@@ -144,8 +144,7 @@ void Graph::saveNode(AbstractNode& node, bool isRepairedNode, bool isErase) {
                          isErase);
             break;
         case NodeType::LOSS:
-            saveRealNode(static_cast<LossNode&>(node), isRepairedNode,
-                         isErase);
+            saveRealNode(static_cast<LossNode&>(node), isRepairedNode, isErase);
         default:
             FatalError(1, "saveNode() in Graph : ", this,
                        ". GraphIndex : ", mGraphIndex, ". Undefined node type");
@@ -268,14 +267,14 @@ const Traversal& Graph::traverse() {
                     break;
                 case NodeType::OUTPUT:
                     cluster.get<OutputNode>().emplace_back(
-                            node->getNodeIndex(),
-                            std::move(visits[nodeIndex].input),
-                            std::move(visits[nodeIndex].output));
+                        node->getNodeIndex(),
+                        std::move(visits[nodeIndex].input),
+                        std::move(visits[nodeIndex].output));
                 case NodeType::LOSS:
                     cluster.get<LossNode>().emplace_back(
-                            node->getNodeIndex(),
-                            std::move(visits[nodeIndex].input),
-                            std::move(visits[nodeIndex].output));
+                        node->getNodeIndex(),
+                        std::move(visits[nodeIndex].input),
+                        std::move(visits[nodeIndex].output));
                     break;
                 default:
                     FatalError(1, "Undefined NodeType in traverse()");

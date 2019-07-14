@@ -44,7 +44,8 @@ template <>
 struct LLVMGeneratorFunctor<void> {
     LLVMGeneratorFunctor() = default;
     template <typename F>
-    explicit LLVMGeneratorFunctor(F&& fun) : LLVMGeneratorFunctor(std::function(fun)){};
+    explicit LLVMGeneratorFunctor(F&& fun)
+        : LLVMGeneratorFunctor(std::function(fun)){};
     template <typename... Args>
     explicit LLVMGeneratorFunctor(std::function<void(Args...)> fun)
         : mFunctor(std::move(fun)) {}

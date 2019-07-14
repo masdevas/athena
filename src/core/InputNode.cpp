@@ -23,8 +23,7 @@ InputNode::InputNode(TensorShape shape,
                      AbstractLoader& loader,
                      std::string name)
     : AbstractNode(std::move(shape), dataType, std::move(name)),
-      mLoader(&loader) {
-}
+      mLoader(&loader) {}
 InputNode::~InputNode() {
     saveInGraph(false);
 }

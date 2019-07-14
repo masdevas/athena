@@ -15,9 +15,7 @@
 #define ATHENA_CRITERION_H
 
 namespace athena::core {
-enum class Criterion {
-    UNDEFINED = 0, MAX = 1, MIN = 2
-};
+enum class Criterion { UNDEFINED = 0, MAX = 1, MIN = 2 };
 }
 
-#endif //ATHENA_CRITERION_H
+#endif  // ATHENA_CRITERION_H
