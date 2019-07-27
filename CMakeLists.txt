@@ -7,20 +7,23 @@ set(ATHENA_MAJOR_VERSION "0")
 set(ATHENA_MINOR_VERSION "1")
 set(ATHENA_PATCH_VERSION "0")
 
-option(DISABLE_TESTS "OFF")
-option(ENABLE_CODE_COVERAGE "OFF")
-option(DOCS_ONLY "OFF")
-set(USE_SANITIZERS "OFF" CACHE STRING "Specify Google Sanitizers")
+option(ATHENA_DISABLE_TESTS "OFF")
+option(ATHENA_DOCS_ONLY "OFF")
+set(ATHENA_USE_SANITIZERS "OFF" CACHE STRING "Specify Google Sanitizers")
+
+# choose new behaviour for CMP0042
+# see http://www.cmake.org/cmake/help/v3.0/policy/CMP0042.html for more details
+if (POLICY CMP0042)
+    cmake_policy(SET CMP0042 NEW)
+endif (POLICY CMP0042)
 
 include(AthenaDocs)
-include(AthenaCoverageOptions)
 enable_docs()
 
-if (NOT DOCS_ONLY)
+if (NOT ATHENA_DOCS_ONLY)
 
     enable_language(C)
     enable_language(CXX)
-    enable_coverage()
 
     set(CMAKE_CXX_STANDARD 17)
 
@@ -35,19 +38,21 @@ if (NOT DOCS_ONLY)
 
     include(AthenaTarget)
     include(AthenaEnableSanitizers)
+    include(AthenaDependency)
+    include(dependencies.cmake)
 
     enable_testing()
     enable_sanitizers()
 
     include_directories(${CMAKE_SOURCE_DIR}/include)
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/athena DESTINATION include)
 
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/null.cpp "")
-    add_athena_library(athena SHARED ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
     add_definitions(-DATHENA_MAJOR_VERSION="${ATHENA_MAJOR_VERSION}")
     add_definitions(-DATHENA_MINOR_VERSION="${ATHENA_MINOR_VERSION}")
-    add_definitions(-DATHENA_PATCH_VERSION="${ATHENA_PATCH_VERSION}")
     if (DEFINED $ENV{ATHENA_CI_BUILD_NUMBER})
         add_definitions(-DATHENA_PATCH_VERSION="$ENV{ATHENA_CI_BUILD_NUMBER}")
+    else ()
+        add_definitions(-DATHENA_PATCH_VERSION="${ATHENA_PATCH_VERSION}")
     endif ()
 
     if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
@@ -57,11 +62,17 @@ if (NOT DOCS_ONLY)
 
     add_subdirectory(src)
 
-    target_link_libraries(athena PUBLIC athena-core athena-ops backend-llvm)
-
-
-    if (NOT DISABLE_TESTS)
+    if (NOT ATHENA_DISABLE_TESTS)
         add_subdirectory(tests)
+        coverage_evaluate()
     endif ()
 
+    set(CPACK_PACKAGE_VENDOR "Athena")
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "High performance deep learning library")
+    set(CPACK_PACKAGE_VERSION_MAJOR ${ATHENA_MAJOR_VERSION})
+    set(CPACK_PACKAGE_VERSION_MINOR ${ATHENA_MINOR_VERSION})
+    set(CPACK_PACKAGE_VERSION_PATCH ${ATHENA_PATCH_VERSION})
+    set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.md")
+    set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+    include(CPack)
 endif ()
