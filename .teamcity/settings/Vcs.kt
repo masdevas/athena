@@ -13,7 +13,7 @@ object AthenaAlex : GitVcsRoot({
     """.trimIndent()
     authMethod = password {
         userName = "athenamlbot"
-        password = "zxx24d3eb84f48caad36dc56a3252875b70b7fd09cd46cb8ab54153e54fc1042983f410212252a6a0cf775d03cbe80d301b"
+        password = "credentialsJSON:c3f84f17-e571-495d-a804-ea7a25b20d89"
     }
 })
 
@@ -28,7 +28,7 @@ object AthenaAndrey : GitVcsRoot({
     """.trimIndent()
     authMethod = password {
         userName = "athenamlbot"
-        password = "zxx24d3eb84f48caad36dc56a3252875b70b7fd09cd46cb8ab54153e54fc1042983f410212252a6a0cf775d03cbe80d301b"
+        password = "credentialsJSON:c3f84f17-e571-495d-a804-ea7a25b20d89"
     }
 })
 
@@ -43,7 +43,7 @@ object AthenaPublic : GitVcsRoot({
     """.trimIndent()
     authMethod = password {
         userName = "athenamlbot"
-        password = "zxx24d3eb84f48caad36dc56a3252875b70b7fd09cd46cb8ab54153e54fc1042983f410212252a6a0cf775d03cbe80d301b"
+        password = "credentialsJSON:c3f84f17-e571-495d-a804-ea7a25b20d89"
     }
 })
 
@@ -52,7 +52,7 @@ object HttpsGithubComAthenamlAthenamlGithubIoRefsHeadsMaster : GitVcsRoot({
     url = "https://github.com/athenaml/athenaml.github.io"
     authMethod = password {
         userName = "athenamlbot"
-        password = "zxx24d3eb84f48caad36dc56a3252875b70b7fd09cd46cb8ab54153e54fc1042983f410212252a6a0cf775d03cbe80d301b"
+        password = "credentialsJSON:c3f84f17-e571-495d-a804-ea7a25b20d89"
     }
 })
 
@@ -61,6 +61,6 @@ object HttpsGithubComAthenamlWebsiteRefsHeadsMaster : GitVcsRoot({
     url = "https://github.com/athenaml/website"
     authMethod = password {
         userName = "athenamlbot"
-        password = "zxx24d3eb84f48caad36dc56a3252875b70b7fd09cd46cb8ab54153e54fc1042983f410212252a6a0cf775d03cbe80d301b"
+        password = "credentialsJSON:c3f84f17-e571-495d-a804-ea7a25b20d89"
     }
 })
