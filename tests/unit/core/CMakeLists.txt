@@ -1,8 +1,9 @@
 file(GLOB_RECURSE CORE_TEST_SRC "*.cpp")
 
-add_athena_executable(runUnitCore ${CORE_TEST_SRC})
-target_link_libraries(runUnitCore athena-core)
-target_link_libraries(runUnitCore ${GTEST_BOTH_LIBRARIES} Threads::Threads)
-target_include_directories(runUnitCore PUBLIC ${GTEST_INCLUDE_DIRS})
+add_athena_executable(TestUnitCoreRunnable ${CORE_TEST_SRC})
+target_link_libraries(TestUnitCoreRunnable PRIVATE
+        athena-core
+        Threads::Threads
+        AthenaDep::googletest)
 
-add_test(NAME UnitCoreTests COMMAND runUnitCore)
+add_test(NAME CoreUnitTest COMMAND TestUnitCoreRunnable)
