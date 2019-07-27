@@ -23,7 +23,7 @@ class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String
     name = "[$buildConfig][$compiler] Build"
 
     var needsCoverage = false && buildConfig == "Debug"
-    var binaryDest = install
+    var binaryDest = "install"
 
     params {
         param("cc", (if (compiler == "Clang") "clang-8" else "gcc-8"))
