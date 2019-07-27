@@ -39,7 +39,7 @@ class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String
     var buildOptions = "--ninja"
     buildOptions += " --build-type " + buildConfig
 
-    buildOptions += ""--install-dir=%env.ATHENA_BINARY_DIR% "
+    buildOptions += " --install-dir=%env.ATHENA_BINARY_DIR% "
 
     if (compiler == "Clang") {
         buildOptions += " --use-ldd"
