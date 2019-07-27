@@ -114,7 +114,7 @@ object AthenaProject : Project({
             name = "Gitlab"
             url = "https://registry.gitlab.com"
             userName = "athenamlbot"
-            password = "zxx6ed3175f54e3c3f10f176feb94d281ab48c3a1fd7c269d45"
+            password = "credentialsJSON:53380671-6863-45e8-8bb2-3a3f8a17b2bc"
         }
         feature {
             id = "PROJECT_EXT_5"
