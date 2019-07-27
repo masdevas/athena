@@ -94,7 +94,7 @@ object AthenaProject : Project({
             type = "OAuthProvider"
             param("clientId", "358302cb895dfde1a3e8")
             param("defaultTokenScope", "public_repo,repo,repo:status,write:repo_hook")
-            param("secure:clientSecret", "credentialsJSON:968d931a-8103-458c-be90-8bd59b758795")
+            param("secure:clientSecret", "zxxf3671e4259734f488a8f1f91d8699587bb6ee3dfdc7e9b8ceb90ae4ec2aa6230abe6753900b2ba4f775d03cbe80d301b")
             param("displayName", "GitHub.com")
             param("gitHubUrl", "https://github.com/")
             param("providerType", "GitHub")
@@ -106,7 +106,7 @@ object AthenaProject : Project({
             userName = ""
             password = ""
             projectExtIds = "athena"
-            accessToken = "credentialsJSON:c62e4f54-04c1-4395-af81-71b19371fab0"
+            accessToken = "zxx1333982c092e489ffe59a53bc2407b3915d355dffe56a396121652b257197741a1421a4daaa4fb92b8e202cb168c199f4cd4d5132b6840d9c328b1b5f1d960a3"
             param("authType", "accesstoken")
         }
         dockerRegistry {
@@ -114,7 +114,7 @@ object AthenaProject : Project({
             name = "Gitlab"
             url = "https://registry.gitlab.com"
             userName = "athenamlbot"
-            password = "credentialsJSON:61429fc2-1691-4c61-9957-e312bbabfc3c"
+            password = "zxx694f9b9daa9cf4420d780bfe0d59211719d13ad7012fa5a5"
         }
         feature {
             id = "PROJECT_EXT_5"
