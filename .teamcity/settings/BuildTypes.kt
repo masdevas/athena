@@ -29,7 +29,6 @@ class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String
         param("cc", (if (compiler == "Clang") "clang-8" else "gcc-8"))
         param("image_name", (if (compiler == "Clang") "llvm8" else "gcc"))
         param("cxx", (if (compiler == "Clang") "clang++-8" else "g++-8"))
-        param("env.BUILD_TYPE", "%build_type%")
         param("repo", "athenaml/athena")
         param("env.SRC_DIR", "%system.teamcity.build.checkoutDir%")
         param("env.ATHENA_BINARY_DIR", "%teamcity.build.checkoutDir%/${binaryDest}_${buildConfig}_$compiler")
