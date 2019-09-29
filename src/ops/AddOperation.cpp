@@ -11,6 +11,7 @@
  * the License.
  */
 
+#include <athena/core/inner/InnerFunctions.h>
 #include <athena/ops/AddOperation.h>
 
 #include <cassert>
@@ -29,9 +30,7 @@ void AddOperation::gen(
 core::inner::Tensor *AddOperation::getResultTensor(
     std::vector<core::inner::Tensor *> args) const {
     core::ShapeView shapeView(args[0]->getShapeView());
-    core::inner::Tensor *res =
-        new core::inner::Tensor(args[0]->getDataType(), shapeView.toShape());
-    return res;
+    return new core::inner::Tensor(args[0]->getDataType(), shapeView.toShape());
 }
 
 core::inner::Tensor *AddOperation::getDerivativeTensor(
@@ -40,25 +39,24 @@ core::inner::Tensor *AddOperation::getDerivativeTensor(
     assert(argNo < 2 && "AddOperation takes 2 arguments!");
 #endif
     core::ShapeView shapeView(args[argNo]->getShapeView());
-    core::inner::Tensor *res = new core::inner::Tensor(
-        args[argNo]->getDataType(), shapeView.toShape());
-    return res;
+    return new core::inner::Tensor(args[argNo]->getDataType(),
+                                   shapeView.toShape());
 }
 void AddOperation::genDerivative(
+    const int order,
     core::AbstractGenerator &g,
+    core::inner::Tensor &operationResult,
     std::vector<core::inner::Tensor *> &operationArguments,
+    core::inner::Tensor &derivativeTensor,
     int argNo) const {
     float f_unit = 1;
     void *unit = reinterpret_cast<void *>(&f_unit);
-    // We need to make sure the 4th (3rd in terms of vector)
-    // tensor persist and is a derivative tensor
 #ifdef DEBUG
-    assert(operationArguments.size() >= 3 &&
-           "operationArguments[2] must be derivative tensor");
-    assert(operationArguments[2]->getDataType() != core::DataType::UNDEFINED &&
-           "operationArguments[2] is broken");
+    // We need to make sure the derivative tensor exists
+    assert(derivativeTensor.getDataType() != core::DataType::UNDEFINED &&
+           "derivativeTensor is broken");
 #endif
-    g.generate("fill", *operationArguments[2], unit);
+    g.generate("fill", derivativeTensor, unit);
 }
 
 }  // namespace athena::ops

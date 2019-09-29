@@ -31,6 +31,23 @@ void add(Device *, Allocator *allocator, Tensor *a, Tensor *b, Tensor *c) {
     }
 }
 
+template <typename T>
+void fma(athena::backend::llvm::Device *,
+         athena::core::Allocator *allocator,
+         athena::core::inner::Tensor *a,
+         T scaleA,
+         athena::core::inner::Tensor *b,
+         T scaleB,
+         athena::core::inner::Tensor *c) {
+    auto *af = reinterpret_cast<T *>(allocator->getRAMPointer(*a));
+    auto *bf = reinterpret_cast<T *>(allocator->getRAMPointer(*b));
+    auto *cf = reinterpret_cast<T *>(allocator->getRAMPointer(*c));
+
+    for (size_t i = 0; i < c->getShape().getTotalSize(); i++) {
+        cf[i] = scaleA * af[i] + scaleB * bf[i];
+    }
+}
+
 template void add<float>(athena::backend::llvm::Device *,
                          athena::core::Allocator *,
                          athena::core::inner::Tensor *a,
@@ -41,4 +58,20 @@ template void add<double>(athena::backend::llvm::Device *,
                           athena::core::Allocator *,
                           athena::core::inner::Tensor *a,
                           athena::core::inner::Tensor *b,
+                          athena::core::inner::Tensor *c);
+
+template void fma<float>(athena::backend::llvm::Device *,
+                         athena::core::Allocator *allocator,
+                         athena::core::inner::Tensor *a,
+                         float scaleA,
+                         athena::core::inner::Tensor *b,
+                         float scaleB,
+                         athena::core::inner::Tensor *c);
+
+template void fma<double>(athena::backend::llvm::Device *,
+                          athena::core::Allocator *allocator,
+                          athena::core::inner::Tensor *a,
+                          double scaleA,
+                          athena::core::inner::Tensor *b,
+                          double scaleB,
                           athena::core::inner::Tensor *c);

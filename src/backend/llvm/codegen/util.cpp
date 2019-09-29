@@ -11,13 +11,17 @@
  * the License.
  */
 
-#ifndef ATHENA_BUILTIN_H
-#define ATHENA_BUILTIN_H
+#include "common.h"
 
-#include <athena/backend/llvm/runtime/add.h>
-#include <athena/backend/llvm/runtime/allocate.h>
-#include <athena/backend/llvm/runtime/fill.h>
-#include <athena/backend/llvm/runtime/matrix.h>
-#include <athena/backend/llvm/runtime/mse.h>
+namespace athena::backend::llvm::codegen {
+template <>
+::llvm::Constant *getFPConstant<float>(::llvm::LLVMContext &ctx, float value) {
+    return ::llvm::ConstantFP::get(::llvm::Type::getFloatTy(ctx), value);
+}
 
-#endif  // ATHENA_BUILTIN_H
+template <>
+::llvm::Constant *getFPConstant<double>(::llvm::LLVMContext &ctx,
+                                        double value) {
+    return ::llvm::ConstantFP::get(::llvm::Type::getDoubleTy(ctx), value);
+}
+}

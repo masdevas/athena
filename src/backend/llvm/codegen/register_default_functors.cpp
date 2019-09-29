@@ -20,5 +20,8 @@ void registerDefaultFunctors(LLVMGenerator *generator) {
     registerAdd(generator);
     registerAllocate(generator);
     registerFill(generator);
+    registerHadamard(generator);
+    registerFma(generator);
+    registerMse(generator);
 }
 }  // namespace athena::backend::llvm::codegen

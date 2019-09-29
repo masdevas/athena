@@ -16,6 +16,7 @@
 
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/FatalError.h>
+#include <athena/core/inner/InnerFunctions.h>
 #include <athena/core/inner/Tensor.h>
 
 #include <string>
@@ -36,6 +37,7 @@ class Operation {
         std::vector<inner::Tensor*> args) const = 0;
     virtual inner::Tensor* getDerivativeTensor(std::vector<inner::Tensor*> args,
                                                int argNo) const = 0;
+
     /**
      * Generate code for Operation
      * @param g Generator to be used
@@ -44,6 +46,7 @@ class Operation {
      */
     virtual void gen(AbstractGenerator& g,
                      std::vector<inner::Tensor*>& operationArguments) const = 0;
+
     /**
      * Generate code for Operation derivative
      * @param g Generator to be used
@@ -51,14 +54,20 @@ class Operation {
      * to Generator implementation
      * @param argNo Index of argument that derivative will be computed to
      */
-    virtual void genDerivative(AbstractGenerator& g,
+    virtual void genDerivative(const int order,
+                               AbstractGenerator& g,
+                               inner::Tensor& operationResult,
                                std::vector<inner::Tensor*>& operationArguments,
+                               inner::Tensor& derivativeTensor,
                                int argNo) const = 0;
+
     /**
      *
      * @return Name of Operation
      */
     std::string getName() const;
+
+    virtual size_t getOperandsCount() const = 0;
 };
 
 class OperationDummy : public Operation {
@@ -67,25 +76,30 @@ class OperationDummy : public Operation {
 
     inner::Tensor* getResultTensor(
         std::vector<inner::Tensor*> args) const override {
-        FatalError(1, "NOT IMPL");
-        return nullptr;
+        return inner::getNullTensor();
     }
 
     inner::Tensor* getDerivativeTensor(std::vector<inner::Tensor*> args,
                                        int argNo) const override {
-        FatalError(1, "NOT IMPL");
-        return nullptr;
+        return inner::getNullTensor();
     }
 
     void gen(AbstractGenerator& g,
              std::vector<inner::Tensor*>& operationArguments) const override {
-        FatalError(1, "NOT IMPL");
+        new FatalError(1, "NOT IMPL");
     }
 
-    void genDerivative(AbstractGenerator& g,
+    void genDerivative(const int order,
+                       AbstractGenerator& g,
+                       inner::Tensor& operationResult,
                        std::vector<inner::Tensor*>& operationArguments,
+                       inner::Tensor& derivativeTensor,
                        int argNo) const override {
-        FatalError(1, "NOT IMPL");
+        new FatalError(1, "NOT IMPL");
+    }
+
+    size_t getOperandsCount() const override {
+        return 0;
     }
 };
 }  // namespace athena::core

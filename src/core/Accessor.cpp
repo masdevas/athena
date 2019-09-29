@@ -11,13 +11,4 @@
  * the License.
  */
 
-#ifndef ATHENA_BUILTIN_H
-#define ATHENA_BUILTIN_H
-
-#include <athena/backend/llvm/runtime/add.h>
-#include <athena/backend/llvm/runtime/allocate.h>
-#include <athena/backend/llvm/runtime/fill.h>
-#include <athena/backend/llvm/runtime/matrix.h>
-#include <athena/backend/llvm/runtime/mse.h>
-
-#endif  // ATHENA_BUILTIN_H
+#include <athena/core/Accessor.h>

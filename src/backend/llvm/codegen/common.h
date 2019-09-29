@@ -22,6 +22,21 @@ namespace athena::backend::llvm::codegen {
 void registerAdd(LLVMGenerator *generator);
 void registerAllocate(LLVMGenerator *generator);
 void registerFill(LLVMGenerator *generator);
+void registerHadamard(LLVMGenerator *generator);
+void registerFma(LLVMGenerator *generator);
+void registerMse(LLVMGenerator *generator);
+
+template <typename T>
+::llvm::Constant *getFPConstant(::llvm::LLVMContext &ctx, T value) {
+    new core::FatalError(1, "Unable to create FP constant");
+    return nullptr;  // unreachable
+}
+
+template <>
+::llvm::Constant *getFPConstant<float>(::llvm::LLVMContext &ctx, float value);
+template <>
+::llvm::Constant *getFPConstant<double>(::llvm::LLVMContext &ctx, double value);
+
 }  // namespace athena::backend::llvm::codegen
 
 #endif  // ATHENA_COMMON_H
