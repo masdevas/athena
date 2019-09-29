@@ -1,3 +1,5 @@
+#include <utility>
+
 /*
  * Copyright (c) 2018 Athena. All rights reserved.
  * https://getathena.ml
@@ -23,7 +25,7 @@ AbstractNode::AbstractNode(const AbstractNode& rhs)
       mNodeIndex(inner::getNodeTable().registerRecord(this)),
       mInputsCount(0) {}
 AbstractNode::AbstractNode(AbstractNode&& rhs) noexcept
-    : mTensor(std::move(rhs.mTensor)),
+    : mTensor(rhs.mTensor),
       mName(std::move(rhs.mName)),
       mGraphIndex(rhs.mGraphIndex),
       mNodeIndex(rhs.mNodeIndex),
@@ -34,7 +36,7 @@ AbstractNode::AbstractNode(AbstractNode&& rhs) noexcept
 AbstractNode::AbstractNode(TensorShape shape,
                            DataType dataType,
                            std::string name)
-    : mTensor(dataType, std::move(shape)),
+    : mTensor(new inner::Tensor(dataType, std::move(shape))),
       mName(std::move(name)),
       mGraphIndex(inner::kKUndefinedIndex),
       mNodeIndex(inner::getNodeTable().registerRecord(this)),
@@ -51,7 +53,7 @@ AbstractNode& AbstractNode::operator=(AbstractNode&& rhs) noexcept {
     if (mGraphIndex != inner::kKUndefinedIndex) {
         FatalError(1, "Move into node, which belongs to graph");
     }
-    mTensor = std::move(rhs.mTensor);
+    mTensor = rhs.mTensor;
     mName = std::move(rhs.mName);
     mGraphIndex = rhs.mGraphIndex;
     mNodeIndex = rhs.mNodeIndex;
@@ -59,9 +61,6 @@ AbstractNode& AbstractNode::operator=(AbstractNode&& rhs) noexcept {
     inner::getNodeTable()[mNodeIndex] = this;
     rhs.fullClear();
     return *this;
-}
-size_t AbstractNode::getTensorAddress() const {
-    return mTensor.getVirtualAddress();
 }
 void AbstractNode::fullClear() {
     AbstractNode::clear();
@@ -84,16 +83,16 @@ void AbstractNode::before(const AbstractNode& node, EdgeMark mark) const {
     }
 }
 ShapeView AbstractNode::getShapeView() const {
-    return mTensor.getShapeView();
+    return mTensor->getShapeView();
 }
 ShapeView AbstractNode::getSubShapeView(size_t offset) const {
-    return mTensor.getSubShapeView(offset);
+    return mTensor->getSubShapeView(offset);
 }
 const TensorShape& AbstractNode::getShape() const {
-    return mTensor.getShape();
+    return mTensor->getShape();
 }
 DataType AbstractNode::getDataType() const {
-    return mTensor.getDataType();
+    return mTensor->getDataType();
 }
 size_t AbstractNode::getNodeIndex() const {
     return mNodeIndex;
@@ -119,10 +118,10 @@ void AbstractNode::setShape(const TensorShape& shape) {
             1,
             "It is forbidden to change shapes of nodes which belongs to graph");
     }
-    mTensor.setShape(shape);
+    mTensor->setShape(shape);
 }
 void AbstractNode::clear() {
-    mTensor.clear();
+    mTensor->clear();
     mName.clear();
 }
 void AbstractNode::removeFromGraph() {
@@ -134,5 +133,15 @@ void AbstractNode::saveInGraph(bool isRepairedNode) {
     if (auto* graph = inner::getGraphTable()[mGraphIndex]; graph) {
         graph->saveNode(*this, isRepairedNode);
     }
+}
+AbstractNode::AbstractNode(std::string name)
+    : mTensor(inner::getNullTensor()),
+      mName(std::move(name)),
+      mGraphIndex(inner::kKUndefinedIndex),
+      mNodeIndex(inner::getNodeTable().registerRecord(this)),
+      mInputsCount(0) {}
+void inner::setResultTensor(athena::core::AbstractNode& node,
+                            athena::core::inner::Tensor* tensor) {
+    node.mTensor = tensor;
 }
 }  // namespace athena::core

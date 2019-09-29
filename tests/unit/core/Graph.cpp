@@ -18,28 +18,39 @@
 #include <set>
 
 namespace athena::core {
-TEST(GraphTest, Creation) {
-    Graph graph;
-}
-TEST(GraphTest, Using) {
-    clearAll();
+
+class GraphTest : public ::testing::Test {
+    protected:
     Graph graph;
     DummyLoader loader;
-    OperationDummy operation("DummyOperation");
-    InputNode inputNodeFirst({1}, DataType::HALF, loader, "Input1");
+    OperationDummy operation;
+
+    GraphTest() : operation("DummyOperation"){};
+
+    void SetUp() override {
+        clearAll();
+        graph.clear();
+    }
+};
+
+TEST(GraphSimpleTest, Creation) {
+    Graph graph;
+}
+TEST_F(GraphTest, Using) {
+    InputNode inputNodeFirst({1}, DataType::HALF, loader, false, "Input1");
     ASSERT_EQ(inputNodeFirst.getNodeIndex(), 1);
     graph.addNode(inputNodeFirst);
-    InputNode inputNodeSecond({1}, DataType::HALF, loader, "Input2");
+    InputNode inputNodeSecond({1}, DataType::HALF, loader, false, "Input2");
     ASSERT_EQ(inputNodeSecond.getNodeIndex(), 2);
     graph.addNode(inputNodeSecond);
-    Node node({1}, DataType::HALF, operation, "Node1");
+    Node node(operation, "Node1");
     ASSERT_EQ(node.getNodeIndex(), 3);
     graph.addNode(node);
     inputNodeFirst.before(node, 1);
     inputNodeSecond.before(node, 1);
-    Node nodeSecondLayerFirst({1}, DataType::FLOAT, operation, "Node2.1");
+    Node nodeSecondLayerFirst(operation, "Node2.1");
     ASSERT_EQ(nodeSecondLayerFirst.getNodeIndex(), 4);
-    Node nodeSecondLayerSecond({1}, DataType::FLOAT, operation, "Node2.2");
+    Node nodeSecondLayerSecond(operation, "Node2.2");
     ASSERT_EQ(nodeSecondLayerSecond.getNodeIndex(), 5);
     graph.addNode(nodeSecondLayerFirst);
     graph.addNode(nodeSecondLayerSecond);
@@ -62,25 +73,21 @@ TEST(GraphTest, Using) {
     ASSERT_EQ(graph.countSyncNodes(), 4);
     ASSERT_EQ(required_topology, graph.getTopology());
 }
-TEST(GraphTest, RemoveNode) {
-    clearAll();
-    Graph graph;
-    DummyLoader loader;
-    OperationDummy operation("DummyOperation");
-    InputNode inputNodeFirst({1}, DataType::HALF, loader, "Input1");
+TEST_F(GraphTest, RemoveNode) {
+    InputNode inputNodeFirst({1}, DataType::FLOAT, loader, false, "Input1");
     ASSERT_EQ(inputNodeFirst.getNodeIndex(), 1);
     graph.addNode(inputNodeFirst);
-    InputNode inputNodeSecond({1}, DataType::HALF, loader, "Input2");
+    InputNode inputNodeSecond({1}, DataType::FLOAT, loader, false, "Input2");
     ASSERT_EQ(inputNodeSecond.getNodeIndex(), 2);
     graph.addNode(inputNodeSecond);
-    Node node({1}, DataType::HALF, operation, "Node1");
+    Node node(operation, "Node1");
     ASSERT_EQ(node.getNodeIndex(), 3);
     graph.addNode(node);
     inputNodeFirst.before(node, 1);
     inputNodeSecond.before(node, 1);
-    Node nodeSecondLayerFirst({1}, DataType::FLOAT, operation, "Node2.1");
+    Node nodeSecondLayerFirst(operation, "Node2.1");
     ASSERT_EQ(nodeSecondLayerFirst.getNodeIndex(), 4);
-    Node nodeSecondLayerSecond({1}, DataType::FLOAT, operation, "Node2.2");
+    Node nodeSecondLayerSecond(operation, "Node2.2");
     ASSERT_EQ(nodeSecondLayerSecond.getNodeIndex(), 5);
     graph.addNode(nodeSecondLayerFirst);
     graph.addNode(nodeSecondLayerSecond);
@@ -92,25 +99,21 @@ TEST(GraphTest, RemoveNode) {
     node.removeFromGraph();
     ASSERT_EQ(graph.getTopology().size(), 0);
 }
-TEST(GraphTest, DeepTestTraverse) {
-    clearAll();
-    Graph graph;
-    DummyLoader loader;
-    OperationDummy operation("DummyOperation");
-    InputNode inputNodeFirst({1}, DataType::HALF, loader, "Input1");
+TEST_F(GraphTest, DeepTestTraverse) {
+    InputNode inputNodeFirst({1}, DataType::DOUBLE, loader, false, "Input1");
     ASSERT_EQ(inputNodeFirst.getNodeIndex(), 1);
     graph.addNode(inputNodeFirst);
-    InputNode inputNodeSecond({1}, DataType::HALF, loader, "Input2");
+    InputNode inputNodeSecond({1}, DataType::DOUBLE, loader, false, "Input2");
     ASSERT_EQ(inputNodeSecond.getNodeIndex(), 2);
     graph.addNode(inputNodeSecond);
-    Node node({1}, DataType::HALF, operation, "Node1");
+    Node node(operation, "Node1");
     ASSERT_EQ(node.getNodeIndex(), 3);
     graph.addNode(node);
     inputNodeFirst.before(node, 1);
     inputNodeSecond.before(node, 1);
-    Node nodeSecondLayerFirst({1}, DataType::FLOAT, operation, "Node2.1");
+    Node nodeSecondLayerFirst(operation, "Node2.1");
     ASSERT_EQ(nodeSecondLayerFirst.getNodeIndex(), 4);
-    Node nodeSecondLayerSecond({1}, DataType::FLOAT, operation, "Node2.2");
+    Node nodeSecondLayerSecond(operation, "Node2.2");
     ASSERT_EQ(nodeSecondLayerSecond.getNodeIndex(), 5);
     graph.addNode(nodeSecondLayerFirst);
     graph.addNode(nodeSecondLayerSecond);
@@ -149,7 +152,7 @@ TEST(GraphTest, DeepTestTraverse) {
                   inner::getNodeTable()
                       [traversal.getClusters()[1].get<Node>()[0].nodeIndex]
                           ->name());
-        ASSERT_EQ(static_cast<Node*>(
+        ASSERT_EQ(node_dyncast<Node*>(
                       inner::getNodeTable()
                           [traversal.getClusters()[1].get<Node>()[0].nodeIndex])
                       ->getOperationPtr(),
@@ -176,28 +179,24 @@ TEST(GraphTest, DeepTestTraverse) {
         ASSERT_EQ(0, traversal.getClusters()[2].get<Node>()[1].output.size());
         ASSERT_EQ(1, traversal.getClusters()[2].get<Node>()[0].input.size());
         ASSERT_EQ(1, traversal.getClusters()[2].get<Node>()[1].input.size());
-        ASSERT_EQ(static_cast<Node*>(
+        ASSERT_EQ(node_dyncast<Node*>(
                       inner::getNodeTable()
                           [traversal.getClusters()[2].get<Node>()[0].nodeIndex])
                       ->getOperationPtr(),
                   &operation);
-        ASSERT_EQ(static_cast<Node*>(
+        ASSERT_EQ(node_dyncast<Node*>(
                       inner::getNodeTable()
                           [traversal.getClusters()[2].get<Node>()[1].nodeIndex])
                       ->getOperationPtr(),
                   &operation);
     }
 }
-TEST(GraphTest, TraverseOnOtherGraph) {
-    clearAll();
-    Graph graph;
-    DummyLoader loader;
-    OperationDummy operation("DummyOperation");
-    InputNode inputNodeFirst({1}, DataType::HALF, loader, "Input1");
-    InputNode inputNodeSecond({1}, DataType::HALF, loader, "Input2");
-    Node nodeFirst({1}, DataType::FLOAT, operation, "Node1");
-    Node nodeSecond({1}, DataType::FLOAT, operation, "Node2");
-    Node nodeOut({1}, DataType::HALF, operation, "NodeOut");
+TEST_F(GraphTest, TraverseOnOtherGraph) {
+    InputNode inputNodeFirst({1}, DataType::HALF, loader, false, "Input1");
+    InputNode inputNodeSecond({1}, DataType::HALF, loader, false, "Input2");
+    Node nodeFirst(operation, "Node1");
+    Node nodeSecond(operation, "Node2");
+    Node nodeOut(operation, "NodeOut");
     graph.addNode(inputNodeFirst);
     graph.addNode(inputNodeSecond);
     graph.addNode(nodeFirst);

@@ -15,6 +15,7 @@
 #define ATHENA_GLOBALTABLES_H
 
 #include <athena/core/inner/Table.h>
+#include <athena/core/inner/Tensor.h>
 
 namespace athena::core::inner {
 Table<AllocationRecord>& getAllocationTable();

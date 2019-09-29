@@ -11,13 +11,23 @@
  * the License.
  */
 
-#ifndef ATHENA_BUILTIN_H
-#define ATHENA_BUILTIN_H
+#ifndef ATHENA_MANGLER_H
+#define ATHENA_MANGLER_H
 
-#include <athena/backend/llvm/runtime/add.h>
-#include <athena/backend/llvm/runtime/allocate.h>
-#include <athena/backend/llvm/runtime/fill.h>
-#include <athena/backend/llvm/runtime/matrix.h>
-#include <athena/backend/llvm/runtime/mse.h>
+#include <string>
 
-#endif  // ATHENA_BUILTIN_H
+namespace athena::backend::llvm {
+class Mangler {
+    private:
+    template <typename T>
+    static std::string getTypePostfix();
+
+    public:
+    template <typename T>
+    static std::string getMangledName(const std::string &name) {
+        return "athn_" + name + getTypePostfix<T>();
+    }
+};
+}  // namespace athena::backend::llvm
+
+#endif  // ATHENA_MANGLER_H

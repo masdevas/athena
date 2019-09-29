@@ -58,7 +58,9 @@ void initQueue(std::queue<size_t>& queue,
         }
     }
 }
-Graph::Graph() : mGraphIndex(inner::getGraphTable().registerRecord(this)) {}
+Graph::Graph()
+    : mGraphIndex(inner::getGraphTable().registerRecord(this)),
+      mGraphName("MainGraph") {}
 Graph::Graph(Graph&& rhs) noexcept
     : mSyncStorage(std::move(rhs.mSyncStorage)),
       mOwningStorage(std::move(rhs.mOwningStorage)),
@@ -133,18 +135,17 @@ void Graph::saveNode(AbstractNode& node, bool isRepairedNode, bool isErase) {
     }
     switch (node.getType()) {
         case NodeType::DEFAULT:
-            saveRealNode(static_cast<Node&>(node), isRepairedNode, isErase);
+            saveRealNode(node_cast<Node&>(node), isRepairedNode, isErase);
             break;
         case NodeType::INPUT:
-            saveRealNode(static_cast<InputNode&>(node), isRepairedNode,
-                         isErase);
+            saveRealNode(node_cast<InputNode&>(node), isRepairedNode, isErase);
             break;
         case NodeType::OUTPUT:
-            saveRealNode(static_cast<OutputNode&>(node), isRepairedNode,
-                         isErase);
+            saveRealNode(node_cast<OutputNode&>(node), isRepairedNode, isErase);
             break;
         case NodeType::LOSS:
-            saveRealNode(static_cast<LossNode&>(node), isRepairedNode, isErase);
+            saveRealNode(node_cast<LossNode&>(node), isRepairedNode, isErase);
+            break;
         default:
             FatalError(1, "saveNode() in Graph : ", this,
                        ". GraphIndex : ", mGraphIndex, ". Undefined node type");
@@ -213,6 +214,14 @@ size_t Graph::getGraphIndex() const {
 bool Graph::isValidTraversal() const {
     return mTraversal.isValidTraversal();
 }
+
+#define TRAVERSE_ADD_NODES_TO_CLUSTER(typeName)                       \
+    case typeName:                                                    \
+        cluster.get<NodeTypeId<typeName>::type>().emplace_back(       \
+            node->getNodeIndex(), std::move(visits[nodeIndex].input), \
+            std::move(visits[nodeIndex].output));                     \
+        break;
+
 const Traversal& Graph::traverse() {
     if (mTraversal.isValidTraversal()) {
         return mTraversal;
@@ -253,29 +262,10 @@ const Traversal& Graph::traverse() {
             }
             AbstractNode* node = inner::getNodeTable()[nodeIndex];
             switch (node->getType()) {
-                case NodeType::DEFAULT:
-                    cluster.get<Node>().emplace_back(
-                        node->getNodeIndex(),
-                        std::move(visits[nodeIndex].input),
-                        std::move(visits[nodeIndex].output));
-                    break;
-                case NodeType::INPUT:
-                    cluster.get<InputNode>().emplace_back(
-                        node->getNodeIndex(),
-                        std::move(visits[nodeIndex].input),
-                        std::move(visits[nodeIndex].output));
-                    break;
-                case NodeType::OUTPUT:
-                    cluster.get<OutputNode>().emplace_back(
-                        node->getNodeIndex(),
-                        std::move(visits[nodeIndex].input),
-                        std::move(visits[nodeIndex].output));
-                case NodeType::LOSS:
-                    cluster.get<LossNode>().emplace_back(
-                        node->getNodeIndex(),
-                        std::move(visits[nodeIndex].input),
-                        std::move(visits[nodeIndex].output));
-                    break;
+                TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::DEFAULT)
+                TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::INPUT)
+                TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::LOSS)
+                TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::OUTPUT)
                 default:
                     FatalError(1, "Undefined NodeType in traverse()");
             }
@@ -289,7 +279,163 @@ const Traversal& Graph::traverse() {
             break;
         }
     }
+
+    // Now that we have graph traversal, it is possible to determine tensor
+    // shapes
+    setUpTensors();
+
     inner::setTraversalValidity(mTraversal, true);
     return mTraversal;
+}
+
+#undef TRAVERSE_ADD_NODES_TO_CLUSTER
+
+void Graph::setUpTensors() const {
+    for (auto& cluster : mTraversal.getClusters()) {
+        auto& actionNodes = cluster.get<Node>();
+        for (auto& nodeDep : actionNodes) {
+            std::vector<inner::Tensor*> opArgs;
+
+            auto& node =
+                node_cast<Node&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
+            std::for_each(nodeDep.input.begin(), nodeDep.input.end(),
+                          [&](const auto& inp) {
+                              opArgs.push_back(&inner::getTensorFromNode(
+                                  *inner::getNodeTable()[inp.nodeIndex]));
+                          });
+
+            inner::setResultTensor(node,
+                                   node.getOperation().getResultTensor(opArgs));
+
+            for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
+                 idx++) {
+                auto& derivativeTensor =
+                    *node.getOperation().getDerivativeTensor(opArgs, idx);
+                inner::addDerivativeTensor(node, derivativeTensor);
+
+                auto& errorTensor =
+                    *node.getOperation().getDerivativeTensor(opArgs, idx);
+                inner::addErrorTensor(node, errorTensor);
+            }
+        }
+
+        auto& lossNodes = cluster.get<LossNode>();
+        for (auto& nodeDep : lossNodes) {
+            std::vector<inner::Tensor*> opArgs;
+
+            auto& node =
+                node_cast<LossNode&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
+            std::for_each(nodeDep.input.begin(), nodeDep.input.end(),
+                          [&](const auto& inp) {
+                              opArgs.push_back(&inner::getTensorFromNode(
+                                  *inner::getNodeTable()[inp.nodeIndex]));
+                          });
+
+            inner::setResultTensor(node,
+                                   node.getOperation().getResultTensor(opArgs));
+
+            for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
+                 idx++) {
+                auto& derivativeTensor =
+                    *node.getOperation().getDerivativeTensor(opArgs, idx);
+                // For loss node error and derivative means the same
+                inner::addDerivativeTensor(node, derivativeTensor);
+                inner::addErrorTensor(node, derivativeTensor);
+            }
+        }
+
+        auto& outputNodes = cluster.get<OutputNode>();
+        for (auto& nodeDep : outputNodes) {
+            auto& node = node_cast<OutputNode&>(
+                *inner::getNodeTable()[nodeDep.nodeIndex]);
+            auto& parentNode =
+                *inner::getNodeTable()[nodeDep.input[0].nodeIndex];
+            inner::setResultTensor(node, &inner::getTensorFromNode(parentNode));
+        }
+    }
+}
+void Graph::printDot(std::basic_ostream<char>& stream) {
+    stream << "digraph mygraph {\n";
+    traverse();
+    for (auto& cluster : mTraversal.getClusters()) {
+        auto& inputNodes = cluster.get<core::InputNode>();
+        for (auto& nodeDeps : inputNodes) {
+            auto& inputNode = node_cast<core::InputNode&>(
+                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            stream << inputNode.getName() << " [label=\"INP "
+                   << inputNode.getName();
+            auto& tensor = inner::getTensorFromNode(inputNode);
+            stream << "\\nTensor addr: " << tensor.getVirtualAddress();
+            stream << "\\nTensor total size: "
+                   << tensor.getShapeView().getTotalSize();
+            stream << "\"";
+
+            stream << ";style=filled;";
+            if (inputNode.isFrozen()) {
+                stream << "color=\"#91D2FF\"";
+            } else {
+                stream << "color=\"#FFDF9E\"";
+            }
+
+            stream << "]\n";
+        }
+
+        auto& actionNodes = cluster.get<core::Node>();
+        for (auto& nodeDeps : actionNodes) {
+            auto& actionNode = node_cast<core::Node&>(
+                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            stream << actionNode.getName() << " [label=\"ACT "
+                   << actionNode.getName();
+            auto& tensor = inner::getTensorFromNode(actionNode);
+            stream << "\\nTensor addr: " << tensor.getVirtualAddress();
+            stream << "\\nTensor total size: "
+                   << tensor.getShapeView().getTotalSize();
+            stream << "\"]\n";
+
+            for (auto& parent : nodeDeps.input) {
+                auto* pNode = core::inner::getNodeTable()[parent.nodeIndex];
+                stream << pNode->getName() << " -> " << actionNode.getName();
+                stream << ";\n";
+            }
+        }
+
+        auto& lossNodes = cluster.get<core::LossNode>();
+        for (auto& nodeDeps : lossNodes) {
+            auto& actionNode = node_cast<core::LossNode&>(
+                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            stream << actionNode.getName() << " [label=\"LOSS "
+                   << actionNode.getName();
+            auto& tensor = inner::getTensorFromNode(actionNode);
+            stream << "\\nTensor addr: " << tensor.getVirtualAddress();
+            stream << "\\nTensor total size: "
+                   << tensor.getShapeView().getTotalSize();
+            stream << "\"]\n";
+
+            for (auto& parent : nodeDeps.input) {
+                auto* pNode = core::inner::getNodeTable()[parent.nodeIndex];
+                stream << pNode->getName() << " -> " << actionNode.getName();
+                stream << ";\n";
+            }
+        }
+
+        auto& outputNodes = cluster.get<core::OutputNode>();
+        for (auto& nodeDeps : outputNodes) {
+            auto& outputNode = node_cast<core::OutputNode&>(
+                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            stream << outputNode.getName() << " [label=\"OUTP "
+                   << outputNode.getName();
+            auto& tensor = inner::getTensorFromNode(outputNode);
+            stream << "\\nTensor addr: " << tensor.getVirtualAddress();
+            stream << "\\nTensor total size: "
+                   << tensor.getShapeView().getTotalSize();
+            stream << "\"]\n";
+
+            auto* pNode =
+                core::inner::getNodeTable()[nodeDeps.input[0].nodeIndex];
+            stream << pNode->getName() << " -> " << outputNode.getName();
+            stream << ";\n";
+        }
+    }
+    stream << "}\n";
 }
 }  // namespace athena::core

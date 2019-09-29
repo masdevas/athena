@@ -4,6 +4,8 @@ add_athena_library(runtime-llvm-cpu SHARED
         add.cpp
         allocate.cpp
         fill.cpp
+        matrix.cpp
+        mse.cpp
         ${WRAPPER_CPP})
 add_dependencies(runtime-llvm-cpu wrapper_cpp)
 
