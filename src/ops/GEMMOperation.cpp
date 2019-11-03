@@ -13,6 +13,8 @@
 
 #include <athena/backend/llvm/runtime/structs.h>
 #include <athena/ops/GEMMOperation.h>
+#include <cassert>
+#include <iostream>
 
 #include <cassert>
 #include <iostream>
@@ -23,6 +25,11 @@ using namespace athena::backend;
 namespace athena::ops {
 inner::Tensor *GEMMOperation::getResultTensor(
     core::Context &context, std::vector<core::inner::Tensor *> args) const {
+    std::cout << "Size: " << args.size() << std::endl;
+    for (auto& val : args) {
+        std::cout << val << ' ';
+    }
+    std::cout << std::endl;
     size_t m = args[0]->getShapeView().dim(mTransposeA ? 1 : 0);
     size_t n = args[1]->getShapeView().dim(mTransposeB ? 0 : 1);
 #ifdef DEBUG
