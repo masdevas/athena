@@ -34,14 +34,9 @@ class ATH_CORE_EXPORT Operation {
 
     public:
     explicit Operation(std::string name) : mName(std::move(name)){};
-    virtual inner::Tensor* getResultTensor(
-        core::Context& context, std::vector<inner::Tensor*> args) const = 0;
-    virtual inner::Tensor* getErrorTensor(core::Context& context,
-                                          std::vector<inner::Tensor*> args,
-                                          int derivativeOrder) const = 0;
-    virtual inner::Tensor* getDerivativeTensor(core::Context& context,
-                                               std::vector<inner::Tensor*> args,
-                                               int argNo) const = 0;
+
+    virtual core::inner::Tensor *createTensor(
+        core::Context& context, std::vector<core::inner::Tensor *> args, int argNo) const = 0;
 
     /**
      * Generate code for Operation

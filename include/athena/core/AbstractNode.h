@@ -34,6 +34,8 @@ class ATH_CORE_EXPORT AbstractNode {
     private:
     void fullClear();
     std::shared_ptr<inner::Tensor> mTensor;
+    std::vector<inner::Tensor*> mOutcomingGradients;
+    inner::Tensor* mIncomingGradientTensor;
     Context* mContext;
     std::string mName;
     size_t mGraphIndex;

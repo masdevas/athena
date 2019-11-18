@@ -27,11 +27,7 @@ class ATH_OPS_EXPORT AddOperation : public core::Operation {
     public:
     AddOperation() : Operation("add") {}
 
-    core::inner::Tensor *getResultTensor(core::Context& context,
-                                         std::vector<core::inner::Tensor *> args) const override;
-    core::inner::Tensor *getErrorTensor(core::Context& context, std::vector<core::inner::Tensor *> args,
-                                        int derivativeOrder) const override;
-    core::inner::Tensor *getDerivativeTensor(
+    core::inner::Tensor *createTensor(
         core::Context& context, std::vector<core::inner::Tensor *> args, int argNo) const override;
     void gen(
         core::AbstractGenerator &g,

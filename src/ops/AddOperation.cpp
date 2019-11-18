@@ -30,22 +30,16 @@ void AddOperation::gen(
 
     g.generate("add", *a, *b, *c);
 }
-core::inner::Tensor *AddOperation::getResultTensor(
-    core::Context& context, std::vector<core::inner::Tensor *> args) const {
-    core::ShapeView shapeView(args[0]->getShapeView());
-    return new core::inner::Tensor(args[0]->getDataType(), shapeView.toShape(), context);
-}
 
-core::inner::Tensor *AddOperation::getDerivativeTensor(
+core::inner::Tensor *AddOperation::createTensor(
     core::Context& context, std::vector<core::inner::Tensor *> args, int argNo) const {
 #ifdef DEBUG
     assert(argNo < 2 && "AddOperation takes 2 arguments!");
 #endif
-    core::ShapeView shapeView(args[argNo]->getShapeView());
     return new core::inner::Tensor(args[argNo]->getDataType(),
-                                   shapeView.toShape(), context);
+                                   args[argNo]->getShape(), context);
 }
-void AddOperation::genDerivative(
+void AddOperation::genIncomingDerivatives(
     const int order,
     core::AbstractGenerator &g,
     core::inner::Tensor &operationResult,
@@ -66,10 +60,6 @@ void AddOperation::genDerivative(
     g.generate("fill", derivativeTensor, unit);
     g.generate("hadamard", opts, derivativeTensor, internalError,
                derivativeTensor);
-}
-core::inner::Tensor *AddOperation::getErrorTensor(
-    core::Context& context, std::vector<core::inner::Tensor *> args, int) const {
-    return getResultTensor(context, args);
 }
 
 }  // namespace athena::ops
