@@ -113,13 +113,6 @@ void GEMMOperation::genDerivative(
 
     g.generate("gemm", opts, *tensorA, *tensorB, derivativeTensor);
 }
-core::inner::Tensor *GEMMOperation::getErrorTensor(
-    core::Context &context,
-    std::vector<core::inner::Tensor *> args,
-    int) const {
-    // todo higher orders not supported
-    return getResultTensor(context, args);
-}
 std::string GEMMOperation::serialize() const {
     std::stringstream stringstream;
     stringstream << mTransposeA << std::endl << mTransposeB << std::endl;

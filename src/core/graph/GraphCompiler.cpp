@@ -157,7 +157,6 @@ static void compileNodeDerivatives(
 
         auto &errorTensor = core::inner::getIncomingGradient(node);
         generator.generate("allocate", errorTensor);
-        graphOptimizer.genError(generator, incomingErrors, errorTensor);
 
         auto &outputTensor = core::inner::getTensorFromNode(node);
 
@@ -176,15 +175,6 @@ static void compileNodeDerivatives(
                 graphOptimizer.getRequiredOrder(), generator, outputTensor,
                 errorTensor, inputs, derivativeTensor, idx);
             // TODO memory clean up
-        }
-
-        std::vector<core::inner::Tensor *> internalErrors;
-
-        for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
-             idx++) {
-            internalErrors.push_back(&errorTensor);
-
-            generator.generate("allocate", errorTensor);
         }
     }
 }

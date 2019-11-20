@@ -71,13 +71,6 @@ void MSELossFunction::genDerivative(
     g.generate("fma", operationResult, scale, *operationArguments[argNo],
                negScale, derivativeTensor);
 }
-core::inner::Tensor *MSELossFunction::getErrorTensor(core::Context& context,
-                                                     std::vector<core::inner::Tensor *> args, int derivativeOrder) const {
-    // Loss node is always the last node (except for output)
-    // No need for actual implementation
-    // todo refactor me
-    return nullptr;
-}
 std::string MSELossFunction::serialize() const {
     return "";
 }
