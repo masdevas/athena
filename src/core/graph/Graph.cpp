@@ -298,7 +298,9 @@ void Graph::setUpTensors() const {
                 });
 
             inner::setResultTensor(
-                node, node.getOperation().getResultTensor(*mContext, opArgs));
+                node,
+                std::shared_ptr<inner::Tensor>(
+                    node.getOperation().getResultTensor(*mContext, opArgs)));
             inner::setErrorTensor(
                 node, node.getOperation().getErrorTensor(
                           *mContext, opArgs, mOptimizer->getRequiredOrder()));
@@ -326,7 +328,9 @@ void Graph::setUpTensors() const {
                 });
 
             inner::setResultTensor(
-                node, node.getOperation().getResultTensor(*mContext, opArgs));
+                node,
+                std::shared_ptr<inner::Tensor>(
+                    node.getOperation().getResultTensor(*mContext, opArgs)));
 
             for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
                  idx++) {
@@ -344,7 +348,8 @@ void Graph::setUpTensors() const {
                 *inner::getNodeTable(*mContext)[nodeDep.nodeIndex]);
             auto& parentNode = *inner::getNodeTable(
                 *mContext)[nodeDep.input.begin()->nodeIndex];
-            inner::setResultTensor(node, &inner::getTensorFromNode(parentNode));
+            inner::setResultTensor(node,
+                                   inner::getTensorPtrFromNode(parentNode));
         }
     }
 }
