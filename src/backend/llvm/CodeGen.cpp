@@ -13,11 +13,10 @@
 
 #include <AthenaGraph/AthenaGraphOps.h>
 #include <athena/backend/llvm/CodeGen.h>
-#include <athena/core/Allocator.h>
-#include <athena/core/DataType.h>
 #include <athena/core/Generator.h>
-#include <athena/core/inner/Tensor.h>
-#include <athena/core/inner/GenBuiltins.h>
+#include <athena/core/internal/GenBuiltins.h>
+#include <athena/core/tensor/DataType.h>
+#include <athena/core/tensor/internal/TensorInternal.h>
 
 #include <llvm/ADT/APFloat.h>
 #include <llvm/ADT/SmallVector.h>
@@ -38,14 +37,14 @@
 #include <vector>
 
 using namespace athena::core;
-using namespace athena::core::inner;
+using namespace athena::core::internal;
 
-struct MlirValueImpl : inner::GenValueImplBase {
+struct MlirValueImpl : internal::GenValueImplBase {
   mlir::Value value;
   MlirValueImpl(mlir::Value val) : value(val) {}
 };
 
-struct MlirNodeImpl : inner::GenNodeImplBase {
+struct MlirNodeImpl : internal::GenNodeImplBase {
   mlir::ath_graph::NodeOp node;
   MlirNodeImpl(mlir::ath_graph::NodeOp node) : node(node) {}
   auto getOperand(size_t i) -> GenValue override {
@@ -62,17 +61,18 @@ struct MlirNodeImpl : inner::GenNodeImplBase {
   };
 };
 
-struct MlirGraphImpl : inner::GenGraphImplBase {
+struct MlirGraphImpl : internal::GenGraphImplBase {
   mlir::ath_graph::GraphOp graph;
   MlirGraphImpl(mlir::ath_graph::GraphOp graph) : graph(graph) {}
 };
 
-struct MlirInsPointImpl : inner::GenInsPointImplBase {
+struct MlirInsPointImpl : internal::GenInsPointImplBase {
   mlir::OpBuilder::InsertPoint point;
   MlirInsPointImpl(mlir::OpBuilder::InsertPoint ip) : point(ip) {}
 };
 
-static auto getTensorType(mlir::OpBuilder& builder, const inner::Tensor& tensor)
+static auto getTensorType(mlir::OpBuilder& builder,
+                          const internal::TensorInternal& tensor)
     -> mlir::Type {
   ::llvm::SmallVector<int64_t, 3> shape;
   for (auto dim : tensor.getShapeView()) {
@@ -92,7 +92,7 @@ static auto getTensorType(mlir::OpBuilder& builder, const inner::Tensor& tensor)
 }
 
 namespace athena::backend::llvm {
-void populateCodeGenPatterns(athena::core::Generator& generator,
+void populateCodeGenPatterns(athena::core::internal::Generator& generator,
                              mlir::OpBuilder& builder) {
 
   //===--------------------------------------------------------------------===//
@@ -148,14 +148,15 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
   generator.registerConstantFunctor(constantFunctor);
 
   std::function<GenNode(std::string_view, size_t, size_t,
-                        const std::vector<inner::Tensor>&, inner::Tensor&)>
+                        const std::vector<internal::TensorInternal*>&,
+                        internal::TensorInternal&)>
       nodeFunctor = [&](std::string_view name, size_t nodeId, size_t clusterId,
-                        const std::vector<inner::Tensor>& operands,
-                        inner::Tensor& out) {
+                        const std::vector<internal::TensorInternal*>& operands,
+                        internal::TensorInternal& out) {
         ::llvm::SmallVector<mlir::Type, 5> nodeOperandTypes;
 
         for (const auto& tensor : operands) {
-          auto tensorType = getTensorType(builder, tensor);
+          auto tensorType = getTensorType(builder, *tensor);
           nodeOperandTypes.push_back(tensorType);
         }
 
@@ -251,13 +252,13 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
 
     return GenValue{nullptr};
   };
-  generator.registerFunctor<builtin::Alloc>( allocFunctor);
+  generator.registerFunctor<builtin::Alloc>(allocFunctor);
 
   builtin_functor_t<builtin::Lock> lockFunctor =
-      [&](GenValue tensor, core::LockType lockType) -> GenValue {
+      [&](GenValue tensor, core::internal::LockType lockType) -> GenValue {
     auto tensorVal = tensor.value<MlirValueImpl>().value;
     mlir::StringAttr mlirLockType;
-    if (lockType == core::LockType::READ) {
+    if (lockType == core::internal::LockType::READ) {
       mlirLockType = builder.getStringAttr("read");
     } else {
       mlirLockType = builder.getStringAttr("read_write");
@@ -277,7 +278,7 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
 
     return GenValue{nullptr};
   };
-  generator.registerFunctor<builtin::Release>( releaseFunctor);
+  generator.registerFunctor<builtin::Release>(releaseFunctor);
 
   // todo barrier
 
@@ -291,11 +292,10 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
 
         return GenValue{nullptr};
       };
-  generator.registerFunctor<builtin::InvokeLoader>( invokeLoaderFunctor);
+  generator.registerFunctor<builtin::InvokeLoader>(invokeLoaderFunctor);
 
-  builtin_functor_t<builtin::NodeEval> 
-      evalFunctor = [&](GenGraph graph, GenNode node,
-                        const std::vector<GenValue>& operands) {
+  builtin_functor_t<builtin::NodeEval> evalFunctor =
+      [&](GenGraph graph, GenNode node, const std::vector<GenValue>& operands) {
         auto mlirGraph = graph.graph<MlirGraphImpl>().graph;
         auto mlirNode = node.node<MlirNodeImpl>().node;
 
@@ -318,20 +318,20 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
       };
   generator.registerFunctor<builtin::NodeEval>(evalFunctor);
 
-  builtin_functor_t<builtin::Add>
-      addFunctor = [&](GenValue a, GenValue scaleA, GenValue b, GenValue scaleB,
-                       GenValue out) {
-        auto aVal = a.value<MlirValueImpl>().value;
-        auto scaleAVal = scaleA.value<MlirValueImpl>().value;
-        auto bVal = b.value<MlirValueImpl>().value;
-        auto scaleBVal = scaleB.value<MlirValueImpl>().value;
-        auto outVal = out.value<MlirValueImpl>().value;
+  builtin_functor_t<builtin::Add> addFunctor = [&](GenValue a, GenValue scaleA,
+                                                   GenValue b, GenValue scaleB,
+                                                   GenValue out) {
+    auto aVal = a.value<MlirValueImpl>().value;
+    auto scaleAVal = scaleA.value<MlirValueImpl>().value;
+    auto bVal = b.value<MlirValueImpl>().value;
+    auto scaleBVal = scaleB.value<MlirValueImpl>().value;
+    auto outVal = out.value<MlirValueImpl>().value;
 
-        builder.create<mlir::ath_graph::AddOp>(
-            builder.getUnknownLoc(), aVal, scaleAVal, bVal, scaleBVal, outVal);
+    builder.create<mlir::ath_graph::AddOp>(builder.getUnknownLoc(), aVal,
+                                           scaleAVal, bVal, scaleBVal, outVal);
 
-        return GenValue{nullptr};
-      };
+    return GenValue{nullptr};
+  };
   generator.registerFunctor<builtin::Add>(addFunctor);
 
   builtin_functor_t<builtin::Mul> mulFunctor =
@@ -347,9 +347,9 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
       };
   generator.registerFunctor<builtin::Mul>(mulFunctor);
 
-  builtin_functor_t<builtin::MatMul>
-      matmulFunctor = [&](GenValue a, GenValue scaleA, GenValue b,
-                          GenValue scaleB, GenValue out) {
+  builtin_functor_t<builtin::MatMul> matmulFunctor =
+      [&](GenValue a, GenValue scaleA, GenValue b, GenValue scaleB,
+          GenValue out) {
         auto aVal = a.value<MlirValueImpl>().value;
         auto scaleAVal = scaleA.value<MlirValueImpl>().value;
         auto bVal = b.value<MlirValueImpl>().value;
@@ -364,38 +364,38 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
       };
   generator.registerFunctor<builtin::MatMul>(matmulFunctor);
 
-  builtin_functor_t<builtin::Fill> fillFunctor =
-      [&](GenValue pattern, GenValue out) {
-        auto patternVal = pattern.value<MlirValueImpl>().value;
-        auto outVal = out.value<MlirValueImpl>().value;
+  builtin_functor_t<builtin::Fill> fillFunctor = [&](GenValue pattern,
+                                                     GenValue out) {
+    auto patternVal = pattern.value<MlirValueImpl>().value;
+    auto outVal = out.value<MlirValueImpl>().value;
 
-        builder.create<mlir::ath_graph::FillOp>(builder.getUnknownLoc(),
-                                                patternVal, outVal);
+    builder.create<mlir::ath_graph::FillOp>(builder.getUnknownLoc(), patternVal,
+                                            outVal);
 
-        return GenValue{nullptr};
-      };
+    return GenValue{nullptr};
+  };
   generator.registerFunctor<builtin::Fill>(fillFunctor);
 
-  builtin_functor_t<builtin::Slice> sliceFunctor =
-      [&](GenValue index, GenValue tensor) {
-        auto indexVal = index.value<MlirValueImpl>().value;
-        auto outVal = tensor.value<MlirValueImpl>().value;
+  builtin_functor_t<builtin::Slice> sliceFunctor = [&](GenValue index,
+                                                       GenValue tensor) {
+    auto indexVal = index.value<MlirValueImpl>().value;
+    auto outVal = tensor.value<MlirValueImpl>().value;
 
-        auto res = builder.create<mlir::ath_graph::SliceOp>(
-            builder.getUnknownLoc(), indexVal, outVal);
-        return GenValue{std::make_shared<MlirValueImpl>(res.getResult())};
-      };
+    auto res = builder.create<mlir::ath_graph::SliceOp>(builder.getUnknownLoc(),
+                                                        indexVal, outVal);
+    return GenValue{std::make_shared<MlirValueImpl>(res.getResult())};
+  };
   generator.registerFunctor<builtin::Slice>(sliceFunctor);
 
-  builtin_functor_t<builtin::Transpose> transposeFunctor =
-      [&](GenValue tensor, GenValue out) {
-        auto tensorVal = tensor.value<MlirValueImpl>().value;
-        auto outVal = out.value<MlirValueImpl>().value;
+  builtin_functor_t<builtin::Transpose> transposeFunctor = [&](GenValue tensor,
+                                                               GenValue out) {
+    auto tensorVal = tensor.value<MlirValueImpl>().value;
+    auto outVal = out.value<MlirValueImpl>().value;
 
-        builder.create<mlir::ath_graph::TransposeOp>(builder.getUnknownLoc(),
-                                                     tensorVal, outVal);
-        return GenValue{nullptr};
-      };
+    builder.create<mlir::ath_graph::TransposeOp>(builder.getUnknownLoc(),
+                                                 tensorVal, outVal);
+    return GenValue{nullptr};
+  };
   generator.registerFunctor<builtin::Transpose>(transposeFunctor);
 }
 } // namespace athena::backend::llvm

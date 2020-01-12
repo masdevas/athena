@@ -22,6 +22,6 @@ class ModuleOp;
 template <typename OpT> class OperationPass;
 
 std::unique_ptr<OperationPass<ModuleOp>> createDeployDefaultFunctionsPass();
-}
+} // namespace mlir
 
 #endif // ATHENA_PASSES_H

@@ -16,25 +16,20 @@
 #ifndef ATHENA_LAUNCHCOMMAND_H
 #define ATHENA_LAUNCHCOMMAND_H
 
-#include <athena/core/inner/Tensor.h>
-
 struct ArgDesc {
-  enum ArgType {
-    TENSOR = 0,
-    DATA = 1
-  };
+  enum ArgType { TENSOR = 0, DATA = 1 };
   size_t size;
-  void *arg;
+  void* arg;
   ArgType type;
 };
 
 struct LaunchCommand {
   const char* kernelName;
   uint32_t argsCount;
-  ArgDesc *args;
+  ArgDesc* args;
   size_t workDim;
-  size_t *globalSize;
-  size_t *localSize;
+  size_t* globalSize;
+  size_t* localSize;
 };
 
 #endif // ATHENA_LAUNCHCOMMAND_H
