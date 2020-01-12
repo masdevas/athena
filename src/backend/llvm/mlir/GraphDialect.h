@@ -17,7 +17,7 @@
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/Function.h"
 
-#include <athena/core/inner/Tensor.h>
+#include <athena/core/tensor/impl/TensorImpl.h>
 
 namespace athena::backend::llvm {
 class GraphDialect : public mlir::Dialect {

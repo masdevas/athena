@@ -15,12 +15,12 @@
 #include <athena/backend/llvm/LLVMTrivialAllocator.h>
 #include <athena/backend/llvm/mlir/MLIRGenerator.h>
 #include <athena/core/GradientDescent.h>
-#include <athena/core/Graph.h>
-#include <athena/core/GraphCompiler.h>
-#include <athena/core/InputNode.h>
 #include <athena/core/LossNode.h>
 #include <athena/core/Node.h>
-#include <athena/core/inner/Tensor.h>
+#include <athena/core/graph/Graph.h>
+#include <athena/core/graph/internal/GraphCompiler.h>
+#include <athena/core/node/impl/InputNodeImpl.h>
+#include <athena/core/tensor/impl/TensorImpl.h>
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 #include <athena/ops/AddOperation.h>
 #include <athena/ops/MSELossFunction.h>
@@ -73,8 +73,8 @@ TEST(MLIRRegression, BasicIR) {
   Graph graph(context);
   graph.setUpOptimizer<Optimizer>(/*learningRate0.01*/);
   graph.setUpOptimizer<GradientDescent>(/*learningRate*/ 0.01);
-  InputNode aInp(shape, DataType::FLOAT, aLoader, context, false, "a");
-  InputNode bInp(shape, DataType::FLOAT, bLoader, context, false, "b");
+  InputNodeImpl aInp(shape, DataType::FLOAT, aLoader, context, false, "a");
+  InputNodeImpl bInp(shape, DataType::FLOAT, bLoader, context, false, "b");
   graph.addNode(aInp);
   graph.addNode(bInp);
 
@@ -84,7 +84,7 @@ TEST(MLIRRegression, BasicIR) {
   add.after(aInp, 1);
   add.after(bInp, 2);
 
-  OutputNode outputNode(DataType::FLOAT, context, "out");
+  OutputNodeInternal outputNode(DataType::FLOAT, context, "out");
   graph.addNode(outputNode);
   outputNode.after(add, 1);
 

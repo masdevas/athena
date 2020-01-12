@@ -15,9 +15,9 @@
 
 #include <athena/backend/llvm/LLVMGeneratorFunctor.h>
 #include <athena/backend/llvm/runtime/Device.h>
-#include <athena/core/AbstractGenerator.h>
-#include <athena/core/AbstractLoader.h>
-#include <athena/core/Allocator.h>
+#include <athena/core/Generator.h>
+#include <athena/core/loader/internal/TensorAllocator.h>
+#include <athena/loaders/impl/AbstractLoader.h>
 
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Module.h>

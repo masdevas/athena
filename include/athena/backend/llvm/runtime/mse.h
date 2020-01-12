@@ -15,8 +15,8 @@
 #define ATHENA_MSE_H
 
 #include <athena/backend/llvm/runtime/Device.h>
-#include <athena/core/Allocator.h>
-#include <athena/core/inner/Tensor.h>
+#include <athena/core/loader/internal/TensorAllocator.h>
+#include <athena/core/tensor/impl/TensorImpl.h>
 
 template <typename T>
 extern void mse(athena::backend::llvm::Device*, athena::core::Allocator*,

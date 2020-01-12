@@ -32,7 +32,7 @@ GraphPartitionPlanner::getGraphPartitioning() {
   auto& nodeTable = inner::getNodeTable(ctx);
 
   for (auto cluster : topology.getClusters()) {
-    for (auto& node : cluster.get<InputNode>()) {
+    for (auto& node : cluster.get<InputNodeImpl>()) {
       partitioning[nodeTable[node.nodeIndex]->getName()] = mDevices.devices;
     }
     for (auto& node : cluster.get<Node>()) {
@@ -41,7 +41,7 @@ GraphPartitionPlanner::getGraphPartitioning() {
     for (auto& node : cluster.get<LossNode>()) {
       partitioning[nodeTable[node.nodeIndex]->getName()] = mDevices.devices;
     }
-    for (auto& node : cluster.get<OutputNode>()) {
+    for (auto& node : cluster.get<OutputNodeInternal>()) {
       partitioning[nodeTable[node.nodeIndex]->getName()] = mDevices.devices;
     }
   }

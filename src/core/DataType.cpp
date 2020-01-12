@@ -11,8 +11,8 @@
  * the License.
  */
 
-#include <athena/core/DataType.h>
-#include <athena/core/FatalError.h>
+#include <athena/core/tensor/DataType.h>
+#include <athena/utils/error/FatalError.h>
 
 namespace athena::core {
 size_t sizeOfDataType(const DataType& dataType) {
@@ -24,7 +24,7 @@ size_t sizeOfDataType(const DataType& dataType) {
   case DataType::HALF:
     return 2ULL;
   default:
-    FatalError(ATH_FATAL_OTHER, "Size for dataType is not defined");
+    utils::FatalError(utils::ATH_FATAL_OTHER, "Size for dataType is not defined");
     return 0;
   }
 }

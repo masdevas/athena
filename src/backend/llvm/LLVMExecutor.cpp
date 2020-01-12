@@ -17,10 +17,10 @@
 #include "runtime/driver/runtime-driver.h"
 
 #include <athena/backend/llvm/LLVMExecutor.h>
-#include <athena/core/FatalError.h>
-#include <athena/core/GraphCompiler.h>
 #include <athena/core/LossNode.h>
-#include <athena/core/Optimizer.h>
+#include <athena/core/generator/Optimizer.h>
+#include <athena/core/graph/internal/GraphCompiler.h>
+#include <athena/utils/error/FatalError.h>
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 

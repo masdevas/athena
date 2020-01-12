@@ -14,12 +14,12 @@
 #include <athena/backend/llvm/LLVMExecutor.h>
 #include <athena/backend/llvm/LLVMTrivialAllocator.h>
 #include <athena/core/GradientDescent.h>
-#include <athena/core/Graph.h>
-#include <athena/core/InputNode.h>
 #include <athena/core/LossNode.h>
 #include <athena/core/Node.h>
+#include <athena/core/graph/Graph.h>
 #include <athena/core/inner/InnerFunctions.h>
-#include <athena/core/inner/Tensor.h>
+#include <athena/core/node/impl/InputNodeImpl.h>
+#include <athena/core/tensor/impl/TensorImpl.h>
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 #include <athena/model/DotModel.h>
 #include <athena/ops/GEMMOperation.h>
@@ -49,13 +49,13 @@ TEST(JIT, LinReg) {
   Context context;
   Graph graph(context);
   graph.setUpOptimizer<GradientDescent>(/*learningRate*/ -0.0000001);
-  InputNode inputInp(shape, DataType::FLOAT, inputLoader, context, false, "a");
-  InputNode weightsInp(shape2, DataType::FLOAT, weightsLoader, context, false,
+  InputNodeImpl inputInp(shape, DataType::FLOAT, inputLoader, context, false, "a");
+  InputNodeImpl weightsInp(shape2, DataType::FLOAT, weightsLoader, context, false,
                        "b");
   graph.addNode(inputInp);
   graph.addNode(weightsInp);
 
-  OutputNode outputNodeDbg(DataType::FLOAT, context, "debugger");
+  OutputNodeInternal outputNodeDbg(DataType::FLOAT, context, "debugger");
   graph.addNode(outputNodeDbg);
   outputNodeDbg.after(weightsInp, 1);
 
@@ -65,12 +65,12 @@ TEST(JIT, LinReg) {
   gemm.after(inputInp, 1);
   gemm.after(weightsInp, 2);
 
-  OutputNode outputNode(DataType::FLOAT, context, "out");
+  OutputNodeInternal outputNode(DataType::FLOAT, context, "out");
   graph.addNode(outputNode);
   outputNode.after(gemm, 2);
 
   MSELossFunction lossFunction;
-  InputNode cInp(shapeScalar, DataType::FLOAT, targetLoader, context, true,
+  InputNodeImpl cInp(shapeScalar, DataType::FLOAT, targetLoader, context, true,
                  "c");
   graph.addNode(cInp);
   LossNode lossNode(lossFunction, Criterion::MIN, context, "mse_loss");
@@ -78,7 +78,7 @@ TEST(JIT, LinReg) {
   lossNode.after(gemm, 1);
   lossNode.after(cInp, 2);
 
-  OutputNode lossOut(DataType::FLOAT, context, "lossOut");
+  OutputNodeInternal lossOut(DataType::FLOAT, context, "lossOut");
   graph.addNode(lossOut);
   lossOut.after(lossNode, 1);
 

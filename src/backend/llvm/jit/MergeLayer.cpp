@@ -13,7 +13,7 @@
 
 #include "MergeLayer.h"
 
-#include <athena/core/FatalError.h>
+#include <athena/utils/error/FatalError.h>
 
 #include <llvm/IR/Verifier.h>
 #include <llvm/Linker/Linker.h>

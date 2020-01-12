@@ -14,7 +14,7 @@
 #include "GraphDialect.h"
 
 #include <athena/backend/llvm/mlir/MLIRGenerator.h>
-#include <athena/core/FatalError.h>
+#include <athena/utils/error/FatalError.h>
 
 using namespace athena::backend::llvm;
 using namespace athena::core;

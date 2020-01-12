@@ -16,8 +16,8 @@
 
 #include <athena/backend/llvm/runtime/Device.h>
 #include <athena/backend/llvm/runtime/structs.h>
-#include <athena/core/Allocator.h>
-#include <athena/core/inner/Tensor.h>
+#include <athena/core/loader/internal/TensorAllocator.h>
+#include <athena/core/tensor/impl/TensorImpl.h>
 
 /**
  * Hadamard (element-wise) product

@@ -13,7 +13,7 @@
 
 #include "AthenaJIT.h"
 
-#include <athena/core/FatalError.h>
+#include <athena/utils/error/FatalError.h>
 
 #include <cstdlib>
 #include <llvm/Passes/PassBuilder.h>

@@ -16,8 +16,8 @@
 #include <athena/backend/llvm/LLVMTrivialAllocator.h>
 #include <athena/backend/llvm/runtime/builtin.h>
 #include <athena/backend/llvm/runtime/structs.h>
-#include <athena/core/Context.h>
-#include <athena/core/inner/Tensor.h>
+#include <athena/core/context/Context.h>
+#include <athena/core/tensor/impl/TensorImpl.h>
 
 #include <cstring>
 

@@ -12,7 +12,7 @@
  */
 
 #include <athena/backend/llvm/LLVMTrivialAllocator.h>
-#include <athena/core/DataType.h>
+#include <athena/core/tensor/DataType.h>
 
 #include <memory>
 

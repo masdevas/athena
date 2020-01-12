@@ -14,9 +14,9 @@
 #define ATHENA_LLVMEXECUTOR_H
 
 #include <athena/backend/llvm/llvm_export.h>
-#include <athena/core/Allocator.h>
 #include <athena/core/Executor.h>
-#include <athena/core/Traversal.h>
+#include <athena/core/graph/Traversal.h>
+#include <athena/core/loader/internal/TensorAllocator.h>
 
 namespace llvm {
 class Module;

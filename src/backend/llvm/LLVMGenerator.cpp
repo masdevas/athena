@@ -16,8 +16,8 @@
 #include "codegen/register_default_functors.h"
 #include "utils.h"
 
-#include <athena/core/FatalError.h>
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
+#include <athena/utils/error/FatalError.h>
 
 #include <utility>
 

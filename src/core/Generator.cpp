@@ -13,26 +13,26 @@
 
 #include <athena/core/Generator.h>
 
-namespace athena::core {
-void Generator::registerFunctor(const std::string& name, FunctorType functor) {
-    mRegisteredFunctors[name] = std::move(functor);
-}
-void Generator::unregisterFunctor(const std::string& name) {
-    if (hasFunctor(name)) {
-        mRegisteredFunctors.erase(name);
-    }
-}
-void Generator::generate(const std::string& functorName,
-                         size_t nodeId,
-                         const std::string& nodeName,
-                         size_t clusterId,
-                         const std::vector<inner::Tensor>& args,
-                         const std::any& options) {
-    if (!hasFunctor(functorName))
-        new FatalError(FatalErrorType::ATH_NOT_IMPLEMENTED,
-                       "No functor with name ", functorName);
-
-    mRegisteredFunctors[functorName](mContext, mGeneratorState, nodeId,
-                                     nodeName, clusterId, args, options);
-}
-}  // namespace athena::core
+//namespace athena::core {
+//void Generator::registerFunctor(const std::string& name, FunctorType functor) {
+//    mRegisteredFunctors[name] = std::move(functor);
+//}
+//void Generator::unregisterFunctor(const std::string& name) {
+//    if (hasFunctor(name)) {
+//        mRegisteredFunctors.erase(name);
+//    }
+//}
+//void Generator::generate(const std::string& functorName,
+//                         size_t nodeId,
+//                         const std::string& nodeName,
+//                         size_t clusterId,
+//                         const std::vector<inner::Tensor>& args,
+//                         const std::any& options) {
+//    if (!hasFunctor(functorName))
+//        new FatalError(FatalErrorType::ATH_NOT_IMPLEMENTED,
+//                       "No functor with name ", functorName);
+//
+//    mRegisteredFunctors[functorName](mContext, mGeneratorState, nodeId,
+//                                     nodeName, clusterId, args, options);
+//}
+//}  // namespace athena::core
