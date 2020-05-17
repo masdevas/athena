@@ -25,6 +25,9 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tablegen/GraphDialect.cpp.
         COMMAND ${MLIR_TBLGEN} --gen-op-defs -o=${CMAKE_CURRENT_BINARY_DIR}/tablegen/GraphDialect.cpp.inc
         -I=${MLIR_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/GraphDialect.td
         )
+
+# fixme use find_package(MLIR) and co.
+
 add_custom_target(mlir_dialect_tblgen
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tablegen/GraphDialect.h.inc
         ${CMAKE_CURRENT_BINARY_DIR}/tablegen/GraphDialect.h.fake
