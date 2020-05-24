@@ -11,9 +11,9 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
+#include "../utils/LaunchCommand.h"
 #include "LoaderFunctionAnalysis.h"
 #include "Passes/Passes.h"
-#include "../utils/LaunchCommand.h"
 
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/IR/Module.h"
