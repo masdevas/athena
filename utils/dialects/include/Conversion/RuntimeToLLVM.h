@@ -11,21 +11,28 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_LOADERFUNCTIONANALYSIS_H
-#define ATHENA_LOADERFUNCTIONANALYSIS_H
+#ifndef ATHENA_RUNTIMETOLLVM_H
+#define ATHENA_RUNTIMETOLLVM_H
 
-#include "mlir/IR/Module.h"
-#include <bits/unordered_set.h>
+#include <memory>
 
-/// Gathers loader function names to deploy function definitions later.
-class LoaderFunctionAnalysis {
-  std::unordered_set<std::string> mLoaders;
+namespace mlir {
 
-public:
-  LoaderFunctionAnalysis(mlir::Operation* op);
-  const std::unordered_set<std::string>& getLoaderFunctionNames() const {
-    return mLoaders;
-  }
-};
+class ModuleOp;
+class MLIRContext;
+class OwningRewritePatternList;
+class LLVMTypeConverter;
 
-#endif // ATHENA_LOADERFUNCTIONANALYSIS_H
+template <typename OpT> class OperationPass;
+
+void populateRuntimeToLLVMConversionPatterns(
+    LLVMTypeConverter& typeConverter,
+    OwningRewritePatternList& loweringPatterns);
+
+auto createLowerRuntimeToLLVMPass()
+    -> std::unique_ptr<OperationPass<ModuleOp>>;
+
+} // namespace mlir
+
+#endif // ATHENA_RUNTIMETOLLVM_H
+

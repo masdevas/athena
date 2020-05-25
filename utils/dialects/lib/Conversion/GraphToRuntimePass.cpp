@@ -12,12 +12,12 @@
 //===----------------------------------------------------------------------===//
 
 #include "Conversion/GraphToRuntimePass.h"
-#include "../utils/LaunchCommand.h"
-#include "ArgInfo.h"
+
 #include "AthenaGraph/AthenaGraphDialect.h"
 #include "AthenaGraph/AthenaGraphOps.h"
+#include "AthenaRuntime/AthenaRuntimeDialect.h"
+#include "AthenaRuntime/AthenaRuntimeOps.h"
 
-#include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/BlockAndValueMapping.h"
@@ -30,596 +30,351 @@
 
 using namespace mlir;
 
-namespace mlir {
-class AthenaTypeConverter : public TypeConverter {
-public:
-  using TypeConverter::convertType;
-
-  explicit AthenaTypeConverter(MLIRContext* ctx)
-      : mLlvmDialect(ctx->getRegisteredDialect<LLVM::LLVMDialect>()) {
-    mModule = &mLlvmDialect->getLLVMModule();
-    mPointerWidth = mModule->getDataLayout().getPointerSizeInBits();
-
-    addConversion([&](FloatType type) { return convertFloatType(type); });
-    addConversion([&](IndexType type) { return convertIndexType(type); });
-    addConversion([&](IntegerType type) { return convertIntegerType(type); });
-    addConversion([&](TensorType type) { return convertTensorType(type); });
-
-    addConversion([](LLVM::LLVMType type) { return type; });
-    // Function types are handled separately.
-    addConversion([](FunctionType type) { return type; });
-  }
-
-  MLIRContext& getContext() { return *getDialect()->getContext(); }
-  llvm::LLVMContext& getLLVMContext() { return mModule->getContext(); }
-  LLVM::LLVMDialect* getDialect() { return mLlvmDialect; }
-  size_t getPointerWidth() { return mPointerWidth; }
-
-  LLVM::LLVMType getVoidPtrTy() {
-    return LLVM::LLVMType::getInt8Ty(mLlvmDialect).getPointerTo();
-  }
-
-protected:
-  llvm::Module* mModule;
-  LLVM::LLVMDialect* mLlvmDialect;
-  size_t mPointerWidth;
-
-private:
-  auto convertIndexType(IndexType type) -> Type {
-    return LLVM::LLVMType::getIntNTy(mLlvmDialect, mPointerWidth);
-  }
-
-  auto convertIntegerType(IntegerType type) -> Type {
-    return LLVM::LLVMType::getIntNTy(mLlvmDialect, type.getWidth());
-  }
-
-  auto convertFloatType(FloatType type) -> Type {
-    switch (type.getKind()) {
-    case mlir::StandardTypes::F32:
-      return LLVM::LLVMType::getFloatTy(mLlvmDialect);
-    case mlir::StandardTypes::F64:
-      return LLVM::LLVMType::getDoubleTy(mLlvmDialect);
-    case mlir::StandardTypes::F16:
-      return LLVM::LLVMType::getHalfTy(mLlvmDialect);
-    default:
-      llvm_unreachable("non-float type in convertFloatType");
-    }
-  }
-
-  auto convertTensorType(TensorType type) -> Type { return getVoidPtrTy(); }
-};
-} // namespace mlir
-
-template <typename OpT>
-class AthenaConversionPattern : public ConversionPattern {
-public:
-  AthenaConversionPattern(AthenaTypeConverter& typeConverter,
-                          PatternBenefit patternBenefit = 1)
-      : ConversionPattern(OpT::getOperationName(), patternBenefit,
-                          &typeConverter.getContext()),
-        mTypeConverter(typeConverter) {}
-
-protected:
-  AthenaTypeConverter& mTypeConverter;
-};
-
-template <typename OpT>
-struct BuiltinToFuncCallLoweringPattern : public AthenaConversionPattern<OpT> {
-  using AthenaConversionPattern<OpT>::AthenaConversionPattern;
-
-  LogicalResult
-  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter& rewriter) const override {
-    auto castOp = llvm::cast<OpT>(op);
-    auto* llvmDialect =
-        op->getContext()->template getRegisteredDialect<LLVM::LLVMDialect>();
-    auto parentFunc = op->template getParentOfType<LLVM::LLVMFuncOp>();
-    auto device = parentFunc.getArgument(parentFunc.getNumArguments() - 1);
-    auto allocator = parentFunc.getArgument(parentFunc.getNumArguments() - 2);
-
-    SmallVector<Value, 3> builtinOperands;
-    builtinOperands.push_back(device);
-    builtinOperands.push_back(allocator);
-    builtinOperands.push_back(castOp.getOperand());
-
-    if constexpr (std::is_same_v<OpT, ath_graph::LockOp>) {
-      auto lockType =
-          op->template getAttrOfType<StringAttr>("lock_type").getValue();
-      int lockTypeInt;
-      if (lockType == "read") {
-        lockTypeInt = 0;
-      } else {
-        lockTypeInt = 1;
-      }
-
-      auto typeConst = rewriter.create<LLVM::ConstantOp>(
-          op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
-          rewriter.getIntegerAttr(rewriter.getIntegerType(32), lockTypeInt));
-      builtinOperands.push_back(typeConst);
-    }
-
-    std::string symbolName;
-    if constexpr (std::is_same_v<OpT, ath_graph::AllocOp>) {
-      symbolName = "ath_allocate";
-    } else if constexpr (std::is_same_v<OpT, ath_graph::ReleaseOp>) {
-      symbolName = "ath_release_tensor";
-    } else if constexpr (std::is_same_v<OpT, ath_graph::GetTensor>) {
-      symbolName = "ath_get_tensor_ptr";
-    } else if constexpr (std::is_same_v<OpT, ath_graph::LockOp>) {
-      symbolName = "ath_lock_tensor";
-    }
-
-    auto funcOp = op->template getParentOfType<ModuleOp>()
-                      .template lookupSymbol<LLVM::LLVMFuncOp>(symbolName);
-    rewriter.replaceOpWithNewOp<LLVM::CallOp>(op, funcOp, operands);
-    return success();
-  }
-};
-
-struct InvokeLoaderLowering
-    : public AthenaConversionPattern<ath_graph::InvokeLoaderOp> {
-  using AthenaConversionPattern<
-      ath_graph::InvokeLoaderOp>::AthenaConversionPattern;
-
-  LogicalResult
-  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter& rewriter) const override {
-    auto parentFunc = op->template getParentOfType<LLVM::LLVMFuncOp>();
-    auto device = parentFunc.getArgument(parentFunc.getNumArguments() - 1);
-    auto allocator = parentFunc.getArgument(parentFunc.getNumArguments() - 2);
-
-    SmallVector<Value, 3> loadArgs;
-    loadArgs.push_back(allocator);
-    loadArgs.push_back(device); // FIXME this must be a loader. Currently no way
-                                //   to express this with Athena Graph.
-    loadArgs.push_back(operands[0]);
-
-    auto loaderOp = llvm::cast<ath_graph::InvokeLoaderOp>(op);
-    auto funcOp =
-        op->template getParentOfType<ModuleOp>()
-            .template lookupSymbol<LLVM::LLVMFuncOp>(loaderOp.loader_routine());
-    rewriter.replaceOpWithNewOp<LLVM::CallOp>(op, funcOp, loadArgs);
-
-    return success();
-  }
-};
-
-/// Converts builtin call to a set of instructions for launching the kernel.
-///
-/// To run the kernel on device, a special LaunchCommand structure must be
-/// generated. The information for its fields is taken from current translation
-/// unit.
-///
-/// The global size is currently determined by the size of return value tensor.
-/// Local size is currently set to 0 for backend to decide later.
-///
-/// \todo actual kernel name resolution
-/// \todo local size
-///
-/// \tparam OpT is a class of Athena Graph Dialect operation
-template <typename OpT>
-class BuiltinConversionPattern : public AthenaConversionPattern<OpT> {
-public:
-  using AthenaConversionPattern<OpT>::AthenaConversionPattern;
-
-  LogicalResult
-  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter& rewriter) const override {
-    auto llvmDialect =
-        op->getContext()->getRegisteredDialect<LLVM::LLVMDialect>();
-
-    auto launchCommandType = getLaunchCommandType(llvmDialect);
-
-    llvm::errs() << OpT::getOperationName() << "\n";
-    Operation* globalString =
-        op->getParentOfType<ModuleOp>().lookupSymbol(OpT::getOperationName());
-
-    // fixme fetch real kernel name
-    StringRef kernelNameStr = OpT::getOperationName();
-
-    LLVM::GlobalOp kernelNameVal;
-    if (globalString) {
-      kernelNameVal = llvm::cast<LLVM::GlobalOp>(globalString);
-    } else {
-      auto module = op->getParentOfType<ModuleOp>();
-      OpBuilder builder(module);
-      builder.setInsertionPointToStart(module.getBody());
-      // todo string must be null-terminated.
-      auto stringType = LLVM::LLVMType::getArrayTy(
-          LLVM::LLVMType::getInt8Ty(llvmDialect), kernelNameStr.size());
-      auto kernelNameAttr = builder.getStringAttr(kernelNameStr.data());
-      kernelNameVal = builder.create<LLVM::GlobalOp>(
-          builder.getUnknownLoc(), stringType, /*isConstant*/ false,
-          LLVM::Linkage::Private, kernelNameStr, kernelNameAttr);
-    }
-
-    // 1. Allocate LaunchCommand structure
-    auto unit = rewriter.create<LLVM::ConstantOp>(
-        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
-        rewriter.getIntegerAttr(rewriter.getIntegerType(32), 1));
-    auto launchCommandMem = rewriter.create<LLVM::AllocaOp>(
-        op->getLoc(), launchCommandType, unit, 8);
-    // 2. Set kernel name
-    auto zeroArg = rewriter.create<LLVM::ConstantOp>(
-        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
-        rewriter.getIntegerAttr(rewriter.getIntegerType(32), 0));
-    auto kerNameMember = rewriter.create<LLVM::GEPOp>(
-        op->getLoc(), launchCommandType.getStructElementType(0).getPointerTo(),
-        launchCommandMem, ValueRange{zeroArg, zeroArg});
-    auto kerNameGlobalAddr =
-        rewriter.create<LLVM::AddressOfOp>(op->getLoc(), kernelNameVal);
-    auto kerNameAddr = rewriter.create<LLVM::GEPOp>(
-        op->getLoc(), LLVM::LLVMType::getInt8Ty(llvmDialect).getPointerTo(),
-        kerNameGlobalAddr, ValueRange{zeroArg, zeroArg});
-    rewriter.create<LLVM::StoreOp>(op->getLoc(), kerNameAddr, kerNameMember);
-
-    // 3. Set kernel args count
-    auto firstArg = unit; // for consistency
-    auto argCountMember = rewriter.create<LLVM::GEPOp>(
-        op->getLoc(), launchCommandType.getStructElementType(1).getPointerTo(),
-        launchCommandMem, ValueRange{zeroArg, firstArg});
-    auto argCountConst = rewriter.create<LLVM::ConstantOp>(
-        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
-        rewriter.getIntegerAttr(rewriter.getIntegerType(32), getArgsCount(op)));
-    rewriter.create<LLVM::StoreOp>(op->getLoc(), argCountConst, argCountMember);
-
-    // 4. Allocate args structure
-    auto argDescTy = getArgDescType(llvmDialect);
-    auto argsArray = rewriter.create<LLVM::AllocaOp>(op->getLoc(), argDescTy,
-                                                     argCountConst, 16);
-
-    // 5. For each arg:
-    //    i.   Set size of arg
-    //    ii.  Set pointer to arg
-    //    iii. Set argument type
-    fillArgDesc(argsArray, op, operands, rewriter);
-
-    auto two = rewriter.create<LLVM::ConstantOp>(
-        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
-        rewriter.getIntegerAttr(rewriter.getIntegerType(32), 2));
-    auto argPtr = rewriter.create<LLVM::GEPOp>(
-        op->getLoc(), getArgDescType(llvmDialect).getPointerTo(), argsArray,
-        ValueRange{zeroArg, zeroArg});
-    auto argMember = rewriter.create<LLVM::GEPOp>(
-        op->getLoc(), launchCommandType.getStructElementType(2).getPointerTo(),
-        launchCommandMem, ValueRange{zeroArg, two});
-    rewriter.create<LLVM::StoreOp>(op->getLoc(), argPtr, argMember);
-
-    // 6. Set ND-range dimension
-    auto outType = op->getOperand(op->getNumOperands() - 1).getType();
-    if (!outType.isa<RankedTensorType>()) {
-      llvm_unreachable("The last type must be a ranked tensor output");
-    }
-
-    auto sizetType = LLVM::LLVMType::getIntNTy(llvmDialect, sizeof(size_t) * 8);
-    auto rankedTensorOut = outType.cast<RankedTensorType>();
-    auto dimSize = rewriter.create<LLVM::ConstantOp>(
-        op->getLoc(), sizetType,
-        rewriter.getIntegerAttr(rewriter.getIntegerType(sizeof(size_t) * 8),
-                                rankedTensorOut.getRank()));
-
-    auto three = rewriter.create<LLVM::ConstantOp>(
-        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
-        rewriter.getIntegerAttr(rewriter.getIntegerType(32), 3));
-    auto workDimMember = rewriter.create<LLVM::GEPOp>(
-        op->getLoc(), launchCommandType.getStructElementType(3).getPointerTo(),
-        launchCommandMem, ValueRange{zeroArg, three});
-    rewriter.create<LLVM::StoreOp>(op->getLoc(), dimSize, workDimMember);
-
-    // 7. Allocate mem for global size
-    auto dimArrayTy =
-        LLVM::LLVMType::getArrayTy(sizetType, rankedTensorOut.getRank());
-    // fixme FWIW alignment must be 4 on 32-bit systems.
-    auto globalSizeArray =
-        rewriter.create<LLVM::AllocaOp>(op->getLoc(), dimArrayTy, dimSize, 16);
-
-    // 8. Fill global sizes
-    for (int i = 0; i < rankedTensorOut.getRank(); i++) {
-      auto curIdx = rewriter.create<LLVM::ConstantOp>(
-          op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
-          rewriter.getIntegerAttr(rewriter.getIntegerType(32), i));
-
-      auto curArrayElt = rewriter.create<LLVM::GEPOp>(
-          op->getLoc(), sizetType.getPointerTo(), launchCommandMem,
-          ValueRange{zeroArg, curIdx});
-
-      auto curDim = rewriter.create<LLVM::ConstantOp>(
-          op->getLoc(), sizetType,
-          rewriter.getIntegerAttr(rewriter.getIntegerType(sizeof(size_t) * 8),
-                                  rankedTensorOut.getShape()[i]));
-      rewriter.create<LLVM::StoreOp>(op->getLoc(), curDim, curArrayElt);
-    }
-    auto four = rewriter.create<LLVM::ConstantOp>(
-        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
-        rewriter.getIntegerAttr(rewriter.getIntegerType(32), 4));
-    auto globalSizePtr = rewriter.create<LLVM::GEPOp>(
-        op->getLoc(), sizetType.getPointerTo(), globalSizeArray,
-        ValueRange{zeroArg, zeroArg});
-    auto globalSizeMember = rewriter.create<LLVM::GEPOp>(
-        op->getLoc(), launchCommandType.getStructElementType(4).getPointerTo(),
-        launchCommandMem, ValueRange{zeroArg, four});
-    llvm::errs() << globalSizePtr.getType() << " " << globalSizeMember.getType()
-                 << "\n";
-    rewriter.create<LLVM::StoreOp>(op->getLoc(), globalSizePtr,
-                                   globalSizeMember);
-
-    // 9. Allocate memory for local size
-    auto localSizeArray =
-        rewriter.create<LLVM::AllocaOp>(op->getLoc(), dimArrayTy, dimSize, 16);
-
-    // 10. Set local size to 0 (for now).
-    for (int i = 0; i < rankedTensorOut.getRank(); i++) {
-      auto curIdx = rewriter.create<LLVM::ConstantOp>(
-          op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
-          rewriter.getIntegerAttr(rewriter.getIntegerType(32), i));
-
-      auto curArrayElt = rewriter.create<LLVM::GEPOp>(
-          op->getLoc(), sizetType.getPointerTo(), launchCommandMem,
-          ValueRange{zeroArg, curIdx});
-
-      auto zeroSize = rewriter.create<LLVM::ConstantOp>(
-          op->getLoc(), sizetType,
-          rewriter.getIntegerAttr(rewriter.getIntegerType(sizeof(size_t) * 8),
-                                  0));
-      rewriter.create<LLVM::StoreOp>(op->getLoc(), zeroSize, curArrayElt);
-    }
-
-    auto five = rewriter.create<LLVM::ConstantOp>(
-        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
-        rewriter.getIntegerAttr(rewriter.getIntegerType(32), 5));
-    auto localSizePtr = rewriter.create<LLVM::GEPOp>(
-        op->getLoc(), sizetType.getPointerTo(), localSizeArray,
-        ValueRange{zeroArg, zeroArg});
-    auto localSizeMember = rewriter.create<LLVM::GEPOp>(
-        op->getLoc(), launchCommandType.getStructElementType(5).getPointerTo(),
-        launchCommandMem, ValueRange{zeroArg, five});
-    rewriter.create<LLVM::StoreOp>(op->getLoc(), localSizePtr, localSizeMember);
-
-    rewriter.eraseOp(op);
-    return success();
-  }
-};
-
-template <typename FuncT>
-class FunctionConversionPattern : public AthenaConversionPattern<FuncT> {
-public:
-  using AthenaConversionPattern<FuncT>::AthenaConversionPattern;
-
-  LogicalResult
-  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter& rewriter) const override {
-    auto funcOp = mlir::cast<FuncT>(op);
-    auto oldType = funcOp.getType();
-    SmallVector<LLVM::LLVMType, 5> newArgs;
-    for (const auto& type : oldType.getInputs()) {
-      Type convType = mTypeConverter.convertType(type);
-      newArgs.push_back(convType.cast<LLVM::LLVMType>());
-    }
-    // The last two arguments have been incorrectly converted.
-    newArgs.pop_back();
-    newArgs.pop_back();
-
-    auto voidPtrTy =
-        LLVM::LLVMType::getInt8Ty(mTypeConverter.getDialect()).getPointerTo();
-
-    newArgs.push_back(voidPtrTy);
-    newArgs.push_back(LLVM::LLVMType::getIntNTy(
-        mTypeConverter.getDialect(), mTypeConverter.getPointerWidth()));
-
-    TypeConverter::SignatureConversion newSignature(oldType.getNumInputs());
-    for (auto& en : llvm::enumerate(newArgs)) {
-      newSignature.addInputs(en.index(), en.value());
-    }
-
-    LLVM::LLVMType functionReturnType =
-        LLVM::LLVMType::getVoidTy(mTypeConverter.getDialect());
-
-    // Allocator pointer
-    newArgs.push_back(voidPtrTy);
-    newSignature.addInputs(voidPtrTy);
-
-    if constexpr (std::is_same_v<FuncT, ath_graph::NodeOp>) {
-      // Device pointer
-      newArgs.push_back(voidPtrTy);
-      newSignature.addInputs(voidPtrTy);
-      functionReturnType =
-          LLVM::LLVMType::getInt8Ty(mTypeConverter.getDialect());
-    }
-
-    auto llvmFuncTy =
-        LLVM::LLVMType::getFunctionTy(functionReturnType, newArgs, false);
-
-    LLVM::LLVMFuncOp newFunc;
-    if constexpr (std::is_same_v<FuncT, ath_graph::NodeOp>) {
-      auto nodeIdAttr = rewriter.getNamedAttr(
-          ath_graph::NodeOp::getNodeIdAttrName(),
-          op->getAttr(ath_graph::NodeOp::getNodeIdAttrName()));
-      auto clusterIdAttr = rewriter.getNamedAttr(
-          ath_graph::NodeOp::getClusterIdAttrName(),
-          op->getAttr(ath_graph::NodeOp::getClusterIdAttrName()));
-      SmallVector<NamedAttribute, 2> attrs;
-      attrs.push_back(nodeIdAttr);
-      attrs.push_back(clusterIdAttr);
-      newFunc = rewriter.create<LLVM::LLVMFuncOp>(
-          funcOp.getLoc(), funcOp.getName(), llvmFuncTy,
-          LLVM::Linkage::External, attrs);
-    } else {
-      newFunc = rewriter.create<LLVM::LLVMFuncOp>(funcOp.getLoc(),
-                                                  funcOp.getName(), llvmFuncTy);
-    }
-
-    rewriter.inlineRegionBefore(funcOp.body(), newFunc.getBody(),
-                                newFunc.getBody().end());
-    rewriter.applySignatureConversion(&newFunc.getBody(), newSignature);
-    rewriter.eraseOp(op);
-
-    return success();
-  }
-
-protected:
-  using AthenaConversionPattern<FuncT>::mTypeConverter;
-};
-
-class SliceLoweringPattern
-    : public AthenaConversionPattern<ath_graph::SliceOp> {
-public:
-  using AthenaConversionPattern<ath_graph::SliceOp>::AthenaConversionPattern;
-
-  LogicalResult
-  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter& rewriter) const override {
-    auto funcOp =
-        op->template getParentOfType<ModuleOp>()
-            .template lookupSymbol<LLVM::LLVMFuncOp>("ath_get_sub_tensor");
-
-    rewriter.replaceOpWithNewOp<LLVM::CallOp>(op, funcOp, operands);
-    return success();
-  }
-};
-
-class EvalLoweringPattern : public AthenaConversionPattern<ath_graph::EvalOp> {
-public:
-  using AthenaConversionPattern<ath_graph::EvalOp>::AthenaConversionPattern;
-
-  LogicalResult
-  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter& rewriter) const override {
-    auto* llvmDialect =
-        op->getContext()->getRegisteredDialect<LLVM::LLVMDialect>();
-    auto evalNode = llvm::cast<ath_graph::EvalOp>(op);
-    auto parentFunc = op->getParentOfType<LLVM::LLVMFuncOp>();
-    auto context = parentFunc.getArgument(parentFunc.getNumArguments() - 3);
-    auto allocator = parentFunc.getArgument(parentFunc.getNumArguments() - 2);
-    auto getDevFunc =
-        op->getParentOfType<ModuleOp>().lookupSymbol<LLVM::LLVMFuncOp>(
-            "ath_get_device_for_node");
-
-    auto node = op->getParentOfType<ModuleOp>().lookupSymbol<LLVM::LLVMFuncOp>(
-        evalNode.node());
-    auto nodeIdAttr =
-        node.getAttrOfType<IntegerAttr>(ath_graph::NodeOp::getNodeIdAttrName());
-
-    auto nodeId = rewriter.create<LLVM::ConstantOp>(
-        op->getLoc(), LLVM::LLVMType::getInt64Ty(llvmDialect),
-        rewriter.getIntegerAttr(rewriter.getIntegerType(64),
-                                nodeIdAttr.getValue()));
-
-    SmallVector<Value, 2> getDevArgs;
-    getDevArgs.push_back(nodeId);
-    getDevArgs.push_back(context);
-
-    auto devPtr =
-        rewriter.create<LLVM::CallOp>(op->getLoc(), getDevFunc, getDevArgs);
-
-    SmallVector<Value, 5> nodeArgs;
-    std::copy(evalNode.getArgOperands().begin(),
-              evalNode.getArgOperands().end(), std::back_inserter(nodeArgs));
-    nodeArgs.push_back(allocator);
-    nodeArgs.push_back(devPtr.getResult(0));
-
-    rewriter.replaceOpWithNewOp<LLVM::CallOp>(op, node, nodeArgs);
-
-    return success();
-  }
-};
-
-class ReturnLoweringPattern
-    : public AthenaConversionPattern<ath_graph::ReturnOp> {
-public:
-  using AthenaConversionPattern<ath_graph::ReturnOp>::AthenaConversionPattern;
-  LogicalResult
-  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter& rewriter) const override {
-    rewriter.replaceOpWithNewOp<LLVM::ReturnOp>(op, operands);
-    return success();
-  }
-
-protected:
-  using AthenaConversionPattern<ath_graph::ReturnOp>::mTypeConverter;
-};
-
-class GraphTerminatorLoweringPattern
-    : public AthenaConversionPattern<ath_graph::GraphTerminatorOp> {
-public:
-  using AthenaConversionPattern<
-      ath_graph::GraphTerminatorOp>::AthenaConversionPattern;
-
-  LogicalResult
-  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter& rewriter) const override {
-    rewriter.replaceOpWithNewOp<LLVM::ReturnOp>(op, ValueRange{});
-    return success();
-  }
-};
-
-class ConstantLoweringPattern : public AthenaConversionPattern<ConstantOp> {
-public:
-  using AthenaConversionPattern<ConstantOp>::AthenaConversionPattern;
-
-  LogicalResult
-  matchAndRewrite(Operation* op, ArrayRef<Value>,
-                  ConversionPatternRewriter& rewriter) const override {
-    auto constOp = llvm::cast<ConstantOp>(op);
-
-    rewriter.replaceOpWithNewOp<LLVM::ConstantOp>(
-        op, mTypeConverter.convertType(op->getResult(0).getType()),
-        constOp.getValue());
-    return success();
-  }
-
-protected:
-  using AthenaConversionPattern<ConstantOp>::mTypeConverter;
-};
-
 namespace {
-class LowerGraphPass
-    : public PassWrapper<LowerGraphPass, OperationPass<ModuleOp>> {
+template <typename OpT>
+class AthenaGraphConversionPattern : public ConversionPattern {
+public:
+  AthenaGraphConversionPattern(MLIRContext* context,
+                               PatternBenefit patternBenefit = 1)
+      : ConversionPattern(OpT::getOperationName(), patternBenefit, context) {}
+};
+
+template <typename OpT>
+struct BuiltinConversionPattern : public AthenaGraphConversionPattern<OpT> {
+  using AthenaGraphConversionPattern<OpT>::AthenaGraphConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+    auto concreteOp = llvm::cast<OpT>(op);
+    FuncOp node = concreteOp.template getParentOfType<FuncOp>();
+
+    auto nodeIdAttr = node.getAttrOfType<mlir::IntegerAttr>(
+        ath_graph::NodeOp::getNodeIdAttrName());
+    auto deviceType = ath_rt::DeviceType::get(op->getContext());
+
+    auto device = rewriter.create<ath_rt::DeviceSelectOp>(
+        op->getLoc(), deviceType, nodeIdAttr);
+
+    SmallVector<mlir::Type, 2> resTypes;
+    resTypes.push_back(operands.back().getType());
+    resTypes.push_back(ath_rt::EventType::get(op->getContext()));
+
+    auto definingOp = operands.back().getDefiningOp();
+    mlir::Value blockingEvent;
+    if (llvm::isa<ath_rt::LaunchOp>(definingOp)) {
+      blockingEvent = llvm::cast<ath_rt::LaunchOp>(definingOp).getResult(1);
+    } else {
+      blockingEvent =
+          rewriter.create<ath_rt::NullEventOp>(op->getLoc(), resTypes.back());
+    }
+
+    RankedTensorType tensorType =
+        concreteOp.getResult().getType().template cast<RankedTensorType>();
+    auto globalSize = rewriter.getI64ArrayAttr(tensorType.getShape());
+    SmallVector<int64_t, 3> local(tensorType.getRank());
+    auto localSize = rewriter.getI64ArrayAttr(local);
+
+    // FIXME this pattern is incorrect if node performs more than one
+    //       computation.
+    auto launchOp = rewriter.create<ath_rt::LaunchOp>(
+        op->getLoc(), resTypes, device, blockingEvent, "dummy", globalSize,
+        localSize, operands);
+    rewriter.replaceOp(op, launchOp.getResult(0));
+    return success();
+  }
+};
+
+struct GraphReturnConversionPattern
+    : public AthenaGraphConversionPattern<ath_graph::ReturnOp> {
+  using AthenaGraphConversionPattern<
+      ath_graph::ReturnOp>::AthenaGraphConversionPattern;
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+    llvm::dbgs() << " operands size: " << operands.size();
+    auto val = operands.front();
+    val.dump();
+    mlir::Value retVal;
+    auto definingOp = operands.front().getDefiningOp();
+    if (llvm::isa<ath_rt::LaunchOp>(definingOp)) {
+      auto launchOp = llvm::cast<ath_rt::LaunchOp>(definingOp);
+      retVal = launchOp.getResult(1);
+    } else {
+      retVal = rewriter.create<ath_rt::NullEventOp>(
+          op->getLoc(), ath_rt::EventType::get(op->getContext()));
+    }
+    rewriter.replaceOpWithNewOp<ReturnOp>(op, ValueRange{retVal});
+
+    return success();
+  }
+};
+
+struct AllocOpConversionPattern
+    : public AthenaGraphConversionPattern<ath_graph::AllocOp> {
+  using AthenaGraphConversionPattern<
+      ath_graph::AllocOp>::AthenaGraphConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+
+    auto concreteOp = llvm::cast<ath_graph::AllocOp>(op);
+    auto node = concreteOp.template getParentOfType<FuncOp>();
+
+    auto nodeIdAttr = node.getAttrOfType<mlir::IntegerAttr>(
+        ath_graph::NodeOp::getNodeIdAttrName());
+    auto deviceType = ath_rt::DeviceType::get(op->getContext());
+
+    auto device = rewriter.create<ath_rt::DeviceSelectOp>(
+        op->getLoc(), deviceType, nodeIdAttr);
+    rewriter.replaceOpWithNewOp<ath_rt::AllocOp>(op, device, operands[0]);
+
+    return success();
+  }
+};
+
+struct ReleaseOpConversionPattern
+    : public AthenaGraphConversionPattern<ath_graph::ReleaseOp> {
+  using AthenaGraphConversionPattern<
+      ath_graph::ReleaseOp>::AthenaGraphConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+
+    auto concreteOp = llvm::cast<ath_graph::ReleaseOp>(op);
+    auto node = concreteOp.getParentOfType<FuncOp>();
+
+    auto nodeIdAttr = node.getAttrOfType<mlir::IntegerAttr>(
+        ath_graph::NodeOp::getNodeIdAttrName());
+    auto deviceType = ath_rt::DeviceType::get(op->getContext());
+
+    auto device = rewriter.create<ath_rt::DeviceSelectOp>(
+        op->getLoc(), deviceType, nodeIdAttr);
+    rewriter.replaceOpWithNewOp<ath_rt::ReleaseOp>(op, device, operands[0]);
+
+    return success();
+  }
+};
+
+struct LockOpConversionPattern
+    : public AthenaGraphConversionPattern<ath_graph::LockOp> {
+  using AthenaGraphConversionPattern<
+      ath_graph::LockOp>::AthenaGraphConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+
+    auto concreteOp = llvm::cast<ath_graph::LockOp>(op);
+    auto node = concreteOp.getParentOfType<FuncOp>();
+
+    auto nodeIdAttr = node.getAttrOfType<mlir::IntegerAttr>(
+        ath_graph::NodeOp::getNodeIdAttrName());
+    auto deviceType = ath_rt::DeviceType::get(op->getContext());
+
+    auto device = rewriter.create<ath_rt::DeviceSelectOp>(
+        op->getLoc(), deviceType, nodeIdAttr);
+    rewriter.replaceOpWithNewOp<ath_rt::LockOp>(op, device, operands[0],
+                                                concreteOp.lock_type());
+
+    return success();
+  }
+};
+
+struct GraphTerminatorConversionPattern
+    : public AthenaGraphConversionPattern<ath_graph::GraphTerminatorOp> {
+  using AthenaGraphConversionPattern<
+      ath_graph::GraphTerminatorOp>::AthenaGraphConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+    rewriter.replaceOpWithNewOp<ReturnOp>(op, operands);
+
+    return success();
+  }
+};
+
+struct NodeOpConversionPattern
+    : public AthenaGraphConversionPattern<ath_graph::NodeOp> {
+  using AthenaGraphConversionPattern<
+      ath_graph::NodeOp>::AthenaGraphConversionPattern;
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+    auto node = llvm::cast<ath_graph::NodeOp>(op);
+
+    auto allAttrs = node.getAttrs();
+    SmallVector<mlir::NamedAttribute, 4> newAttrs(allAttrs.begin(),
+                                                  allAttrs.end());
+    auto rem = std::remove_if(newAttrs.begin(), newAttrs.end(),
+                              [&](mlir::NamedAttribute& attr) {
+                                return attr.first == node.getTypeAttrName() ||
+                                       attr.first == "sym_name";
+                              });
+
+    newAttrs.erase(rem, newAttrs.end());
+
+    auto funcType = rewriter.getFunctionType(
+        {ath_rt::GraphHandleType::get(op->getContext())},
+        {ath_rt::EventType::get(op->getContext())});
+    auto func = rewriter.create<FuncOp>(node.getLoc(), node.getName(), funcType,
+                                        newAttrs);
+
+    TypeConverter::SignatureConversion newSignature(0);
+    newSignature.addInputs(funcType.getInput(0));
+
+    rewriter.inlineRegionBefore(node.getBody(), func.getBody(),
+                                func.getBody().end());
+    rewriter.applySignatureConversion(&func.getBody(), newSignature);
+    rewriter.eraseOp(op);
+
+    return success();
+  };
+};
+
+struct GraphOpConversionPattern
+    : public AthenaGraphConversionPattern<ath_graph::GraphOp> {
+  using AthenaGraphConversionPattern<
+      ath_graph::GraphOp>::AthenaGraphConversionPattern;
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+    auto graph = llvm::cast<ath_graph::GraphOp>(op);
+
+    auto allAttrs = graph.getAttrs();
+    SmallVector<mlir::NamedAttribute, 4> newAttrs(allAttrs.begin(),
+                                                  allAttrs.end());
+    auto rem = std::remove_if(newAttrs.begin(), newAttrs.end(),
+                              [&](mlir::NamedAttribute& attr) {
+                                return attr.first == graph.getTypeAttrName() ||
+                                       attr.first == "sym_name";
+                              });
+
+    newAttrs.erase(rem, newAttrs.end());
+    auto funcType = rewriter.getFunctionType(
+        {ath_rt::GraphHandleType::get(op->getContext())}, {});
+    auto func = rewriter.create<FuncOp>(graph.getLoc(), graph.getName(),
+                                        funcType, newAttrs);
+
+    TypeConverter::SignatureConversion newSignature(0);
+    newSignature.addInputs(funcType.getInput(0));
+
+    rewriter.inlineRegionBefore(graph.body(), func.getBody(),
+                                func.getBody().end());
+    rewriter.applySignatureConversion(&func.getBody(), newSignature);
+    rewriter.eraseOp(op);
+
+    return success();
+  };
+};
+
+struct EvalOpConversionPattern
+    : public AthenaGraphConversionPattern<ath_graph::EvalOp> {
+  using AthenaGraphConversionPattern<
+      ath_graph::EvalOp>::AthenaGraphConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+    auto evalOp = llvm::cast<ath_graph::EvalOp>(op);
+    auto module = evalOp.getParentOfType<ModuleOp>();
+    auto nodeFunc = module.lookupSymbol<FuncOp>(evalOp.node());
+    auto parentFunc = evalOp.getParentOfType<FuncOp>();
+
+    auto graphHandle = parentFunc.getArgument(0);
+
+    rewriter.replaceOpWithNewOp<CallOp>(op, nodeFunc, ValueRange{graphHandle});
+    return success();
+  }
+};
+
+struct BarrierConversionPattern
+    : AthenaGraphConversionPattern<ath_graph::BarrierOp> {
+  using AthenaGraphConversionPattern<
+      ath_graph::BarrierOp>::AthenaGraphConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+    auto barrierOp = llvm::cast<ath_graph::BarrierOp>(op);
+
+    auto attr = barrierOp.clusterIdAttr();
+
+    auto newBarrier =
+        rewriter.create<ath_rt::BarrierOp>(op->getLoc(), ValueRange{});
+    newBarrier.setAttr("cluster_id", attr); // fixme refactor name
+    rewriter.eraseOp(op);
+
+    return success();
+  }
+};
+
+class GraphToRuntimePass
+    : public PassWrapper<GraphToRuntimePass, OperationPass<ModuleOp>> {
 protected:
-  void runOnOperation() override {
-    OwningRewritePatternList structureLoweringPatterns;
-    AthenaTypeConverter typeConverter(&getContext());
-    populateGraphToRuntimeConversionPatterns(
-        typeConverter, structureLoweringPatterns, &getContext());
+  void runOnOperation() {
+    OwningRewritePatternList patterns;
+    populateGraphToRuntimeConversionPatterns(patterns, &getContext());
     ConversionTarget target(getContext());
-    target.addLegalDialect<LLVM::LLVMDialect>();
     target.addLegalOp<ModuleOp>();
     target.addLegalOp<ModuleTerminatorOp>();
-    target.addIllegalDialect<ath_graph::AthenaGraphDialect>();
-    if (failed(applyFullConversion(getOperation(), target,
-                                   structureLoweringPatterns))) {
+    target.addLegalOp<FuncOp>();
+    target.addLegalOp<ReturnOp>();
+    target.addLegalDialect<StandardOpsDialect>();
+    target.addLegalDialect<ath_rt::AthenaRuntimeDialect>();
+    target.addLegalDialect<ath_graph::AthenaGraphDialect>();
+
+    target.addIllegalOp<ath_graph::EvalOp>();
+    target.addIllegalOp<ath_graph::NodeOp>();
+    target.addIllegalOp<ath_graph::ReturnOp>();
+    target.addIllegalOp<ath_graph::GraphTerminatorOp>();
+    target.addIllegalOp<ath_graph::GraphOp>();
+    target.addIllegalOp<ath_graph::BarrierOp>();
+    target.addIllegalOp<ath_graph::AllocOp>();
+    target.addIllegalOp<ath_graph::ReleaseOp>();
+    target.addIllegalOp<ath_graph::LockOp>();
+    target.addIllegalOp<ath_graph::AddOp>();
+    target.addIllegalOp<ath_graph::MulOp>();
+    target.addIllegalOp<ath_graph::MatmulOp>();
+    target.addIllegalOp<ath_graph::TransposeOp>();
+    target.addIllegalOp<ath_graph::FillOp>();
+
+    if (failed(applyPartialConversion(getOperation(), target, patterns))) {
       signalPassFailure();
     }
   }
 };
+
 } // namespace
 
 namespace mlir {
 void populateGraphToRuntimeConversionPatterns(
-    AthenaTypeConverter& typeConverter,
     OwningRewritePatternList& loweringPatterns, MLIRContext* ctx) {
-  loweringPatterns.insert<
+  loweringPatterns.insert <
       // clang-format off
-          ReturnLoweringPattern,
-          GraphTerminatorLoweringPattern,
-          SliceLoweringPattern,
-          InvokeLoaderLowering,
-          EvalLoweringPattern,
-          ConstantLoweringPattern,
-          BuiltinToFuncCallLoweringPattern<ath_graph::AllocOp>,
-          BuiltinToFuncCallLoweringPattern<ath_graph::ReleaseOp>,
-          BuiltinToFuncCallLoweringPattern<ath_graph::GetTensor>,
-          BuiltinToFuncCallLoweringPattern<ath_graph::LockOp>,
-          BuiltinConversionPattern<ath_graph::AddOp>,
-          BuiltinConversionPattern<ath_graph::MulOp>,
-          BuiltinConversionPattern<ath_graph::MatmulOp>,
-          BuiltinConversionPattern<ath_graph::TransposeOp>,
-          BuiltinConversionPattern<ath_graph::FillOp>,
-          FunctionConversionPattern<ath_graph::NodeOp>,
-          FunctionConversionPattern<ath_graph::GraphOp>
+      GraphOpConversionPattern,
+      NodeOpConversionPattern,
+      GraphTerminatorConversionPattern, 
+      GraphReturnConversionPattern,
+      EvalOpConversionPattern,
+      BarrierConversionPattern,
+      AllocOpConversionPattern,
+      LockOpConversionPattern,
+      ReleaseOpConversionPattern,
+      BuiltinConversionPattern<ath_graph::AddOp>,
+      BuiltinConversionPattern<ath_graph::MulOp>,
+      BuiltinConversionPattern<ath_graph::MatmulOp>,
+      BuiltinConversionPattern<ath_graph::FillOp>,
+      BuiltinConversionPattern<ath_graph::TransposeOp>
       // clang-format on
-      >(typeConverter);
+      >(ctx);
 }
-std::unique_ptr<OperationPass<ModuleOp>> createLowerGraphToRuntimePass() {
-  return std::make_unique<LowerGraphPass>();
+
+auto createLowerGraphToRuntimePass()
+    -> std::unique_ptr<OperationPass<ModuleOp>> {
+  return std::make_unique<GraphToRuntimePass>();
 }
 } // namespace mlir

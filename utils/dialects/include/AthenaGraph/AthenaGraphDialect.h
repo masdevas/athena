@@ -14,9 +14,10 @@
 #ifndef ATHENA_ATHENAGRAPHDIALECT_H
 #define ATHENA_ATHENAGRAPHDIALECT_H
 
-#include "mlir/IR/Dialect.h"
+#include <mlir/IR/Dialect.h>
 
 namespace mlir::ath_graph {
+
 #include "AthenaGraph/AthenaGraphOpsDialect.h.inc"
 } // namespace mlir::ath_graph
 

@@ -12,7 +12,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "../utils/LaunchCommand.h"
-#include "LoaderFunctionAnalysis.h"
 #include "Passes/Passes.h"
 
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
@@ -37,79 +36,66 @@ protected:
     builder.setInsertionPointToStart(module.getBody());
     {
       SmallVector<LLVM::LLVMType, 3> args;
-      args.push_back(voidPtrTy);
-      args.push_back(voidPtrTy);
-      args.push_back(voidPtrTy);
+      args.push_back(voidPtrTy); // GraphHandle
+      args.push_back(voidPtrTy); // Device
+      args.push_back(voidPtrTy); // Tensor
 
       auto funcTy = LLVM::LLVMType::getFunctionTy(
           LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
       builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
                                              "ath_allocate", funcTy);
       builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
-                                             "ath_release_tensor", funcTy);
-    }
-    {
-      SmallVector<LLVM::LLVMType, 3> args;
-      args.push_back(voidPtrTy);
-      args.push_back(voidPtrTy);
-      args.push_back(
-          LLVM::LLVMType::getInt64Ty(llvmDialect)); // fixme 32-bit systems?
-
-      auto funcTy = LLVM::LLVMType::getFunctionTy(voidPtrTy, args, false);
-      builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
-                                             "ath_get_tensor_ptr", funcTy);
+                                             "ath_release", funcTy);
     }
     {
       SmallVector<LLVM::LLVMType, 4> args;
-      args.push_back(voidPtrTy);
-      args.push_back(voidPtrTy);
-      args.push_back(voidPtrTy);
-      args.push_back(LLVM::LLVMType::getInt32Ty(llvmDialect));
+      args.push_back(voidPtrTy);                               // GraphHandle
+      args.push_back(voidPtrTy);                               // Device
+      args.push_back(voidPtrTy);                               // Tensor
+      args.push_back(LLVM::LLVMType::getInt32Ty(llvmDialect)); // Lock type
 
       auto funcTy = LLVM::LLVMType::getFunctionTy(
           LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
       builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
-                                             "ath_lock_tensor", funcTy);
-      {
-        SmallVector<LLVM::LLVMType, 2> args;
-        args.push_back(
-            LLVM::LLVMType::getIntNTy(llvmDialect, sizeof(size_t) * 8));
-        args.push_back(voidPtrTy);
-        args.push_back(LLVM::LLVMType::getInt32Ty(llvmDialect));
+                                             "ath_lock", funcTy);
+    }
+    {
+      SmallVector<LLVM::LLVMType, 2> args;
+      args.push_back(voidPtrTy);                               // GraphHandle
+      args.push_back(LLVM::LLVMType::getInt64Ty(llvmDialect)); // NodeId
 
-        auto funcTy = LLVM::LLVMType::getFunctionTy(voidPtrTy, args, false);
-        builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
-                                               "ath_get_sub_tensor", funcTy);
-        builder.create<mlir::LLVM::LLVMFuncOp>(
-            builder.getUnknownLoc(), "ath_get_device_for_node", funcTy);
-      }
+      auto funcTy = LLVM::LLVMType::getFunctionTy(voidPtrTy, args, false);
+      builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
+                                             "ath_device_select", funcTy);
     }
 
     {
-      SmallVector<LLVM::LLVMType, 3> args;
-      args.push_back(voidPtrTy);
-      args.push_back(voidPtrTy);
-      args.push_back(voidPtrTy);
+      SmallVector<LLVM::LLVMType, 2> args;
+      args.push_back(voidPtrTy);                               // GraphHandle
+      args.push_back(LLVM::LLVMType::getInt64Ty(llvmDialect)); // NodeId
+      args.push_back(voidPtrTy);                               // Tensor
 
-      auto funcTy = LLVM::LLVMType::getFunctionTy(
-          LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
-
-      auto loaderFuncAnalysis = getAnalysis<LoaderFunctionAnalysis>();
-      auto funcNames = loaderFuncAnalysis.getLoaderFunctionNames();
-
-      for (const auto& funcName : funcNames) {
-        builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
-                                               funcName, funcTy);
-      }
+      auto funcTy = LLVM::LLVMType::getFunctionTy(LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
+      builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
+                                             "ath_load", funcTy);
     }
+    {
+      SmallVector<LLVM::LLVMType, 2> args;
+      args.push_back(LLVM::LLVMType::getInt64Ty(llvmDialect)); // Count
+      args.push_back(voidPtrTy);                               // Events
 
+      auto funcTy = LLVM::LLVMType::getFunctionTy(LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
+      builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
+                                             "ath_barrier", funcTy);
+    }
     // fixme this piece of code must be autogenerated
     // LaunchCommand structure
     {
       auto launchCommandTy = getLaunchCommandType(llvmDialect);
       auto funcTy = LLVM::LLVMType::getFunctionTy(
-          LLVM::LLVMType::getVoidTy(llvmDialect),
-          {voidPtrTy, voidPtrTy, launchCommandTy}, false);
+          voidPtrTy,
+          {voidPtrTy, voidPtrTy, voidPtrTy, launchCommandTy.getPointerTo()},
+          false);
 
       builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
                                              "ath_launch", funcTy);

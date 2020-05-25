@@ -11,25 +11,21 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_GRAPHTORUNTIMEPASS_H
-#define ATHENA_GRAPHTORUNTIMEPASS_H
+#ifndef ATHENA_ATHENARUNTIMEOPS_H
+#define ATHENA_ATHENARUNTIMEOPS_H
 
-#include <memory>
+#include "mlir/IR/Dialect.h"
+#include "mlir/IR/FunctionSupport.h"
+#include "mlir/IR/OpImplementation.h"
+#include "mlir/IR/OpDefinition.h"
+#include "mlir/IR/StandardTypes.h"
+#include "mlir/Interfaces/CallInterfaces.h"
+#include "mlir/Interfaces/ControlFlowInterfaces.h"
+#include "mlir/Interfaces/SideEffects.h"
 
-namespace mlir {
+namespace mlir::ath_rt {
+#define GET_OP_CLASSES
+#include "AthenaRuntime/AthenaRuntimeOps.h.inc"
+} // namespace mlir::ath_rt
 
-class ModuleOp;
-class MLIRContext;
-class OwningRewritePatternList;
-
-template <typename OpT> class OperationPass;
-
-void populateGraphToRuntimeConversionPatterns(
-    OwningRewritePatternList& loweringPatterns, MLIRContext* ctx);
-
-auto createLowerGraphToRuntimePass()
-    -> std::unique_ptr<OperationPass<ModuleOp>>;
-
-} // namespace mlir
-
-#endif // ATHENA_GRAPHTORUNTIMEPASS_H
+#endif // ATHENA_ATHENARUNTIMEOPS_H

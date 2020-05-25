@@ -11,25 +11,9 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_GRAPHTORUNTIMEPASS_H
-#define ATHENA_GRAPHTORUNTIMEPASS_H
+#include "AthenaGraph/ComputationalOpInterface.h"
 
-#include <memory>
+using namespace mlir;
+using namespace mlir::ath_graph;
 
-namespace mlir {
-
-class ModuleOp;
-class MLIRContext;
-class OwningRewritePatternList;
-
-template <typename OpT> class OperationPass;
-
-void populateGraphToRuntimeConversionPatterns(
-    OwningRewritePatternList& loweringPatterns, MLIRContext* ctx);
-
-auto createLowerGraphToRuntimePass()
-    -> std::unique_ptr<OperationPass<ModuleOp>>;
-
-} // namespace mlir
-
-#endif // ATHENA_GRAPHTORUNTIMEPASS_H
+#include "AthenaGraph/ComputationalOpInterface.cpp.inc"

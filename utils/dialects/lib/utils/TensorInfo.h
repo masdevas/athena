@@ -11,13 +11,18 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "LoaderFunctionAnalysis.h"
-#include "AthenaGraph/AthenaGraphOps.h"
+#pragma once
 
-using namespace mlir;
+#include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 
-LoaderFunctionAnalysis::LoaderFunctionAnalysis(mlir::Operation* op) {
-  op->walk([&](ath_graph::InvokeLoaderOp op) {
-    mLoaders.emplace(op.loader_routine().data());
-  });
+inline mlir::LLVM::LLVMType
+getTensorInfoType(mlir::LLVM::LLVMDialect* llvmDialect) {
+  using namespace mlir;
+
+  auto uint64Ty = LLVM::LLVMType::getInt64Ty(llvmDialect);
+  auto int32Ty = LLVM::LLVMType::getInt32Ty(llvmDialect);
+
+  // fixme is it guaranteed for enum to have i32 type?
+  return LLVM::LLVMType::getStructTy(uint64Ty, int32Ty, uint64Ty,
+                                     uint64Ty.getPointerTo());
 }
