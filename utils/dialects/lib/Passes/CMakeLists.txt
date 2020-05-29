@@ -2,9 +2,11 @@ add_mlir_conversion_library(MLIRAthenaPasses
         RelationDestructorPass.cpp
         DeployDefaultFunctions.cpp
         BarrierLegalizerPass.cpp
+        LegalizeRTForLoweringPass.cpp
 
         ADDITIONAL_HEADER_DIRS
         ${PROJECT_SOURCE_DIR}/include/
+        ${PROJECT_BINARY_DIR}/include
 
         DEPENDS
         MLIRAthenaGraph
