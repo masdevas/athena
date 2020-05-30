@@ -48,6 +48,10 @@ add_athena_library(${ATH_BACKEND_LLVM} STATIC
         allocators/LayerAllocator.cpp
         CodeGen.cpp)
 
+#if (TARGET kernels_spirv)
+    add_dependencies(${ATH_BACKEND_LLVM} kernels_spirv)
+#endif()
+
 target_include_directories(${ATH_BACKEND_LLVM} PRIVATE ${LLVM_INCLUDE_DIRS})
 target_compile_definitions(${ATH_BACKEND_LLVM} PRIVATE ${LLVM_DEFINITIONS})
 
