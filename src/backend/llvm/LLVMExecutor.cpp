@@ -15,15 +15,24 @@
 #include "allocators/LayerAllocator.h"
 #include "jit/AthenaJIT.h"
 
-#include <athena/backend/llvm/LLVMExecutor.h>
+#include "AthenaGraph/AthenaGraphDialect.h"
+#include "AthenaRuntime/AthenaRuntimeDialect.h"
 #include <athena/backend/llvm/CodeGen.h>
-#include <athena/core/graph/internal/GraphCompiler.h>
+#include <athena/backend/llvm/LLVMExecutor.h>
 #include <athena/core/Generator.h>
+#include <athena/core/graph/internal/GraphCompiler.h>
 #include <athena/utils/error/FatalError.h>
 
+#include "mlir/IR/Builders.h"
+#include "mlir/IR/Dialect.h"
+#include "mlir/IR/MLIRContext.h"
+#include "mlir/InitAllDialects.h"
+#include "mlir/InitAllPasses.h"
+#include "mlir/Pass/Pass.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/Support/Host.h"
-#include "mlir/IR/Builders.h"
+#include "llvm/Support/InitLLVM.h"
+#include "llvm/Support/TargetSelect.h"
 
 #include <algorithm>
 
@@ -45,6 +54,7 @@ void LLVMExecutor::addGraph(Graph& graph) {
   populateCodeGenPatterns(generator, opBuilder);
 
   core::internal::GraphCompiler::compile(graph, generator);
+  ref->dump();
 
   mJITCompiler->addModule(ref);
 }
@@ -58,7 +68,17 @@ void LLVMExecutor::evaluate(Graph& graph) {
   evaluateFunction(nullptr);
 }
 
-LLVMExecutor::LLVMExecutor() : mJITCompiler(AthenaJIT::create()) {
+LLVMExecutor::LLVMExecutor() {
+  mlir::registerAllDialects();
+  mlir::registerAllPasses();
+
+  mlir::registerDialect<mlir::ath_graph::AthenaGraphDialect>();
+  mlir::registerDialect<mlir::ath_rt::AthenaRuntimeDialect>();
+
+  ::llvm::InitializeNativeTarget();
+  ::llvm::InitializeNativeTargetAsmPrinter();
+
+  mJITCompiler = AthenaJIT::create();
   if (!mJITCompiler) {
     new utils::FatalError(utils::ATH_FATAL_OTHER,
                           "Unable to create JIT compiler");

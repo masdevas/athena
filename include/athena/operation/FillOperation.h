@@ -7,7 +7,8 @@
 
 namespace athena::operation {
 class ATH_OPERATION_EXPORT FillOperation : public core::Operation {
-  using InternalType = internal::AddOperationInternal;
+public:
+  using InternalType = internal::FillOperationInternal;
 };
 }
 
