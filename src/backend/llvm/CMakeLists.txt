@@ -41,10 +41,8 @@ endif ()
 
 add_subdirectory(runtime/driver)
 
-# FIXME hacky hack
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/images.cpp)
-
-add_custom_target(ath_llvm_rt_images)
+add_custom_target(ath_llvm_rt_images
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/images.hpp)
 
 if (TARGET kernels_spirv)
     add_dependencies(ath_llvm_rt_images kernels_spirv)
@@ -54,10 +52,8 @@ endif()
 
 string(REPLACE ";" " " IMAGE_BINARIES_STR ${IMAGE_BINARIES})
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/images.cpp 
-    ${CMAKE_CURRENT_BINARY_DIR}/images.hpp
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/images.hpp 
     COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/utils/kernels/bin2c.py
-    --source ${CMAKE_CURRENT_BINARY_DIR}/images.cpp
     --header ${CMAKE_CURRENT_BINARY_DIR}/images.hpp
     ${IMAGE_BINARIES_STR})
 
@@ -67,7 +63,6 @@ add_athena_library(${ATH_BACKEND_LLVM} STATIC
         LLVMExecutor.cpp
         GraphPartitionPlanner.cpp
         allocators/LayerAllocator.cpp
-        ${CMAKE_CURRENT_BINARY_DIR}/images.cpp
         ImageManager.cpp
         CodeGen.cpp)
 
