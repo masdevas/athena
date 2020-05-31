@@ -15,6 +15,7 @@ endif()
 
 find_package(LLVM REQUIRED CONFIG)
 find_package(MLIR REQUIRED CONFIG)
+find_package(Python3 COMPONENTS Interpreter)
 
 list(APPEND CMAKE_MODULE_PATH "${MLIR_CMAKE_DIR}")
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
@@ -40,15 +41,38 @@ endif ()
 
 add_subdirectory(runtime/driver)
 
+add_custom_target(ath_llvm_rt_images
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/images.hpp)
+
+if (TARGET kernels_spirv)
+    add_dependencies(ath_llvm_rt_images kernels_spirv)
+    get_target_property(__binary kernels_spirv BINARY_FILE)
+    list(APPEND IMAGE_BINARIES ${__binary})
+endif()
+
+string(REPLACE ";" " " IMAGE_BINARIES_STR ${IMAGE_BINARIES})
+
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/images.hpp 
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/utils/kernels/bin2c.py
+    --header ${CMAKE_CURRENT_BINARY_DIR}/images.hpp
+    ${IMAGE_BINARIES_STR})
+
 add_athena_library(${ATH_BACKEND_LLVM} STATIC
         ATH_BACKEND_LLVM # export name
         backend/llvm/llvm_export.h
         LLVMExecutor.cpp
         GraphPartitionPlanner.cpp
         allocators/LayerAllocator.cpp
+        ImageManager.cpp
         CodeGen.cpp)
 
-target_include_directories(${ATH_BACKEND_LLVM} PRIVATE ${LLVM_INCLUDE_DIRS})
+# FIXME this isn't always true
+target_compile_definitions(${ATH_BACKEND_LLVM} PRIVATE -DHAS_SPIRV=1)
+add_dependencies(${ATH_BACKEND_LLVM} ath_llvm_rt_images)
+
+target_include_directories(${ATH_BACKEND_LLVM} PRIVATE 
+                          ${LLVM_INCLUDE_DIRS}
+                          ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_definitions(${ATH_BACKEND_LLVM} PRIVATE ${LLVM_DEFINITIONS})
 
 llvm_map_components_to_libnames(llvm_libs
