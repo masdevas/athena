@@ -68,6 +68,7 @@ function(add_device_target target_name triple)
   endif()
     
   add_custom_target(${target_name} DEPENDS ${outfile})
+  set_target_properties(${target_name} PROPERTIES BINARY_FILE ${outfile})
 endfunction()
 
 add_subdirectory(src)
