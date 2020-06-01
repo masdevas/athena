@@ -39,9 +39,16 @@ core::internal::GenValue AddOperationInternal::gen(
     utils::SharedPtr<core::internal::ContextInternal> context,
     core::internal::Generator& generator,
     std::vector<utils::Index>& operationArguments,
-    core::internal::GenNode) const {
-  // TODO call generator
-  return core::internal::GenValue{};
+    core::internal::GenNode parent) const {
+  generator.callBuiltin<core::internal::builtin::Lock>(
+      parent.getResult(), core::internal::LockType::READ_WRITE);
+
+  // TODO other data types
+  core::internal::GenValue val;
+  auto result = generator.callBuiltin<core::internal::builtin::Add>(
+      val, parent.getResult());
+
+  generator.callBuiltin<core::internal::builtin::Release>(parent.getResult())
 }
 
 std::tuple<utils::Index, std::vector<core::internal::Edge>,

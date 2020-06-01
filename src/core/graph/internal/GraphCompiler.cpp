@@ -18,7 +18,7 @@
 
 namespace athena::core::internal {
 void GraphCompiler::compile(Graph& graph, Generator& generator) {
-  auto traversal = graph.traverse();
+  auto& traversal = graph.traverse();
   const auto& clusters = traversal.getClusters();
 
   auto genGraph = generator.createGraph(graph.getName().getString(),
@@ -27,8 +27,9 @@ void GraphCompiler::compile(Graph& graph, Generator& generator) {
   std::map<utils::Index, GenValue> nodeResults;
 
   auto ctxInternal = graph.getContext().internal();
-  for (auto c : utils::enumerate(clusters)) {
-    for (const auto& node : c.value().content) {
+  size_t clusterIndex = 0;
+  for (auto& c : clusters) {
+    for (const auto& node : c.content) {
       auto topLevelInsPoint = generator.getInsertionPoint();
       auto& nodeInternal =
           ctxInternal->get<AbstractNodeInternal>(node.nodeIndex);
@@ -40,7 +41,7 @@ void GraphCompiler::compile(Graph& graph, Generator& generator) {
       }
       // fixme don't use const_cast
       auto genNode = generator.createNode(
-          nodeInternal.getName().getString(), node.nodeIndex, c.index(), inputs,
+          nodeInternal.getName().getString(), node.nodeIndex, clusterIndex, inputs,
           *const_cast<TensorInternal*>(nodeInternal.getTensorPtr()));
 
       generator.setInsertionPoint(genNode);
@@ -84,8 +85,9 @@ void GraphCompiler::compile(Graph& graph, Generator& generator) {
 
     auto checkoint = generator.getInsertionPoint();
     generator.setInsertionPoint(genGraph);
-    generator.callBuiltin<builtin::Barrier>(c.index());
+    generator.callBuiltin<builtin::Barrier>(clusterIndex);
     generator.setInsertionPoint(checkoint);
+    ++clusterIndex;
   }
 }
 } // namespace athena::core::internal
