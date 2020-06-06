@@ -26,13 +26,19 @@ ATH_RT_SUPPORT_EXPORT void ath_allocate(GraphHandle* handle, Device& device,
   }
 }
 
-ATH_RT_SUPPORT_EXPORT void ath_release(GraphHandle* handle, Device& device,
-                                       TensorInfo* tensor) {
+ATH_RT_SUPPORT_EXPORT void ath_release(GraphHandle* handle, Device* device,
+                                       TensorInfo* tensor, Event* evt) {
   auto record = tensorInfoToRecord(tensor);
-  if (device.getDeviceName() == "host") {
-    handle->allocator->allocate(record);
+  if (device->getDeviceName() == "host") {
+    handle->allocator->release(record);
   } else {
-    handle->allocator->release(record, device);
+    if (evt) {
+      evt->addCallback([record, device, handle]() {
+        handle->allocator->release(record, *device);
+      });
+    } else {
+      handle->allocator->release(record, *device);
+    }
   }
 }
 
@@ -55,11 +61,20 @@ ATH_RT_SUPPORT_EXPORT Device* ath_device_select(GraphHandle* handle,
   return handle->devices.front(); // TODO real device selection logic.
 }
 
-ATH_RT_SUPPORT_EXPORT void ath_barrier(uint32_t count, Event** events) {}
+ATH_RT_SUPPORT_EXPORT void ath_barrier(uint32_t count, Event** events) {
+  for (int i = 0; i < count; i++) {
+    if (events[i]) {
+      events[i]->wait();
+      auto* device = events[i]->getDevice();
+      device->consumeEvent(events[i]);
+    }
+  }
+}
 
 ATH_RT_SUPPORT_EXPORT Event* ath_launch(GraphHandle* handle, Device* device,
                                         Event* event, LaunchCommand& command) {
-  return device->launch(*handle->allocator, command, event);
+  Event* evt = device->launch(*handle->allocator, command, event);
+  return evt;
 }
 
 ATH_RT_SUPPORT_EXPORT void ath_load(GraphHandle* handle, uint64_t nodeId,
